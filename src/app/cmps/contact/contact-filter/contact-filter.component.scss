@@ -1,0 +1,69 @@
+@import "../../../../assets/scss/setup/variables";
+@import "../../../../assets/scss/setup/functions";
+
+.contact-filter {
+    place-self: center;
+    width: max-content;
+    margin: auto;
+  
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 300px; // Match input width
+  
+      input {
+        font-family: monospace;
+        font-size: rem(16px);
+        border: 1px solid $clr7;
+        color: $clr7;
+        padding: 10px 40px 10px 15px; // Adjusted padding for consistent spacing
+        height: 40px;
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 10px;
+  
+        &::placeholder {
+          font-family: monospace;
+          font-size: rem(16px);
+          color: $clr7;
+        }
+  
+        &:active {
+          border: 2px solid $clr7;
+        }
+  
+        &:focus-visible {
+          outline: none;
+          border: 2px solid $clr7;
+        }
+      }
+  
+      .clear-button {
+        position: absolute;
+        right: 10px;
+        top: 42%;
+        transform: translateY(-50%); // Centers the button vertically
+        height: 30px; // Slightly smaller than the input height
+        width: 30px; // Keeps a consistent size
+        font-size: 16px; // Adjusted font size for "X"
+        border: none;
+        background: none;
+        color: $clr7;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+  
+        &:hover {
+          color: lighten($clr7, 40%);
+        }
+  
+        &:focus {
+          outline: none;
+        }
+      }
+    }
+  }
+  
+  

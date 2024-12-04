@@ -1,0 +1,13 @@
+@import "../../../assets/scss/setup/functions";
+@import "../../../assets/scss/setup/variables";
+.charts-container {
+    width: 80%;
+    margin: auto;
+    h1 {
+        text-align: center;
+        margin-block-end: 30px;
+        font-weight: 700;
+        font-size: rem(30px);
+        color: $clr7;
+    }
+}

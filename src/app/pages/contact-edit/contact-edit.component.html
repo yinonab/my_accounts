@@ -1,0 +1,42 @@
+<div class="contact-edit-container">
+    <section class="flex column contact-edit">
+        <section class="contact-actions">
+            <a routerLink="/contact">
+                <img src="../../../assets/images/back.png" alt="go back">
+            </a>
+            <button *ngIf="contact._id" (click)="onDeleteContact(contact._id)">
+                <img src="../../../assets/images/delete.png" alt="delete image">
+            </button>
+        </section>
+        <img class="contact-image" src="../../../assets/images/contact.png" alt="contact image">
+        <form [formGroup]="form" (ngSubmit)="onSaveContact()" class="flex column">
+            <h2>{{contact._id ? 'Edit contact' : 'Add contact'}}</h2>
+            <div class="flex column">
+                <div class="form-input">
+                    <label for="name">Name</label>
+                    <input formControlName="name" placeholder="Contact name" id="name" />
+                </div>
+                <p *ngIf="form.controls['name'].invalid && form.controls['name'].touched" class="errors">
+                    Contact name is required!
+                </p>
+                <div class="form-input">
+                    <label for="phone">Phone</label>
+                    <input formControlName="phone" placeholder="Phone number" id="phone" />
+                </div>
+                <p *ngIf="form.controls['phone'].invalid && form.controls['phone'].touched" class="errors">
+                    Phone number is required!
+                </p>
+                <div class="form-input">
+                    <label for="email">Email</label>
+                    <input formControlName="email" placeholder="Contact email" id="email" />
+                </div>
+                <p *ngIf="form.controls['email'].invalid && form.controls['email'].touched" class="errors">
+                    Email is required!
+                </p>
+            </div>
+            <div align="end">
+                <button [disabled]="form.invalid" class="save-btn" type="submit">Save</button>
+            </div>
+        </form>
+    </section>
+</div>

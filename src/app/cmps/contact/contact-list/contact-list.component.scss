@@ -1,0 +1,41 @@
+@import "../../../../assets/scss/setup/variables";
+@import "../../../../assets/scss/setup/functions";
+
+:host {
+    .contact-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .add-contact-btn {
+        padding: 0;
+        border: none;
+        margin: auto;
+        display: flex;
+        background-color: $clr9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+        width: 300px;
+        height: 70px;
+        border-radius: 50px;
+        align-items: center;
+        font-family: monospace;
+        font-weight: 700;
+        font-size: rem(20px);
+        cursor: pointer;
+        color: white;
+        span {
+            margin-inline-end: 30px;
+        }
+        img {
+            height: 70px;
+            margin-inline-end: 10px;
+
+        }
+        &:hover {
+            scale: 1.1;
+            background-color: $clr6;
+            color: $clr8;
+        }
+    }
+}

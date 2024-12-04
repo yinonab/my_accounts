@@ -1,0 +1,56 @@
+@import "../../../assets/scss/setup/variables";
+
+:host {
+    header {
+        background-color: $clr1;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        color: $clr3;
+        margin-bottom: 30px;
+        font-size: 1.5em;
+        font-family: monospace;
+        justify-content: space-between;
+
+        .logo {
+            margin-left: 20px;
+            height: 65px;
+            width: auto;
+        }
+
+        nav {
+            margin-inline-end: 20px;
+
+            a {
+                margin: 0 10px 0 10px;
+                img {
+                    width: 40px;
+                    height: 40px;
+                    object-fit: cover;
+
+                    &:hover {
+                        scale: 1.1;
+                    }
+                }
+
+                color: $clr3;
+
+                &:not(:last-child) {
+                    margin-right: 10px;
+                }
+
+                &.active {
+                    color: $clr4;
+                    font-weight: bold;
+
+                    img {
+                        // Add border or any visual cue for active
+                        border: 2px solid $clr9;
+                        border-radius: 50%; // optional, for rounded border
+                        padding: 7px; // Adjust to your layout
+                    }
+            }
+        }
+    }
+    }
+}

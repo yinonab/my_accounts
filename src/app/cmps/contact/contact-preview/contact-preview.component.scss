@@ -1,0 +1,199 @@
+@import "../../../../assets/scss/setup/variables";
+@import "../../../../assets/scss/setup/functions";
+
+:host {
+    display: flex; // Arrange items side by side
+    justify-content: center; // Center them horizontally in the parent container
+    align-items: center; // Align them vertically
+    flex-wrap: wrap; // Allow items to wrap on smaller screens
+    gap: 20px; // Add space between contact-preview and button-container
+
+    .contact-preview {
+        display: flex;
+        justify-content: space-between; // Space between content inside the article
+        align-items: center; // Align content vertically inside the article
+        background-color: $clr5;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+        width: 20%;
+        height: 100px;
+        border-radius: 50px;
+        font-family: monospace;
+        font-size: rem(16px);
+        margin: 0; // Remove any unwanted margin
+        padding: 0; // Remove any unwanted padding
+        cursor: pointer;
+        color: $clr8;
+
+        &:hover {
+            scale: 1.1;
+            background-color: $clr6;
+        }
+
+        img {
+            height: 70px;
+            margin-inline-end: 10px; // Optional spacing
+        }
+
+        h1 {
+            flex-grow: 1; // Allow the `h1` to fill space
+            text-align: center;
+        }
+    }
+
+    .button-container {
+        display: flex; // Arrange buttons side by side
+        justify-content: center; // Center them in their container
+        align-items: center; // Align buttons vertically
+        gap: 10px; // Add space between the buttons
+        background-color: $clr5; // Match contact-preview background
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); // Same shadow as contact-preview
+        width: 8%; // Smaller width for the button container
+        height: 80px; // Smaller height for the button container
+        border-radius: 20px; // Slightly rounded edges
+        padding: 5px; // Smaller padding for a compact design
+        margin-left: 20px; // Add horizontal space between containers
+    }
+
+    .delete-button,
+    .edit-button {
+        background-color: $clr5; // Match background to container
+        height: 40px; // Adjust button height
+        width: 40px; // Adjust button width
+        border-radius: 50%; // Circular buttons
+        display: flex; // Enable flexbox
+        align-items: center; // Center content vertically
+        justify-content: center; // Center content horizontally
+        cursor: pointer; // Make buttons clickable
+        border: none; // Remove borders
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // Light shadow for depth
+        padding: 0; // Remove default padding
+        outline: none; // Remove focus outline
+
+        img {
+            width: 20px; // Scale the icon width
+            height: 20px; // Scale the icon height
+        }
+
+        &:hover {
+            scale: 1.1;
+            background-color: $clr6; // Same hover effect as contact-preview
+        }
+    }
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5); // Semi-transparent background
+        display: flex;
+        justify-content: center; // Center modal horizontally
+        align-items: center; // Center modal vertically
+        z-index: 1000; // Ensure it appears above all content
+    
+        .modal-content {
+            background-color: $clr5; // Match contact-preview background color
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 20px; // Rounded corners
+            padding: 20px; // Add padding inside the modal
+            text-align: center;
+            width: 90%; // Full width for mobile
+            max-width: 400px; // Limit width for larger screens
+    
+            p {
+                color: $clr8; // Text color to match your theme
+                font-family: monospace; // Same font as contact-preview
+                font-size: rem(16px); // Consistent font size
+                margin-bottom: 20px; // Spacing below the text
+            }
+    
+            .modal-actions {
+                display: flex; // Arrange buttons side by side
+                justify-content: space-around; // Equal spacing between buttons
+                gap: 10px; // Spacing between buttons
+    
+                button {
+                    background-color: $clr5; // Match button-container background
+                    border: none; // Remove default border
+                    border-radius: 10px; // Rounded buttons
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // Light shadow for depth
+                    padding: 10px 20px; // Add padding for a larger click area
+                    color: $clr8; // Button text color
+                    cursor: pointer; // Pointer cursor on hover
+                    font-family: monospace; // Consistent font
+                    font-size: rem(14px); // Slightly smaller font for buttons
+    
+                    &:hover {
+                        scale: 1.05; // Subtle hover effect
+                        background-color: $clr6; // Highlight on hover
+                    }
+                }
+            }
+        }
+    }
+    
+     // Responsive adjustments
+     @media (max-width: 900px) and (min-width: 601px) {
+        .contact-preview {
+            width: 50%; // Adjust width for tablet
+        }
+
+        .button-container {
+            width: 15%; // Adjust width for tablet
+            height: 70px; // Adjust height for tablet
+        }
+
+        .delete-button,
+        .edit-button {
+            height: 35px; // Adjust button size for tablet
+            width: 35px;
+
+            img {
+                width: 18px; // Scale the image for tablet
+                height: 18px;
+            }
+        }
+
+        .modal-content {
+            width: 80%; // Adjust width for tablets
+        }
+    }
+
+    @media (max-width: 600px) {
+        flex-direction: column; // Stack main items vertically
+        align-items: center;
+        gap: 15px; // Add space between containers in vertical layout
+
+        .contact-preview {
+            width: 90%; // Take up most of the screen width
+            margin-bottom: 10px; // Add spacing below the article
+        }
+
+        .button-container {
+            width: 20%; // Adjust width for mobile
+            height: 60px; // Adjust height for mobile
+            flex-direction: row; // Arrange buttons side by side
+            justify-content: space-evenly; // Even spacing between buttons
+        }
+
+        .delete-button,
+        .edit-button {
+            height: 30px; // Smaller buttons for mobile
+            width: 30px;
+
+            img {
+                width: 15px; // Scale the image size
+                height: 15px;
+            }
+        }
+
+        .modal-content {
+            width: 95%; // Take up most of the screen width on mobile
+        }
+
+        .modal-actions button {
+            font-size: rem(12px); // Smaller font size for mobile
+            padding: 8px 15px; // Adjust padding for smaller screens
+        }
+    }
+}

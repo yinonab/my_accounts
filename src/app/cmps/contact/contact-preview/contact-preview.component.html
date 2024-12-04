@@ -1,0 +1,23 @@
+<article [routerLink]="['/contact', contact._id]" class="contact-preview">
+    <img src="../../../assets/images/contact.png" alt="contact-image">
+    <h1>{{contact.name}}</h1>
+</article>
+<div class="button-container">
+    <button class="delete-button" (click)="showDeleteModal = true">
+        <img src="../../../assets/images/delete.png" alt="delete image">
+    </button>
+    <button [routerLink]="['/edit', contact._id]" class="edit-button">
+        <img src="../../../assets/images/edit.png" alt="edit contact">
+    </button>
+</div>
+
+<!-- Modal -->
+<div *ngIf="showDeleteModal" class="modal">
+    <div class="modal-content">
+        <p>Are you sure you want to delete {{contact.name}}?</p>
+        <div class="modal-actions">
+            <button (click)="confirmDelete()">Yes</button>
+            <button (click)="cancelDelete()">No</button>
+        </div>
+    </div>
+</div>

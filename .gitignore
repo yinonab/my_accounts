@@ -20,3 +20,60 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+# Node modules
+node_modules/
+
+# Angular build outputs
+dist/
+out-tsc/
+tmp/
+
+# IDE/Editor directories and files
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+.vscode/
+.vscode-test/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+src/environments/environment*.ts
+
+# Dependency directories
+jspm_packages/
+typings/
+
+# TypeScript compiled output
+*.js
+*.js.map
+*.d.ts
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Coverage reports
+coverage/
+
+# Misc
+*.tgz
+!src/assets/.gitkeep
+
+# Angular CLI
+.angular/cache/
+.angular/
+
+# Compiled output from build tools
+*.out
+*.exe
+
+# Other
+*.swp

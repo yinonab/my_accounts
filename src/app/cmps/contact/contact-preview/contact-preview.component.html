@@ -1,25 +1,25 @@
 <article [routerLink]="['/contact', contact._id]" class="contact-preview">
-    <img src="../../../assets/images/contact.png" alt="contact-image">
-    <h1>{{contact.name}}</h1>
-</article>
-<div class="button-container">
-    <button class="delete-button" (click)="showDeleteModal = true">
-        <img src="../../../assets/images/delete.png" alt="delete image">
+    <img src="../../../assets/images/contact.png" alt="contact-image" />
+    <h1>{{ contact.name }}</h1>
+  </article>
+  <div class="button-container">
+    <!-- Delete Button -->
+    <button class="delete-button" (click)="onDeleteClick($event)">
+      <img src="../../../assets/images/delete.png" alt="delete image" />
     </button>
+  
+    <!-- Edit Button -->
     <button [routerLink]="['/contact/edit', contact._id]" class="edit-button">
-        <img src="../../../assets/images/edit.png" alt="edit contact">
-      </button>
-      
-</div>
-
-<!-- Modal -->
-<div *ngIf="showDeleteModal" class="modal">
-    <div class="modal-content">
-        <p>Are you sure you want to delete {{contact.name}}?</p>
-        <div class="modal-actions">
-            <button (click)="confirmDelete()">Yes</button>
-            <button (click)="cancelDelete()">No</button>
-        </div>
-    </div>
-</div>
+      <img src="../../../assets/images/edit.png" alt="edit contact" />
+    </button>
+  </div>
+  
+  <!-- Reusable Modal -->
+  <app-modal
+    [isVisible]="showDeleteModal"
+    [message]="'Are you sure you want to delete this contact?'"
+    (confirmed)="confirmDelete()"
+    (canceled)="cancelDelete()"
+  ></app-modal>
+  
 <router-outlet/>

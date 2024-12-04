@@ -13,6 +13,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 export class ContactEditComponent implements OnInit, OnDestroy {
 
   form!: FormGroup
+  showDeleteModal: boolean = false; // State for controlling modal visibility
   constructor(private fb: FormBuilder) { }
 
   contactService = inject(ContactService)
@@ -60,13 +61,27 @@ export class ContactEditComponent implements OnInit, OnDestroy {
   }
   
 
-  onDeleteContact(contactId: string) {
-    this.contactService.deleteContact(contactId)
-      .pipe(takeUntil(this.destroySubject$),)
-      .subscribe({
-        next: this.onBack,
-        error: err => console.log('err:', err)
-      })
+  // Show the delete confirmation modal
+  onDeleteClick(): void {
+    this.showDeleteModal = true;
+  }
+
+  // Confirm deletion
+  confirmDelete(): void {
+    if (this.contact._id) {
+      this.contactService.deleteContact(this.contact._id)
+        .pipe(takeUntil(this.destroySubject$))
+        .subscribe({
+          next: () => this.onBack(),
+          error: err => console.error('Error deleting contact:', err)
+        });
+    }
+    this.showDeleteModal = false; // Close the modal
+  }
+
+  // Cancel deletion
+  cancelDelete(): void {
+    this.showDeleteModal = false; // Close the modal
   }
 
   onSaveContact() {

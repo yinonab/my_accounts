@@ -7,18 +7,25 @@ import { Contact } from '../../../models/contact.model';
   styleUrls: ['./contact-preview.component.scss']
 })
 export class ContactPreviewComponent {
-  @Input() contact!: Contact;
-  @Output() remove = new EventEmitter<string>();
-  
-  showDeleteModal: boolean = false;
+  @Input() contact!: Contact; // Input to receive the contact details
+  @Output() remove = new EventEmitter<string>(); // Output to emit delete action
+  showDeleteModal: boolean = false; // Controls modal visibility
 
-  confirmDelete() {
-    console.log(this.contact.name + " - was deleted");
-    this.remove.emit(this.contact._id);
-    this.showDeleteModal = false;
+  // Triggered when the delete button is clicked
+  onDeleteClick(event: MouseEvent): void {
+    event.stopPropagation(); // Prevent triggering navigation
+    this.showDeleteModal = true; // Show the delete confirmation modal
   }
 
-  cancelDelete() {
+  // Confirm the deletion and emit the remove event
+  confirmDelete(): void {
+    console.log(this.contact.name + ' - was deleted');
+    this.remove.emit(this.contact._id); // Emit the contact ID for removal
+    this.showDeleteModal = false; // Hide the modal
+  }
+
+  // Cancel the deletion and hide the modal
+  cancelDelete(): void {
     this.showDeleteModal = false;
   }
 }

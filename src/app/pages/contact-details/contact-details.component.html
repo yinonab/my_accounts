@@ -1,7 +1,10 @@
 <section *ngIf="contact$ as contact" class="contact-details">
     <section class="contact-actions">
         <button (click)="onBack()"><img src="../../../assets/images/back.png" alt="go back"></button>
-        <button [routerLink]="['/edit', contact._id]"><img src="../../../assets/images/edit.png" alt="edit contact"></button>
+        <button [routerLink]="['/contact/edit', contact._id]" class="edit-button">
+            <img src="../../../assets/images/edit.png" alt="edit contact">
+        </button>
+          
     </section>
 
     <hr>
@@ -11,5 +14,6 @@
     <h2>Phone: {{contact.phone}}</h2>
     <h2>Email: {{contact.email}}</h2>
     <h2>Birthday: {{contact.birthday | date: 'longDate'}}</h2>
-
+    
 </section>
+<router-outlet/>

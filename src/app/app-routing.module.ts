@@ -15,17 +15,20 @@ const routes: Routes = [
   },
   {
     path: 'contact',
-    component: ContactIndexComponent
+    component: ContactIndexComponent,
+    children: [
+      {
+        path: 'edit/:id', // Edit existing contact
+        component: ContactEditComponent,
+        resolve: { contact: contactResolver }
+      },
+      {
+        path: 'edit', // Create new contact
+        component: ContactEditComponent
+      },
+    ]
   },
-  {
-    path: 'edit/:id',
-    component: ContactEditComponent,
-    resolve: { contact: contactResolver }
-  },
-  {
-    path: 'edit',
-    component: ContactEditComponent
-  },
+  
   {
     path: 'chart',
     component: ChartsComponent,

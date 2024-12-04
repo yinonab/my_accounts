@@ -6,9 +6,10 @@
     <button class="delete-button" (click)="showDeleteModal = true">
         <img src="../../../assets/images/delete.png" alt="delete image">
     </button>
-    <button [routerLink]="['/edit', contact._id]" class="edit-button">
+    <button [routerLink]="['/contact/edit', contact._id]" class="edit-button">
         <img src="../../../assets/images/edit.png" alt="edit contact">
-    </button>
+      </button>
+      
 </div>
 
 <!-- Modal -->
@@ -21,3 +22,4 @@
         </div>
     </div>
 </div>
+<router-outlet/>

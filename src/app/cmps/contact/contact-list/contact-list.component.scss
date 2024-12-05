@@ -3,10 +3,43 @@
 
 :host {
     .contact-list {
-        display: flex;
-        flex-direction: column;
+        display: grid;
         gap: 20px;
+    
+        // Grid for large desktops
+        grid-template-columns: repeat(5, 1fr);
+    
+        @media (max-width: 1440px) {
+            // Grid for smaller desktops
+            grid-template-columns: repeat(4, 1fr);
+        }
+    
+        @media (max-width: 1200px) {
+            // Grid for laptops
+            grid-template-columns: repeat(3, 1fr);
+        }
+    
+        @media (max-width: 1024px) {
+            // Grid for tablets in landscape mode
+            grid-template-columns: repeat(2, 1fr);
+        }
+    
+        @media (max-width: 768px) {
+            // Grid for tablets in portrait mode
+            grid-template-columns: 1fr 1fr;
+        }
+    
+        @media (max-width: 576px) {
+            // Grid for large phones
+            grid-template-columns: 1fr;
+        }
+    
+        @media (max-width: 375px) {
+            // Grid for small phones
+            grid-template-columns: 1fr;
+        }
     }
+    
 
     .add-contact-btn {
         padding: 0;
@@ -30,7 +63,6 @@
         img {
             height: 70px;
             margin-inline-end: 10px;
-
         }
         &:hover {
             scale: 1.1;

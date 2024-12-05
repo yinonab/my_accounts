@@ -1,8 +1,5 @@
 <section class="contact-list">
-    <button class="add-contact-btn" routerLink="/contact/edit">
-      <img src="../../../../assets/images/add-contact.png" alt="Add contact image">
-      <span>Add contact</span>
-    </button>
+   
     <contact-preview 
       *ngFor="let contact of contacts" 
       [contact]="contact" 

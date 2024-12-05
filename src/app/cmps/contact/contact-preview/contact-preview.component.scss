@@ -10,9 +10,9 @@
 
     .contact-preview {
         display: flex;
-        flex-direction: column; // Default stack layout
+        flex-direction: row; // Arrange items in a row
         align-items: center;
-        justify-content: space-between;
+        justify-content: space-between; // Distribute items equally
         background-color: $clr5;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
         width: 90%; // Full width on mobile
@@ -20,73 +20,85 @@
         border-radius: 20px;
         padding: 15px;
         gap: 10px;
-      
+    
+        // Make children split space equally
+        img,
+        h1,
+        .button-container {
+            flex: 1; // Distribute space equally
+            text-align: center; // Center content for better visual alignment
+        }
+    
         img {
-          width: 70px;
-          height: 70px;
-          margin-bottom: 10px;
+            width: 70px;
+            height: 70px;
+            margin: 0 auto; // Center the image
         }
-      
+    
         h1 {
-          flex-grow: 1;
-          text-align: center;
-          margin-bottom: 10px;
-          font-size: 1.5rem;
-          color: $clr8;
-        }
-      
-        .button-container {
-          display: flex;
-          flex-wrap: wrap; // Enable wrapping for small screens
-          gap: 10px; // Space between buttons
-      
-          .delete-button,
-          .edit-button {
-            background-color: $clr5;
-            height: 40px;
-            width: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
+            margin: 0; // Remove unnecessary spacing
+            font-size: 1.5rem;
+            color: $clr8;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      
-            img {
-              width: 20px;
-              height: 20px;
-            }
-      
-            &:hover {
-              scale: 1.1;
-              background-color: $clr6;
-            }
-          }
         }
-      }
-      
-      // Responsive adjustments
-      @media (min-width: 601px) {
-        .contact-preview {
-          flex-direction: row; // Horizontal layout for larger screens
-          align-items: center;
-          gap: 20px;
-      
-          .button-container {
-            flex-direction: row; // Buttons side by side
-          }
-        }
-      }
-      
-      @media (max-width: 600px) {
-        .contact-preview {
-          flex-direction: column; // Stack layout for mobile
-        }
-      
+    
         .button-container {
-          flex-direction: column; // Stack buttons vertically
-          gap: 10px; // Add space between buttons
+            display: flex;
+            flex-direction: column; // Stack buttons vertically
+            justify-content: center; // Center buttons vertically
+            align-items: center;
+            gap: 10px; // Add space between buttons
+    
+            .delete-button,
+            .edit-button {
+                background-color: $clr5;
+                height: 40px;
+                width: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: none;
+                cursor: pointer;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    
+                img {
+                    width: 20px;
+                    height: 20px;
+                }
+    
+                &:hover {
+                    scale: 1.1;
+                    background-color: $clr6;
+                }
+            }
         }
-      }
+    }
+    
+    // Responsive adjustments
+    @media (min-width: 601px) {
+        .contact-preview {
+            gap: 20px; // Ensure spacing for larger screens
+        }
+    }
+    
+    @media (max-width: 600px) {
+        .contact-preview {
+            flex-direction: column; // Stack layout for mobile
+            align-items: center;
+    
+            img,
+            h1,
+            .button-container {
+                flex: unset; // Disable equal spacing for vertical layout
+            }
+        }
+    
+        .button-container {
+            flex-direction: column; // Stack buttons vertically
+            gap: 10px; // Add space between buttons
+        }
+    }
+    
+    
     }      

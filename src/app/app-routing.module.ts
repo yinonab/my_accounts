@@ -9,29 +9,28 @@ import { ContactEditComponent } from './pages/contact-edit/contact-edit.componen
 
 const routes: Routes = [
   {
+    path: 'contact',
+    component: ContactIndexComponent,
+    children: [
+      {
+        path: 'edit', // Create new contact
+        component: ContactEditComponent
+      },
+      {
+        path: 'edit/:id', // Edit existing contact
+        component: ContactEditComponent,
+        resolve: { contact: contactResolver }
+      }
+    ]
+  },
+  {
     path: 'contact/:id',
     component: ContactDetailsComponent,
     resolve: { contact: contactResolver }
   },
   {
-    path: 'contact',
-    component: ContactIndexComponent,
-    children: [
-      {
-        path: 'edit/:id', // Edit existing contact
-        component: ContactEditComponent,
-        resolve: { contact: contactResolver }
-      },
-      {
-        path: 'edit', // Create new contact
-        component: ContactEditComponent
-      },
-    ]
-  },
-  
-  {
     path: 'chart',
-    component: ChartsComponent,
+    component: ChartsComponent
   },
   {
     path: '',
@@ -43,4 +42,5 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes, { useHash: true })],
   exports: [RouterModule]
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}
+

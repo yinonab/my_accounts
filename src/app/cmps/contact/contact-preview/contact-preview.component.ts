@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Contact } from '../../../models/contact.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'contact-preview',
@@ -10,6 +11,15 @@ export class ContactPreviewComponent {
   @Input() contact!: Contact; // Input to receive the contact details
   @Output() remove = new EventEmitter<string>(); // Output to emit delete action
   showDeleteModal: boolean = false; // Controls modal visibility
+
+  constructor(private router: Router) {} // Inject the Router service
+
+  // Navigate to the contact details page
+  onPreviewClick(): void {
+    console.log('Preview clicked:', this.contact.name);
+    // Navigate to contact details page only if not interacting with child buttons
+    this.router.navigate(['/contact', this.contact._id]);
+  }
 
   // Triggered when the delete button is clicked
   onDeleteClick(event: MouseEvent): void {
@@ -27,5 +37,12 @@ export class ContactPreviewComponent {
   // Cancel the deletion and hide the modal
   cancelDelete(): void {
     this.showDeleteModal = false;
+  }
+
+  // Triggered when the edit button is clicked
+  onEditClick(event: MouseEvent): void {
+    event.stopPropagation(); // Prevent triggering navigation
+    console.log('Edit clicked:', this.contact.name);
+    // Navigation for edit is handled by [routerLink]
   }
 }

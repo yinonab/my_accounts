@@ -1,19 +1,22 @@
 <section *ngIf="contact$ as contact" class="contact-details">
     <section class="contact-actions">
         <button (click)="onBack()"><img src="../../../assets/images/back.png" alt="go back"></button>
-        <button [routerLink]="['/contact/edit', contact._id]" class="edit-button">
+        <h1>Contact details :</h1>
+        <!-- <button [routerLink]="['/contact/edit', contact._id]" class="edit-button">
             <img src="../../../assets/images/edit.png" alt="edit contact">
-        </button>
+        </button> -->
           
     </section>
 
     <hr>
-    
-    <img src="../../../assets/images/contact.png" alt="contact-img">
-    <h2>Name: {{contact.name}}</h2>
-    <h2>Phone: {{contact.phone}}</h2>
-    <h2>Email: {{contact.email}}</h2>
-    <h2>Birthday: {{contact.birthday | date: 'longDate'}}</h2>
+    <div class ="det">
+        <img src="../../../assets/images/contact.png" alt="contact-img">
+        <h2>Name: {{contact.name}}</h2>
+        <h2>Phone: {{contact.phone}}</h2>
+        <h2>Email: {{contact.email}}</h2>
+        <h2>Birthday: {{contact.birthday | date: 'longDate'}}</h2>
+        
+    </div>
     
 </section>
 <router-outlet/>

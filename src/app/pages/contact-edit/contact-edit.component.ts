@@ -30,6 +30,8 @@ export class ContactEditComponent implements OnInit, OnDestroy {
       name: [this.contact.name, [Validators.required]],
       phone: [this.contact.phone, [Validators.required]],
       email: [this.contact.email, [Validators.required]],
+
+      
       _id: [this.contact._id] // Ensure `_id` is included
     });
     

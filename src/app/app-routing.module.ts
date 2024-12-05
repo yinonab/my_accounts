@@ -26,6 +26,7 @@ const routes: Routes = [
   {
     path: 'contact/:id',
     component: ContactDetailsComponent,
+    outlet: 'modal', // Define this as a modal outlet
     resolve: { contact: contactResolver }
   },
   {

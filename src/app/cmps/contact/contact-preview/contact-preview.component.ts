@@ -18,7 +18,8 @@ export class ContactPreviewComponent {
   onPreviewClick(): void {
     console.log('Preview clicked:', this.contact.name);
     // Navigate to contact details page only if not interacting with child buttons
-    this.router.navigate(['/contact', this.contact._id]);
+    this.router.navigate([{ outlets: { modal: ['contact', this.contact._id] } }]);
+
   }
 
   // Triggered when the delete button is clicked

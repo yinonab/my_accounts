@@ -1,61 +1,73 @@
 @import "../../../assets/scss/setup/variables";
 
 .contact-details {
-    margin: auto;
-    min-width: 350px;
-    width: max-content;
-    height: max-content;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    font-family: monospace;
+  position: fixed; /* Position the modal relative to the viewport */
+  top: 10%; /* Adjust vertical position */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, 0); /* Align horizontally to center */
+  z-index: 1000; /* Ensure it's above other content */
+  background: white; /* Background color for the modal */
+  margin: 0; /* Remove unnecessary margin */
+  min-width: 350px; /* Minimum width for the modal */
+  width: max-content;
+  height: max-content;
+  padding: 25px;
+  border-radius: 8px; /* Rounded corners for the modal */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhance shadow for better modal effect */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  font-family: monospace;
 
-    .det {
-        display: flex; /* Use flexbox */
-        flex-direction: column; /* Stack elements vertically */
-        align-items: center; /* Center elements horizontally */
-        gap: 10px; /* Add spacing between elements */
-        width: 100%; /* Optional: adjust width for responsive behavior */
-    }
+  .det {
+    display: flex; /* Use flexbox */
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center elements horizontally */
+    gap: 10px; /* Add spacing between elements */
+    width: 100%; /* Adjust width for responsive behavior */
+  }
 
-    .contact-actions {
+  .contact-actions {
+    display: grid;
+    justify-content: center;
+    align-items: center; /* Align vertically */
+    margin: 0;
+
+    button {
+      border: none;
+      background: none;
+      cursor: pointer;
+
+      img {
         height: 40px;
-        display: grid;
-        justify-content: space-between;
-        margin-block-end: 10px;
-        margin-right: 10em;
-        margin-bottom: 0.8em;
+        width: 40px;
 
-        button {
-            border: none;
-            background: none;
-            height: fit-content;
-            cursor: pointer;
-            margin-right: 10em;
-            margin-bottom: 0.8em;
-
-            img {
-                height: 40px;
-                width: 40px;
-
-                &:hover {
-                    scale: 1.1;
-                }
-            }
+        &:hover {
+          transform: scale(1.1); /* Add hover effect */
+          transition: transform 0.2s ease-in-out; /* Smooth transition */
         }
+      }
     }
+  }
 
-    hr {
-        border: none;
-        height: 1px;
-        background-color: $clr6;
-        margin: 20px 0;
-    }
+  hr {
+    border: none;
+    height: 1px;
+    background-color: $clr6;
+    margin: 20px 0;
+  }
 
-    img {
-        width: 150px;
-    }
+  img {
+    width: 150px;
+  }
+}
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5); /* Dim the background */
+  z-index: 999; /* Ensure it is behind the modal */
 }

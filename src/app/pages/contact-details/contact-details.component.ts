@@ -23,10 +23,10 @@ export class ContactDetailsComponent implements OnInit, OnDestroy {
     .subscribe(contact => this.contact$ = contact)
   }
 
-  onBack() {
-    this.router.navigateByUrl('/contact')
-  
+  onBack(): void {
+    this.router.navigate([{ outlets: { modal: null } }]); // Clear the 'modal' outlet
   }
+  
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe()

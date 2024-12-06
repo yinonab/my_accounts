@@ -21,6 +21,22 @@ export class ContactPreviewComponent {
     this.router.navigate([{ outlets: { modal: ['contact', this.contact._id] } }]);
 
   }
+  public getFacebookToken(contact: Contact): string | null {
+    if (!contact.facebookToken) {
+      console.error('Token not available for this contact:', contact.name);
+      return null;
+    }
+    return contact.facebookToken;
+  }
+  public loginWithFacebook(event: MouseEvent,contact: Contact): void {
+    event.stopPropagation();
+    const token = this.getFacebookToken(contact);
+    if (!token) return;
+  
+    const facebookLoginUrl = `https://facebook.com/login?token=${token}`;
+    window.open(facebookLoginUrl, '_blank');
+  }
+  
 
   // Triggered when the delete button is clicked
   onDeleteClick(event: MouseEvent): void {

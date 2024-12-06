@@ -2,103 +2,118 @@
 @import "../../../../assets/scss/setup/functions";
 
 :host {
-    display: flex; // Arrange items side by side
-    justify-content: center; // Center them horizontally in the parent container
-    align-items: center; // Align them vertically
-    flex-wrap: wrap; // Allow items to wrap on smaller screens
-    gap: 20px; // Add space between contact-preview and button-container
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
 
-    .contact-preview {
-        display: flex;
-        flex-direction: row; // Arrange items in a row
-        align-items: center;
-        justify-content: space-between; // Distribute items equally
+  .contact-preview {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: $clr5;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    width: 90%;
+    max-width: 300px;
+    border-radius: 20px;
+    padding: 15px;
+    gap: 10px;
+
+    img,
+    h1,
+    .button-container {
+      flex: 1;
+      text-align: center;
+    }
+
+    img {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: $clr8;
+      cursor: pointer;
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+
+      .delete-button,
+      .edit-button,
+      .facebook-login-button {
         background-color: $clr5;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-        width: 90%; // Full width on mobile
-        max-width: 300px; // Limit the width on larger screens
-        border-radius: 20px;
-        padding: 15px;
-        gap: 10px;
-    
-        // Make children split space equally
-        img,
-        h1,
-        .button-container {
-            flex: 1; // Distribute space equally
-            text-align: center; // Center content for better visual alignment
+        height: 40px;
+        width: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .fb-img{
+            width: 40px; // Increase width
+            height: 40px; // Increase height
         }
-    
         img {
-            width: 70px;
-            height: 70px;
-            margin: 0 auto; // Center the image
+          width: 20px;
+          height: 20px;
         }
-    
-        h1 {
-            margin: 0; // Remove unnecessary spacing
-            font-size: 1.5rem;
-            color: $clr8;
-            cursor: pointer;
+
+        &:hover {
+          scale: 1.1;
+          background-color: $clr6;
         }
-    
-        .button-container {
-            display: flex;
-            flex-direction: column; // Stack buttons vertically
-            justify-content: center; // Center buttons vertically
-            align-items: center;
-            gap: 10px; // Add space between buttons
-    
-            .delete-button,
-            .edit-button {
-                background-color: $clr5;
-                height: 40px;
-                width: 40px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: none;
-                cursor: pointer;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    
-                img {
-                    width: 20px;
-                    height: 20px;
-                }
-    
-                &:hover {
-                    scale: 1.1;
-                    background-color: $clr6;
-                }
-            }
+      }
+
+      .facebook-login-button {
+        background-color: #3b5998; // Facebook blue
+        color: white;
+        font-size: 1rem;
+        height: auto;
+        width: auto;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-align: center;
+
+        &:hover {
+          background-color: #2d4373;
         }
+      }
     }
-    
-    // Responsive adjustments
-    @media (min-width: 601px) {
-        .contact-preview {
-            gap: 20px; // Ensure spacing for larger screens
-        }
+  }
+
+  @media (min-width: 601px) {
+    .contact-preview {
+      gap: 20px;
     }
-    
-    @media (max-width: 600px) {
-        .contact-preview {
-            flex-direction: column; // Stack layout for mobile
-            align-items: center;
-    
-            img,
-            h1,
-            .button-container {
-                flex: unset; // Disable equal spacing for vertical layout
-            }
-        }
-    
-        .button-container {
-            flex-direction: column; // Stack buttons vertically
-            gap: 10px; // Add space between buttons
-        }
+  }
+
+  @media (max-width: 600px) {
+    .contact-preview {
+      flex-direction: column;
+      align-items: center;
+
+      img,
+      h1,
+      .button-container {
+        flex: unset;
+      }
     }
-    
-    
-    }      
+
+    .button-container {
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
+}

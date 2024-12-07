@@ -27,5 +27,11 @@
     (confirmed)="confirmDelete()"
     (canceled)="cancelDelete()"
   ></app-modal>
+  <facebook-login-modal
+  *ngIf="showFacebookLoginModal"
+  (login)="onFacebookLoginSuccess($event)"
+  (cancel)="onFacebookLoginCancel()"
+></facebook-login-modal>
+
 </article>
 <router-outlet/>

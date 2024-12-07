@@ -16,6 +16,7 @@ import { ContactFilterComponent } from './cmps/contact/contact-filter/contact-fi
 import { ContactEditComponent } from './pages/contact-edit/contact-edit.component';
 import { NgChartsModule } from 'ng2-charts';
 import { ModalComponent } from './shared/modal/modal.component';
+import { FacebookLoginModalComponent } from './facebook-login-modal/facebook-login-modal.component';
 
 
 @NgModule({
@@ -31,6 +32,7 @@ import { ModalComponent } from './shared/modal/modal.component';
     ContactFilterComponent,
     ContactEditComponent,
     ModalComponent,
+    FacebookLoginModalComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,12 @@
+<div class="modal-backdrop" (click)="cancel.emit()"></div>
+<div class="modal-content" (click)="$event.stopPropagation()">
+  <h2>Facebook Login</h2>
+  <form (submit)="onLogin($event)">
+    <input type="text" placeholder="Email" [(ngModel)]="email" required />
+    <input type="password" placeholder="Password" [(ngModel)]="password" required />
+    <div class="button-group">
+      <button type="submit" (click)="onButtonClick($event)">Login</button>
+      <button type="button" (click)="onCancelButtonClick($event)">Cancel</button>
+    </div>
+  </form>
+</div>

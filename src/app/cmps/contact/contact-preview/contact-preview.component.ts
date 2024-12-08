@@ -13,15 +13,12 @@ export class ContactPreviewComponent {
   showDeleteModal: boolean = false; // Controls modal visibility
   showFacebookLoginModal: boolean = false; // Controls Facebook login modal visibility
 
-
-  constructor(private router: Router) {} // Inject the Router service
+  constructor(private router: Router) {}
 
   // Navigate to the contact details page
   onPreviewClick(): void {
     console.log('Preview clicked:', this.contact.name);
-    // Navigate to contact details page only if not interacting with child buttons
     this.router.navigate([{ outlets: { modal: ['contact', this.contact._id] } }]);
-
   }
 
   private getFacebookTokenFromStorage(contactId: string): string | null {
@@ -33,65 +30,63 @@ export class ContactPreviewComponent {
   }
 
   public validateAndExtendFacebookToken(token: string): Promise<string | null> {
-    // Replace this with an actual API call to validate and refresh the token
     return new Promise((resolve) => {
-      const isValid = true; // Assume valid token for this mockup
-      if (isValid) {
-        const refreshedToken = `${token}_extended`; // Mock token extension
-        resolve(refreshedToken);
-      } else {
-        resolve(null);
-      }
+        const isValid = token && token.length > 0; // Add real validation logic
+        if (isValid) {
+            const extendedToken = `${token}_extended`; // Simulated token extension
+            resolve(extendedToken);
+        } else {
+            resolve(null);
+        }
     });
-  }
+}
 
-  public loginWithFacebook(event: MouseEvent, contact: Contact): void {
-    event.stopPropagation();
-    const storedToken = this.getFacebookTokenFromStorage(contact._id);
 
-    if (!storedToken) {
-      this.showFacebookLoginModal = true; // Show login modal if no token
+public loginWithFacebook(event: MouseEvent, contact: Contact): void {
+  event.stopPropagation();
+
+  const storedToken = this.getFacebookTokenFromStorage(contact._id);
+
+  if (!storedToken) {
+      this.showFacebookLoginModal = true; // Open login modal if no token
       return;
-    }
+  }
 
-    this.validateAndExtendFacebookToken(storedToken).then((newToken) => {
+  this.validateAndExtendFacebookToken(storedToken).then((newToken) => {
       if (newToken) {
-        this.saveFacebookTokenToStorage(contact._id, newToken);
-        const facebookLoginUrl = `https://facebook.com/login?token=${newToken}`;
-        window.open(facebookLoginUrl, '_blank');
+          this.saveFacebookTokenToStorage(contact._id, newToken);
+          const facebookLoginUrl = `https://facebook.com/login?token=${newToken}`;
+          console.log('Navigating to Facebook login with token:', newToken); // Debug log
+          window.open(facebookLoginUrl, '_blank');
       } else {
-        this.showFacebookLoginModal = true; // Show login modal if token is invalid
+          this.showFacebookLoginModal = true; // Open modal if token invalid
       }
-    });
-  }
+  });
+}
 
-  onFacebookLoginSuccess(token: string): void {
-    if (!token) return;
-    this.saveFacebookTokenToStorage(this.contact._id, token);
-    this.showFacebookLoginModal = false;
-  }
+
+
+onFacebookLoginSuccess(token: string): void {
+  const contactId = this.contact._id; // Get the current contact's ID
+  if (!contactId) return;
+
+  // Save the token for the contact in localStorage
+  this.saveFacebookTokenToStorage(contactId, token);
+
+  // Update the contact's `facebookToken` property dynamically
+  this.contact.facebookToken = token;
+
+  console.log(`Facebook token updated for contact ${contactId}:`, token); // Debug log
+
+  // Close the modal
+  this.showFacebookLoginModal = false;
+}
+
+
 
   onFacebookLoginCancel(): void {
     this.showFacebookLoginModal = false;
   }
-
-
-  public getFacebookToken(contact: Contact): string | null {
-    if (!contact.facebookToken) {
-      console.error('Token not available for this contact:', contact.name);
-      return null;
-    }
-    return contact.facebookToken;
-  }
-  // public loginWithFacebook(event: MouseEvent,contact: Contact): void {
-  //   event.stopPropagation();
-  //   const token = this.getFacebookToken(contact);
-  //   if (!token) return;
-  
-  //   const facebookLoginUrl = `https://facebook.com/login?token=${token}`;
-  //   window.open(facebookLoginUrl, '_blank');
-  // }
-  
 
   // Triggered when the delete button is clicked
   onDeleteClick(event: MouseEvent): void {
@@ -115,6 +110,5 @@ export class ContactPreviewComponent {
   onEditClick(event: MouseEvent): void {
     event.stopPropagation(); // Prevent triggering navigation
     console.log('Edit clicked:', this.contact.name);
-    // Navigation for edit is handled by [routerLink]
   }
 }

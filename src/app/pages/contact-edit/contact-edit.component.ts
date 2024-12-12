@@ -27,9 +27,22 @@ export class ContactEditComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Initialize the form
     this.form = this.fb.group({
-      name: [this.contact.name, [Validators.required]],
-      phone: [this.contact.phone, [Validators.required]],
-      email: [this.contact.email, [Validators.required]],
+      name: [
+        this.contact.name, 
+        [Validators.required, Validators.minLength(3)]
+      ],
+      phone: [
+        this.contact.phone, 
+        [Validators.required, Validators.pattern(/^\d{10}$/)] // Example pattern for a valid phone number
+      ],
+      email: [
+        this.contact.email, 
+        [Validators.required, Validators.email]
+      ],
+      birth: [
+        this.contact.birthday, 
+        [Validators.required]
+      ],
 
       
       _id: [this.contact._id] // Ensure `_id` is included
@@ -49,17 +62,17 @@ export class ContactEditComponent implements OnInit, OnDestroy {
   });
 
     // Close modal on route change to '/contact'
-    this.router.events
-      .pipe(
-        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-        takeUntil(this.destroySubject$)
-      )
-      .subscribe((event: NavigationEnd) => {
-        if (event.url === '/contact') {
-          console.log('Route changed to /contact. Closing modal.');
-          this.contact = this.contactService.getEmptyContact(); // Clear contact
-        }
-      });
+    // this.router.events
+    //   .pipe(
+    //     filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+    //     takeUntil(this.destroySubject$)
+    //   )
+    //   .subscribe((event: NavigationEnd) => {
+    //     if (event.url === '/contact') {
+    //       console.log('Route changed to /contact. Closing modal.');
+    //       this.contact = this.contactService.getEmptyContact(); // Clear contact
+    //     }
+    //   });
   }
   
 
@@ -86,20 +99,40 @@ export class ContactEditComponent implements OnInit, OnDestroy {
     this.showDeleteModal = false; // Close the modal
   }
 
+  // onSaveContact() {
+  //   console.log('Form values before saving:', this.form.value); // Debug log
+  //   this.contactService.saveContact(this.form.value as Contact)
+  //     .pipe(takeUntil(this.destroySubject$))
+  //     .subscribe({
+  //       next: () => {
+  //         console.log('Contact saved successfully.');
+  //         this.onBack(); // Close modal and navigate back
+  //       },
+  //       error: (err) => {
+  //         console.log('Error saving contact:', err);
+  //       }
+  //     });
+  // }
   onSaveContact() {
-    console.log('Form values before saving:', this.form.value); // Debug log
-    this.contactService.saveContact(this.form.value as Contact)
-      .pipe(takeUntil(this.destroySubject$))
-      .subscribe({
-        next: () => {
-          console.log('Contact saved successfully.');
-          this.onBack(); // Close modal and navigate back
-        },
-        error: (err) => {
-          console.log('Error saving contact:', err);
-        }
-      });
+  if (this.form.invalid) {
+    this.form.markAllAsTouched(); // Marks all controls as touched to trigger validation messages
+    console.log('Form is invalid, please correct the errors.');
+    return;
   }
+  console.log('Form values before saving:', this.form.value); // Debug log
+  this.contactService.saveContact(this.form.value as Contact)
+    .pipe(takeUntil(this.destroySubject$))
+    .subscribe({
+      next: () => {
+        console.log('Contact saved successfully.');
+        this.onBack(); // Close modal and navigate back
+      },
+      error: (err) => {
+        console.log('Error saving contact:', err);
+      }
+    });
+}
+
   
 
   onBack = () => {

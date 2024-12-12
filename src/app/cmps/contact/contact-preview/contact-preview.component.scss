@@ -39,6 +39,11 @@
       font-size: 1.5rem;
       color: $clr8;
       cursor: pointer;
+      &.long-name {
+        font-size: 1.2rem;
+        line-height: 1.2;
+        word-break: break-word; // Ensures long words wrap instead of overflowing
+      }
     }
 
     .button-container {

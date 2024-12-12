@@ -10,30 +10,47 @@
       </section>
       <img class="contact-image" src="../../../assets/images/contact.png" alt="contact image" />
       <form [formGroup]="form" (ngSubmit)="onSaveContact()" class="flex column">
-        <h2>{{ contact._id ? 'Edit contact' : 'Add contact' }}</h2>
+        <h2>{{ contact._id ? 'Edit' : 'Add' }} Contact</h2>
         <div class="flex column">
+          <!-- Name Input -->
           <div class="form-input">
             <label for="name">Name</label>
             <input formControlName="name" placeholder="Contact name" id="name" />
           </div>
-          <p *ngIf="form.controls['name'].invalid && form.controls['name'].touched" class="errors">
-            Contact name is required!
+          <p *ngIf="form.controls['name'].errors && form.controls['name'].touched" class="errors">
+            <span *ngIf="form.controls['name'].errors['required']">Name is required!</span>
+            <span *ngIf="form.controls['name'].errors['minlength']">Name must be at least 3 characters long!</span>
           </p>
+  
+          <!-- Phone Input -->
           <div class="form-input">
             <label for="phone">Phone</label>
             <input formControlName="phone" placeholder="Phone number" id="phone" />
           </div>
-          <p *ngIf="form.controls['phone'].invalid && form.controls['phone'].touched" class="errors">
-            Phone number is required!
+          <p *ngIf="form.controls['phone'].errors && form.controls['phone'].touched" class="errors">
+            <span *ngIf="form.controls['phone'].errors['required']">Phone number is required!</span>
+            <span *ngIf="form.controls['phone'].errors['pattern']">Phone number is not valid!</span>
           </p>
+  
+          <!-- Email Input -->
           <div class="form-input">
             <label for="email">Email</label>
             <input formControlName="email" placeholder="Contact email" id="email" />
           </div>
-          <p *ngIf="form.controls['email'].invalid && form.controls['email'].touched" class="errors">
-            Email is required!
+          <p *ngIf="form.controls['email'].errors && form.controls['email'].touched" class="errors">
+            <span *ngIf="form.controls['email'].errors['required']">Email is required!</span>
+            <span *ngIf="form.controls['email'].errors['email']">Email is not valid!</span>
           </p>
         </div>
+  
+        <!-- Birth Input -->
+        <div class="form-input">
+          <label for="birthday">Birth</label>
+          <input type="date" formControlName="birth" id="birthday" />
+        </div>
+        <p *ngIf="form.controls['birth'].errors && form.controls['birth'].touched" class="errors">
+          <span *ngIf="form.controls['birth'].errors['required']">Birth date is required!</span>
+        </p>
         <div align="end">
           <button [disabled]="form.invalid" class="save-btn" type="submit">Save</button>
         </div>

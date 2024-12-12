@@ -1,6 +1,10 @@
 <article class="contact-preview" (click)="onPreviewClick()">
   <img src="../../../assets/images/contact.png" alt="contact-image" />
-  <h1>{{ contact.name }}</h1>
+  <h1 [ngClass]="{ 'long-name': isLongName }">
+    {{ contact.name }}
+  </h1>
+  
+
   <div class="button-container">
     <!-- Delete Button -->
     <button class="delete-button" (click)="onDeleteClick($event)">

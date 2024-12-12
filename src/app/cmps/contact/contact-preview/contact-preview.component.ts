@@ -62,4 +62,7 @@ export class ContactPreviewComponent {
     console.log('Edit clicked:', this.contact.name);
     // Navigation for edit is handled by [routerLink]
   }
+  get isLongName(): boolean {
+    return this.contact.name.length > 15;
+  }
 }

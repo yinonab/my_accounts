@@ -2,8 +2,7 @@
 <div class="backdrop" (click)="onBack()"></div>
 
 <!-- Modal content -->
-<section *ngIf="contact$ as contact" class="contact-details">
-  <!-- Header with back button and title -->
+<section *ngIf="contact$ | async as contact" class="contact-details">
   <section class="contact-actions">
     <button (click)="onBack()">
       <img src="../../../assets/images/back.png" alt="go back" />
@@ -23,6 +22,7 @@
   <div class="det">
     <img src="../../../assets/images/contact.png" alt="contact-img" />
     <h2>Name: {{ contact.name }}</h2>
+    <h2>Last Name: {{ contact.lastName }}</h2>
     <h2>Phone: {{ contact.phone }}</h2>
     <h2>Email: {{ contact.email }}</h2>
     <h2>Birthday: {{ contact.birthday | date: 'longDate' }}</h2>

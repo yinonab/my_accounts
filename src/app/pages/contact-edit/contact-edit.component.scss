@@ -125,6 +125,25 @@
             cursor: not-allowed;
         }
     }
+    .add-btn{
+        font-size: rem(12px);
+        background-color: $clr5;
+        border-radius: 3px;
+        width: 10em;
+        height: 30px;
+        border: 1px solid $clr8;
+        font-weight: 600;
+        &:hover {
+            background-color: $clr9;
+            color: white;
+        }
+        &:disabled {
+            color: $clr8;
+            background-color: $clr5;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
 
     .contact-image {
         width: 100px;

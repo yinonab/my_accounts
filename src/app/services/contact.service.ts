@@ -28,7 +28,12 @@ export class ContactService {
         return from(storageService.query<Contact>(ENTITY))
             .pipe(
                 tap(contacts => {
-                    const filterBy = this._filterBy$.value
+                    const filterBy = this._filterBy$.value;
+                    contacts = contacts.map(contact => ({
+                        ...contact,
+                        lastName:  contact.lastName || '', 
+                        birthday:  contact.birthday || '', 
+                    }));
                     if (filterBy && filterBy.name) {
                         contacts = this._filter(contacts, filterBy.name)
                     }
@@ -66,6 +71,7 @@ export class ContactService {
     public getEmptyContact():Partial<Contact>  {
         return {
             name: '',
+            lastName: '',
             email: '',
             phone: ''
         }

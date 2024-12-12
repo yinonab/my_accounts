@@ -12,6 +12,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 })
 export class ContactEditComponent implements OnInit, OnDestroy {
 
+  IsLastName:boolean=false
   form!: FormGroup
   showDeleteModal: boolean = false; // State for controlling modal visibility
   constructor(private fb: FormBuilder) { }
@@ -30,6 +31,10 @@ export class ContactEditComponent implements OnInit, OnDestroy {
       name: [
         this.contact.name, 
         [Validators.required, Validators.minLength(3)]
+      ],
+      lastName: [
+        this.contact.name, 
+        [ Validators.minLength(3)]
       ],
       phone: [
         this.contact.phone, 
@@ -79,6 +84,9 @@ export class ContactEditComponent implements OnInit, OnDestroy {
   // Show the delete confirmation modal
   onDeleteClick(): void {
     this.showDeleteModal = true;
+  }
+  onAddLastNameClick(): void {
+    this.IsLastName = true;
   }
 
   // Confirm deletion

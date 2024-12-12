@@ -1,8 +1,14 @@
 <article class="contact-preview" (click)="onPreviewClick()">
   <img src="../../../assets/images/contact.png" alt="contact-image" />
-  <h1 [ngClass]="{ 'long-name': isLongName }">
-    {{ contact.name }}
-  </h1>
+  <div class="contact-info">
+    <h1 class="contact-name" [ngClass]="{ 'long-name': isLongName }">
+      {{ contact.name }}
+    </h1>
+    <h1 class="contact-last-name" [ngClass]="{ 'long-name': isLongName }">
+      {{ contact.lastName }}
+    </h1>
+  </div>
+  
   
 
   <div class="button-container">

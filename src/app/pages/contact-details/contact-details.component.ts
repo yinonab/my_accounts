@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { Subscription, map } from 'rxjs';
+import { Observable, Subscription, map } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Contact } from '../../models/contact.model';
 
@@ -15,13 +15,26 @@ export class ContactDetailsComponent implements OnInit, OnDestroy {
 
   subscription!: Subscription
 
-  contact$!: Contact
-
-  async ngOnInit(): Promise<void> {
-    this.subscription = this.route.data
-    .pipe(map(data => data['contact']))
-    .subscribe(contact => this.contact$ = contact)
+  contact$!: Observable<Contact>;
+  
+  ngOnInit(): void {
+    this.contact$ = this.route.data.pipe(
+      map(data => {
+        const contact = data['contact'];
+        if (contact) {
+          // Normalize the keys
+          return {
+            ...contact,
+            lastName: contact.lastName,
+            birthday: contact.birth,
+          };
+        }
+        return contact;
+      })
+    );
   }
+  
+  
 
   onBack(): void {
     this.router.navigate([{ outlets: { modal: null } }]); // Clear the 'modal' outlet

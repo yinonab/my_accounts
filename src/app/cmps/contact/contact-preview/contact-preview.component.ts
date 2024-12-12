@@ -63,6 +63,6 @@ export class ContactPreviewComponent {
     // Navigation for edit is handled by [routerLink]
   }
   get isLongName(): boolean {
-    return this.contact.name.length > 15;
+    return this.contact.name.length > 10;
   }
 }

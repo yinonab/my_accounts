@@ -38,7 +38,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
       ],
       phone: [
         this.contact.phone, 
-        [Validators.required, Validators.pattern(/^\d{10}$/)] // Example pattern for a valid phone number
+        [Validators.required, Validators.pattern(/^\d{10,}$/)]
       ],
       email: [
         this.contact.email, 
@@ -52,6 +52,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
       
       _id: [this.contact._id] // Ensure `_id` is included
     });
+    
     
   
     // Populate the contact for edit mode

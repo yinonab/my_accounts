@@ -4,18 +4,26 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { Subject, filter, map, takeUntil } from 'rxjs';
 import { Contact } from '../../models/contact.model';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { DatePipe } from '@angular/common';
+
 
 @Component({
   selector: 'contact-edit',
   templateUrl: './contact-edit.component.html',
-  styleUrl: './contact-edit.component.scss'
+  styleUrl: './contact-edit.component.scss',
+  providers: [DatePipe]
 })
 export class ContactEditComponent implements OnInit, OnDestroy {
 
-  IsLastName:boolean=false
+  IsLastName: boolean = false
   form!: FormGroup
   showDeleteModal: boolean = false; // State for controlling modal visibility
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder, private datePipe: DatePipe) { }
+
+  formatDate(date: Date): string {
+    return this.datePipe.transform(date, 'yyyy-MM-dd') || ''; // Format as '2024-12-16'
+  }
+
 
   contactService = inject(ContactService)
   contact = this.contactService.getEmptyContact()
@@ -26,46 +34,51 @@ export class ContactEditComponent implements OnInit, OnDestroy {
   destroySubject$ = new Subject<void>()
 
   ngOnInit(): void {
-    // Initialize the form
+    // Check if a contact exists and initialize form fields accordingly
+    const contactExists = !!this.contact && this.contact._id;
+
     this.form = this.fb.group({
       name: [
-        this.contact.name, 
+        contactExists ? this.contact.name : '',
         [Validators.required, Validators.minLength(3)]
       ],
       lastName: [
-        this.contact.name, 
-        [ Validators.minLength(3)]
+        contactExists ? this.contact.lastName : '',
+        [Validators.minLength(3)]
       ],
       phone: [
-        this.contact.phone, 
+        contactExists ? this.contact.phone : '',
         [Validators.required, Validators.pattern(/^\d{10,}$/)]
       ],
       email: [
-        this.contact.email, 
+        contactExists ? this.contact.email : '',
         [Validators.required, Validators.email]
       ],
       birth: [
-        this.contact.birthday, 
+        contactExists && this.contact.birthday
+          ? this.formatDate(new Date(this.contact.birthday))
+          : this.formatDate(new Date()), // Default to today's date if no contact
         [Validators.required]
       ],
-
-      
-      _id: [this.contact._id] // Ensure `_id` is included
+      _id: [contactExists ? this.contact._id : null]
     });
-    
-    
-  
+
+
+
     // Populate the contact for edit mode
     this.route.data
-  .pipe(
-    map((data) => data['contact']),
-    filter((contact) => !!contact),
-    takeUntil(this.destroySubject$)
-  )
-  .subscribe((contact) => {
-    this.contact = contact;
-    this.form.patchValue(contact); // Populate form with contact data, including `_id`
-  });
+      .pipe(
+        map((data) => data['contact']),
+        filter((contact) => !!contact),
+        takeUntil(this.destroySubject$)
+      )
+      .subscribe((contact) => {
+        this.contact = contact;
+        const formattedDate = contact.birthday
+          ? this.formatDate(new Date(contact.birthday))
+          : this.formatDate(new Date());
+        this.form.patchValue({ ...contact, birth: formattedDate });
+      });
 
     // Close modal on route change to '/contact'
     // this.router.events
@@ -80,7 +93,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
     //     }
     //   });
   }
-  
+
 
   // Show the delete confirmation modal
   onDeleteClick(): void {
@@ -123,41 +136,44 @@ export class ContactEditComponent implements OnInit, OnDestroy {
   //     });
   // }
   onSaveContact() {
-  if (this.form.invalid) {
-    this.form.markAllAsTouched(); // Marks all controls as touched to trigger validation messages
-    console.log('Form is invalid, please correct the errors.');
-    return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched(); // Marks all controls as touched to trigger validation messages
+      console.log('Form is invalid, please correct the errors.');
+      return;
+    }
+    const formValue = { ...this.form.value };
+    // Convert 'birth' back to timestamp
+    formValue.birth = new Date(formValue.birth).getTime();
+    console.log('Form values before saving:', formValue); // Debug log
+    this.contactService.saveContact(formValue as Contact)
+      .pipe(takeUntil(this.destroySubject$))
+      .subscribe({
+        next: () => {
+          console.log('Contact saved successfully.');
+          this.onBack(); // Close modal and navigate back
+        },
+        error: (err) => {
+          console.log('Error saving contact:', err);
+        }
+      });
   }
-  console.log('Form values before saving:', this.form.value); // Debug log
-  this.contactService.saveContact(this.form.value as Contact)
-    .pipe(takeUntil(this.destroySubject$))
-    .subscribe({
-      next: () => {
-        console.log('Contact saved successfully.');
-        this.onBack(); // Close modal and navigate back
-      },
-      error: (err) => {
-        console.log('Error saving contact:', err);
-      }
-    });
-}
 
-  
+
 
   onBack = () => {
     console.log('Navigating back to /contact'); // Debug log
     this.contact = this.contactService.getEmptyContact(); // Reset the contact state
     this.router.navigateByUrl('/contact'); // Navigate back
   };
-  
-  
-  
+
+
+
 
   ngOnDestroy(): void {
     this.destroySubject$.next(); // Complete any subscriptions
     this.destroySubject$.complete();
     this.contact = this.contactService.getEmptyContact(); // Reset the contact state
   }
-  
-  
+
+
 }

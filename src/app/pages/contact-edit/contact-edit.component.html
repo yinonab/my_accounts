@@ -17,10 +17,13 @@
           <label for="name">Name</label>
           <input formControlName="name" placeholder="Contact name" id="name" />
         </div>
-        <p *ngIf="form.controls['name'].errors && form.controls['name'].touched" class="errors">
-          <span *ngIf="form.controls['name'].errors['required']">Name is required!</span>
-          <span *ngIf="form.controls['name'].errors['minlength']">Name must be at least 3 characters long!</span>
-        </p>
+        <ng-container *ngIf="form.controls['name'] as nameInput">
+          <p *ngIf="nameInput.errors && nameInput.touched && nameInput.invalid" class="errors">
+            <span *ngIf="nameInput.errors?.['required']">Name is required!</span>
+            <span *ngIf="nameInput.errors?.['minlength']">Name must be at least 3 characters long!</span>
+          </p>
+        </ng-container>
+
 
         <!-- Last Name Input -->
         <div *ngIf="IsLastName || contact.lastName" class="form-input">
@@ -74,9 +77,5 @@
 </div>
 
 <!-- Reusable Modal for Delete Confirmation -->
-<app-modal
-  [isVisible]="showDeleteModal"
-  [message]="'Are you sure you want to delete this contact?'"
-  (confirmed)="confirmDelete()"
-  (canceled)="cancelDelete()"
-></app-modal>
+<app-modal [isVisible]="showDeleteModal" [message]="'Are you sure you want to delete this contact?'"
+  (confirmed)="confirmDelete()" (canceled)="cancelDelete()"></app-modal>

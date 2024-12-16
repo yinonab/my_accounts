@@ -17,13 +17,10 @@
           <label for="name">Name</label>
           <input formControlName="name" placeholder="Contact name" id="name" />
         </div>
-        <ng-container *ngIf="form.controls['name'] as nameInput">
-          <p *ngIf="nameInput.errors && nameInput.touched && nameInput.invalid" class="errors">
-            <span *ngIf="nameInput.errors?.['required']">Name is required!</span>
-            <span *ngIf="nameInput.errors?.['minlength']">Name must be at least 3 characters long!</span>
-          </p>
-        </ng-container>
-
+        <p *ngIf="form.controls['name'].errors && form.controls['name'].touched" class="errors">
+          <span *ngIf="form.controls['name'].errors['required']">Name is required!</span>
+          <span *ngIf="form.controls['name'].errors['minlength']">Name must be at least 3 characters long!</span>
+        </p>
 
         <!-- Last Name Input -->
         <div *ngIf="IsLastName || contact.lastName" class="form-input">
@@ -50,10 +47,19 @@
           <label for="email">Email</label>
           <input formControlName="email" placeholder="Contact email" id="email" />
         </div>
-        <p *ngIf="form.controls['email'].errors && form.controls['email'].touched" class="errors">
-          <span *ngIf="form.controls['email'].errors['required']">Email is required!</span>
-          <span *ngIf="form.controls['email'].errors['email']">Email is not valid!</span>
-        </p>
+        <ng-container *ngIf="form.controls['email'].errors && form.controls['email'].touched" class="errors">
+          <div *ngIf="form.controls['email'].errors['required']" class="errors">
+            Email is required!
+          </div>
+
+          <div *ngIf="form.controls['email'].errors['email']" class="errors">
+            Email is not valid!
+          </div>
+
+          <div *ngIf="form.controls['email'].errors['nonEnglishLatters']" class="errors">
+            Only English letters are allowed!
+          </div>
+        </ng-container>
       </div>
 
       <!-- Birth Input -->

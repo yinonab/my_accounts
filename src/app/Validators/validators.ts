@@ -1,5 +1,7 @@
 import { AbstractControl } from "@angular/forms";
 import { debounceTime, map, timer } from "rxjs";
+import { ContactService } from "../services/contact.service";
+import { inject } from "@angular/core";
 
 export function nonEnglishLatters(control: AbstractControl) {
     const nonEnglishRegex = /^[a-zA-Z @. ]*$/ig;
@@ -8,10 +10,14 @@ export function nonEnglishLatters(control: AbstractControl) {
 }
 
 export function nameTaken(control: AbstractControl) {
-    return timer(1000).pipe(
-        debounceTime(500), map(() => {
-            if (control.value === 'test') return { nameTaken: true }
-            return null
+    const contactService = inject(ContactService);
+    return contactService.loadContacts().pipe(
+        map(contacts => {
+            const isNameTaken = contacts.some(contact =>
+                contact.name.toLowerCase() === control.value.toLowerCase()
+            );
+
+            return isNameTaken ? { nameTaken: true } : null;
         })
-    )
+    );
 }

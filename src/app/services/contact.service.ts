@@ -9,7 +9,7 @@ const ENTITY = 'contacts'
     providedIn: 'root'
 })
 export class ContactService {
-    
+
     private _contacts$ = new BehaviorSubject<Contact[]>([])
     public contacts$ = this._contacts$.asObservable()
 
@@ -31,8 +31,8 @@ export class ContactService {
                     const filterBy = this._filterBy$.value;
                     contacts = contacts.map(contact => ({
                         ...contact,
-                        lastName:  contact.lastName || '', 
-                        birthday:  contact.birthday || '', 
+                        lastName: contact.lastName || '',
+                        birthday: contact.birthday || '',
                     }));
                     if (filterBy && filterBy.name) {
                         contacts = this._filter(contacts, filterBy.name)
@@ -68,7 +68,7 @@ export class ContactService {
         this.loadContacts().pipe(take(1)).subscribe()
     }
 
-    public getEmptyContact():Partial<Contact>  {
+    public getEmptyContact(): Partial<Contact> {
         return {
             name: '',
             lastName: '',
@@ -90,7 +90,7 @@ export class ContactService {
             .pipe(
                 tap(updatedContact => {
                     const contacts = this._contacts$.value
-                    this._contacts$.next(contacts.map(contact => contact._id === updatedContact._id ? updatedContact : contact))
+                    this._contacts$.next([...contacts.map(contact => contact._id === updatedContact._id ? updatedContact : contact)])
                 }),
                 retry(1),
                 catchError(this._handleError)
@@ -289,7 +289,7 @@ export class ContactService {
         ];
         return contacts;
     }
-    
+
 
     private _handleError(err: HttpErrorResponse) {
         console.log('err:', err)

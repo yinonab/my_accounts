@@ -40,7 +40,7 @@
       color: $clr8;
       cursor: pointer;
       &.long-name {
-        font-size: 1.2rem;
+        font-size: 1rem;
         line-height: 1.2;
         word-break: break-word; // Ensures long words wrap instead of overflowing
       }

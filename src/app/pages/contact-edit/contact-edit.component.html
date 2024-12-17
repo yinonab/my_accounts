@@ -17,67 +17,70 @@
           <label for="name">Name</label>
           <input formControlName="name" placeholder="Contact name" id="name" />
         </div>
-        <p *ngIf="form.controls['name'].errors && form.controls['name'].touched" class="errors">
-          <span *ngIf="form.controls['name'].errors['required']">Name is required!</span>
-          <span *ngIf="form.controls['name'].errors['minlength']">Name must be at least 3 characters long!</span>
-        </p>
+        <ng-container *ngIf="form.controls['name'] as nameInput">
+          <p *ngIf="nameInput.errors && nameInput.touched" class="errors">
+            <span *ngIf="nameInput.errors['required']">Name is required!</span>
+            <span *ngIf="nameInput.errors['minlength']">Name must be at least 3 characters long!</span>
+          </p>
+        </ng-container>
 
         <!-- Last Name Input -->
         <div *ngIf="IsLastName || contact.lastName" class="form-input">
           <label for="lastName">Last Name</label>
-          <input formControlName="lastName" placeholder="Contact lastName" id="lastName" />
+          <input formControlName="lastName" placeholder="Contact Last Name" id="lastName" />
         </div>
-        <p *ngIf="form.controls['lastName'].errors && form.controls['lastName'].touched" class="errors">
-          <span *ngIf="form.controls['lastName'].errors['required']">Last name is required!</span>
-          <span *ngIf="form.controls['lastName'].errors['minlength']">Name must be at least 3 characters long!</span>
-        </p>
+        <ng-container *ngIf="form.controls['lastName'] as lastNameInput">
+          <p *ngIf="lastNameInput.errors && lastNameInput.touched" class="errors">
+            <span *ngIf="lastNameInput.errors['required']">Last name is required!</span>
+            <span *ngIf="lastNameInput.errors['minlength']">Last name must be at least 3 characters long!</span>
+          </p>
+        </ng-container>
 
         <!-- Phone Input -->
         <div class="form-input">
           <label for="phone">Phone</label>
           <input formControlName="phone" placeholder="Phone number" id="phone" />
         </div>
-        <p *ngIf="form.controls['phone'].errors && form.controls['phone'].touched" class="errors">
-          <span *ngIf="form.controls['phone'].errors['required']">Phone number is required!</span>
-          <span *ngIf="form.controls['phone'].errors['pattern']">Phone number is not valid!</span>
-        </p>
+        <ng-container *ngIf="form.controls['phone'] as phoneInput">
+          <p *ngIf="phoneInput.errors && phoneInput.touched" class="errors">
+            <span *ngIf="phoneInput.errors['required']">Phone number is required!</span>
+            <span *ngIf="phoneInput.errors['pattern']">Phone number is not valid!</span>
+          </p>
+        </ng-container>
 
         <!-- Email Input -->
         <div class="form-input">
           <label for="email">Email</label>
-          <input formControlName="email" placeholder="Contact email" id="email" />
+          <input formControlName="email" placeholder="Contact Email" id="email" />
         </div>
-        <ng-container *ngIf="form.controls['email'].errors && form.controls['email'].touched" class="errors">
-          <div *ngIf="form.controls['email'].errors['required']" class="errors">
-            Email is required!
-          </div>
-
-          <div *ngIf="form.controls['email'].errors['email']" class="errors">
-            Email is not valid!
-          </div>
-
-          <div *ngIf="form.controls['email'].errors['nonEnglishLatters']" class="errors">
-            Only English letters are allowed!
-          </div>
+        <ng-container *ngIf="form.controls['email'] as emailInput">
+          <p *ngIf="emailInput.errors && emailInput.touched" class="errors">
+            <span *ngIf="emailInput.errors['required']">Email is required!</span>
+            <span *ngIf="emailInput.errors['email']">Email is not valid!</span>
+            <span *ngIf="emailInput.errors['nonEnglishLetters']">Only English letters are allowed!</span>
+          </p>
         </ng-container>
-      </div>
 
-      <!-- Birth Input -->
-      <div class="form-input">
-        <label for="birthday">Birth</label>
-        <input type="date" formControlName="birth" id="birthday" />
-      </div>
-      <p *ngIf="form.controls['birth'].errors && form.controls['birth'].touched" class="errors">
-        <span *ngIf="form.controls['birth'].errors['required']">Birth date is required!</span>
-      </p>
+        <!-- Birth Input -->
+        <div class="form-input">
+          <label for="birthday">Birth</label>
+          <input type="date" formControlName="birth" id="birthday" />
+        </div>
+        <ng-container *ngIf="form.controls['birth'] as birthInput">
+          <p *ngIf="birthInput.errors && birthInput.touched" class="errors">
+            <span *ngIf="birthInput.errors['required']">Birth date is required!</span>
+          </p>
+        </ng-container>
 
-      <!-- Buttons -->
-      <div class="form-actions">
-        <button *ngIf="!(IsLastName || contact.lastName)" (click)="onAddLastNameClick()" class="add-btn" type="button">
-          Add Last Name
-        </button>
-        <button [disabled]="form.invalid" class="save-btn" type="submit">Save</button>
-      </div>
+        <!-- Buttons -->
+        <div class="form-actions">
+          <button *ngIf="!(IsLastName || contact.lastName)" (click)="onAddLastNameClick()" class="add-btn"
+            type="button">
+            Add Last Name
+          </button>
+          <button [disabled]="form.invalid" class="save-btn" type="submit">Save</button>
+        </div>
+      </div> <!-- Added closing </div> for .flex.column -->
     </form>
   </section>
 </div>

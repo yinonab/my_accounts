@@ -56,10 +56,15 @@
         <ng-container *ngIf="form.controls['email'] as emailInput">
           <p *ngIf="emailInput.errors && emailInput.touched" class="errors">
             <span *ngIf="emailInput.errors['required']">Email is required!</span>
-            <span *ngIf="emailInput.errors['email']">Email is not valid!</span>
-            <span *ngIf="emailInput.errors['nonEnglishLetters']">Only English letters are allowed!</span>
+            <span *ngIf="!emailInput.errors['nonEnglishLetters'] && emailInput.errors['email']">
+              Email is not valid!
+            </span>
+            <span *ngIf="emailInput.errors['nonEnglishLetters']">
+              Only English letters are allowed!
+            </span>
           </p>
         </ng-container>
+
 
         <!-- Birth Input -->
         <div class="form-input">

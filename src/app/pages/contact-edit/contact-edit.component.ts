@@ -5,7 +5,7 @@ import { Subject, filter, map, takeUntil } from 'rxjs';
 import { Contact } from '../../models/contact.model';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { nonEnglishLatters } from '../../Validators/validators';
+import { nonEnglishLetters } from '../../Validators/validators';
 
 
 @Component({
@@ -53,7 +53,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
       ],
       email: [
         contactExists ? this.contact.email : '',
-        [Validators.required, Validators.email, nonEnglishLatters]
+        [Validators.required, Validators.email, nonEnglishLetters] // Corrected here
       ],
       birth: [
         contactExists && this.contact.birthday

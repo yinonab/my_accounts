@@ -1,9 +1,25 @@
 <header>
     <img class="logo" src="../../../assets/images/logo.png" alt="bitcoin img">
     <nav>
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><img
-                src="../../../assets/images/home.png" alt=""></a>
-        <a routerLink="/contact" routerLinkActive="active"><img src="../../../assets/images/users.png" alt=""></a>
-        <a routerLink="/chart" routerLinkActive="active"><img src="../../../assets/images/increase.png" alt=""></a>
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <img src="../../../assets/images/home.png" alt="Home">
+      </a>
+      <a routerLink="/contact" routerLinkActive="active">
+        <img src="../../../assets/images/users.png" alt="Contacts">
+      </a>
+      <a routerLink="/chart" routerLinkActive="active">
+        <img src="../../../assets/images/increase.png" alt="Charts">
+      </a>
     </nav>
-</header>
+    <div class="auth-links">
+      <ng-container *ngIf="!loggedInUser; else loggedIn">
+        <a routerLink="/login">Login</a>
+        <a routerLink="/signup">Sign Up</a>
+      </ng-container>
+      <ng-template #loggedIn>
+        <span>Welcome, {{ loggedInUser?.username }}</span>
+        <button (click)="onLogout()">Logout</button>
+      </ng-template>
+    </div>
+  </header>
+  

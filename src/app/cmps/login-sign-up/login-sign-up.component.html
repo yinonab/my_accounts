@@ -1,0 +1,53 @@
+<div class="login-signup-container">
+    <h4>{{ isSignupMode ? 'Create an Account' : 'Sign In' }}</h4>
+  
+    <form (ngSubmit)="onSubmit()">
+      <label for="username">Username:</label>
+      <input
+        id="username"
+        type="text"
+        #usernameInput
+        [value]="user.username"
+        (input)="handleInputChange('username', usernameInput.value)"
+        required
+      />
+      <br />
+  
+      <label for="password">Password:</label>
+      <input
+        id="password"
+        type="password"
+        #passwordInput
+        [value]="user.password"
+        (input)="handleInputChange('password', passwordInput.value)"
+        required
+      />
+      <br />
+  
+      <ng-container *ngIf="isSignupMode">
+        <label for="email">Email:</label>
+        <input
+          id="email"
+          type="email"
+          #emailInput
+          [value]="user.email"
+          (input)="handleInputChange('email', emailInput.value)"
+          required
+        />
+        <br />
+      </ng-container>
+  
+      <button type="submit">{{ isSignupMode ? 'Sign Up' : 'Log In' }}</button>
+      <p>
+        {{ isSignupMode ? 'Already have an account?' : 'Don’t have an account?' }}
+        <a href="#" (click)="toggleMode(); $event.preventDefault()">
+          {{ isSignupMode ? 'Sign in here' : 'Create an account' }}
+        </a>
+      </p>
+      
+    </form>
+  
+    <!-- Error Message -->
+    <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+  </div>
+  

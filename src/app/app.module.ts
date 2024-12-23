@@ -10,13 +10,14 @@ import { ContactIndexComponent } from './pages/contact-index/contact-index.compo
 import { ContactDetailsComponent } from './pages/contact-details/contact-details.component';
 import { ContactListComponent } from './cmps/contact/contact-list/contact-list.component';
 import { ContactPreviewComponent } from './cmps/contact/contact-preview/contact-preview.component';
-import { AppHeaderComponent } from './cmps/app-header/app-header.component';
+import { HeaderComponent } from './cmps/app-header/app-header.component';
 import { ChartsComponent } from './pages/charts/charts.component';
 import { ContactFilterComponent } from './cmps/contact/contact-filter/contact-filter.component';
 import { ContactEditComponent } from './pages/contact-edit/contact-edit.component';
 import { NgChartsModule } from 'ng2-charts';
 import { ModalComponent } from './shared/modal/modal.component';
 import { LoaderComponent } from './loader/loader.component';
+import { LoginSignupComponent } from './cmps/login-sign-up/login-sign-up.component';
 
 
 @NgModule({
@@ -27,12 +28,13 @@ import { LoaderComponent } from './loader/loader.component';
     ContactDetailsComponent,
     ContactListComponent,
     ContactPreviewComponent,
-    AppHeaderComponent,
+    HeaderComponent,
     ChartsComponent,
     ContactFilterComponent,
     ContactEditComponent,
     ModalComponent,
     LoaderComponent,
+    LoginSignupComponent,
   ],
   imports: [
     BrowserModule,

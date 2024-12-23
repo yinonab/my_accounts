@@ -13,6 +13,7 @@ export class HomePageComponent implements OnDestroy {
   user!: User
   bitCoinService = inject(BitCoinService)
   userService = inject(UserService)
+  logdinUser=this.userService.getLoggedInUser();
 
   BitCoinRate!: number 
   subscription!: Subscription

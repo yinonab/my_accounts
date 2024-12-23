@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { User } from '../../models/user.model.ts';
 import { UserService } from '../../services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'login-sign-up',
   templateUrl: './login-sign-up.component.html',
   styleUrls: ['./login-sign-up.component.scss']
-})export class LoginSignupComponent implements OnInit {
+})
+export class LoginSignupComponent implements OnInit {
   user: User; // For login/signup form
   isSignupMode: boolean = false; // Toggles between login and signup
   errorMessage: string = ''; // For displaying error messages
@@ -35,7 +36,6 @@ import { UserService } from '../../services/user.service';
       this.router.navigate(['/login']);
     }
   }
-  
 
   onSubmit(): void {
     this.errorMessage = '';
@@ -43,30 +43,25 @@ import { UserService } from '../../services/user.service';
       this.errorMessage = 'Please fill in all required fields.';
       return;
     }
-  
+
     if (this.isSignupMode) {
-      console.log('Signing up with user:', this.user);
       this.userService.saveUser(this.user).subscribe({
         next: (newUser) => {
-          console.log('Signup successful:', newUser);
-          // Automatically log in the user
           this.userService.login(this.user.username, this.user.password).subscribe({
             next: (loggedInUser) => {
               if (loggedInUser) {
                 console.log('Auto-login successful:', loggedInUser);
-                this.router.navigate(['/']); // Redirect to home page after auto-login
+                this.router.navigate(['/contact']);
               } else {
                 this.errorMessage = 'Auto-login failed. Please log in manually.';
               }
             },
             error: (err) => {
-              console.error('Auto-login failed:', err);
               this.errorMessage = 'Signup successful, but login failed. Please log in manually.';
             }
           });
         },
         error: (err) => {
-          console.error('Signup failed:', err);
           this.errorMessage = 'Signup failed. Please try again.';
         }
       });
@@ -75,16 +70,15 @@ import { UserService } from '../../services/user.service';
         next: (loggedInUser) => {
           if (loggedInUser) {
             console.log('Login successful:', loggedInUser);
-            this.router.navigate(['/']); // Redirect to home page after login
+            
           } else {
             this.errorMessage = 'Invalid username or password.';
           }
         },
         error: (err) => {
-          console.error('Login failed:', err);
           this.errorMessage = 'Login failed. Please try again.';
         }
       });
     }
   }
-}  
+}

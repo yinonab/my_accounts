@@ -6,6 +6,7 @@ import { ContactDetailsComponent } from './pages/contact-details/contact-details
 import { contactResolver } from './resolvers/contact.resolver';
 import { ChartsComponent } from './pages/charts/charts.component';
 import { ContactEditComponent } from './pages/contact-edit/contact-edit.component';
+import { LoginSignupComponent } from './cmps/login-sign-up/login-sign-up.component';
 
 const routes: Routes = [
   {
@@ -32,6 +33,14 @@ const routes: Routes = [
   {
     path: 'chart',
     component: ChartsComponent
+  },
+  {
+    path: 'login', // Route for Login
+    component: LoginSignupComponent
+  },
+  {
+    path: 'signup', // Route for Signup
+    component: LoginSignupComponent
   },
   {
     path: '',

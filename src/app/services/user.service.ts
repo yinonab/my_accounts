@@ -1,16 +1,174 @@
 import { Injectable } from '@angular/core';
+import { Observable, BehaviorSubject, from, throwError, tap, catchError, map } from 'rxjs';
+import { User } from '../models/user.model.ts';
+import { storageService } from './async-storage.service'; // Replace with your async storage service
+
+const ENTITY = 'users';
+const LOGGEDIN_USER = 'loggedInUser';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  constructor() { }
+  private _users$ = new BehaviorSubject<User[]>([]);
+  public users$ = this._users$.asObservable();
 
-  getUser() {
-    return {
-      name: "Ochoa Hyde",
-      coins: 100,
-      moves:[]
+  private _loggedInUser$ = new BehaviorSubject<User | null>(null);
+  public loggedInUser$ = this._loggedInUser$.asObservable();
+
+  constructor() {
+    // Initialize users in local storage if not present
+    const users = JSON.parse(localStorage.getItem(ENTITY) || 'null');
+    if (!users || users.length === 0) {
+      localStorage.setItem(ENTITY, JSON.stringify(this._createDemoUsers()));
+    }
+    const loggedInUser = JSON.parse(localStorage.getItem(LOGGEDIN_USER) || 'null');
+    if (loggedInUser) this._loggedInUser$.next(loggedInUser);
+  }
+
+  public login(username: string, password: string): Observable<User | null> {
+    return from(storageService.query<User>(ENTITY)).pipe(
+      map(users => {
+        const user = users.find(u => u.username === username && u.password === password);
+        if (user) {
+          this._loggedInUser$.next(user);
+          localStorage.setItem(LOGGEDIN_USER, JSON.stringify(user));
+          return user;
+        }
+        return null;
+      }),
+      catchError(this._handleError)
+    );
+  }
+  
+  
+
+  // Logout method
+  public logout(): void {
+    this._loggedInUser$.next(null);
+    localStorage.removeItem(LOGGEDIN_USER);
+  }
+
+  // Get logged-in user from local storage
+  public getLoggedInUser(): User | null {
+    return JSON.parse(localStorage.getItem(LOGGEDIN_USER) || 'null');
+  }
+
+  // Load users from storage and apply sorting
+  public loadUsers(): Observable<User[]> {
+    return from(storageService.query<User>(ENTITY)).pipe(
+      tap(users => {
+        this._users$.next(this._sort(users));
+      }),
+      catchError(this._handleError)
+    );
+  }
+
+  // Save a user (add or update)
+  public saveUser(user: User): Observable<User> {
+    return user._id ? this._updateUser(user) : this._addUser(user);
+  }
+
+  // Delete a user by ID
+  public deleteUser(userId: string): Observable<void> {
+    return from(storageService.remove(ENTITY, userId)).pipe(
+      tap(() => {
+        const users = this._users$.value.filter(user => user._id !== userId);
+        this._users$.next(users);
+      }),
+      catchError(this._handleError)
+    );
+  }
+
+  // Get a single user by ID
+  public getUserById(userId: string): Observable<User> {
+    return from(storageService.get<User>(ENTITY, userId)).pipe(
+      catchError(this._handleError)
+    );
+  }
+
+  // Get an empty user structure
+  // Get an empty user structure
+public getEmptyUser(): User {
+  return {
+    _id: '', // Default ID is empty for new users
+    username: '',
+    password: '',
+    email: '',
+    createdAt: new Date(),
+    img: ''
+  };
+}
+
+
+  // Create demo users for initialization
+  private _createDemoUsers(): User[] {
+    return [
+      {
+        _id: this._getRandomId(),
+        username: 'john_doe',
+        password: '12345',
+        email: 'john.doe@example.com',
+        createdAt: new Date('2020-01-01'),
+        img: ''
+      },
+      {
+        _id: this._getRandomId(),
+        username: 'jane_smith',
+        password: 'password',
+        email: 'jane.smith@example.com',
+        createdAt: new Date('2021-01-01'),
+        img: ''
       }
+    ];
+  }
+
+  // Sort users by username
+  private _sort(users: User[]): User[] {
+    return users.sort((a, b) => a.username.localeCompare(b.username));
+  }
+
+  // Add a new user
+  private _addUser(user: User): Observable<User> {
+    const newUser = { ...user, _id: this._getRandomId() }; // Ensure `_id` is assigned
+    return from(storageService.post(ENTITY, newUser)).pipe(
+      tap(savedUser => {
+        const users = this._users$.value;
+        this._users$.next([...users, savedUser]); // Update users BehaviorSubject
+      }),
+      catchError(this._handleError)
+    );
+  }
+  
+
+  // Update an existing user
+  private _updateUser(user: User): Observable<User> {
+    return from(storageService.put(ENTITY, user)).pipe(
+      tap(updatedUser => {
+        const users = this._users$.value.map(u =>
+          u._id === updatedUser._id ? updatedUser : u
+        );
+        this._users$.next(users);
+      }),
+      catchError(this._handleError)
+    );
+  }
+
+  // Generate a random ID
+  private _getRandomId(length = 8): string {
+    let result = '';
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  }
+
+  // Handle errors
+  private _handleError(err: any): Observable<never> {
+    console.error('An error occurred:', err);
+    return throwError(() => new Error(err));
   }
 }

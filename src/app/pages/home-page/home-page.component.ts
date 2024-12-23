@@ -18,7 +18,7 @@ export class HomePageComponent implements OnDestroy {
   subscription!: Subscription
 
   constructor() {
-    this.user = this.userService.getUser()
+    this.user = this.userService.getEmptyUser() as User
     this.getBitcoinRate();
   }
 

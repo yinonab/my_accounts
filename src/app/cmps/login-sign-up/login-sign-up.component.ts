@@ -70,7 +70,7 @@ export class LoginSignupComponent implements OnInit {
         next: (loggedInUser) => {
           if (loggedInUser) {
             console.log('Login successful:', loggedInUser);
-            
+            this.router.navigate(['/contact']);
           } else {
             this.errorMessage = 'Invalid username or password.';
           }

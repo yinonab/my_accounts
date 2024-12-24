@@ -1,5 +1,10 @@
 <section class="home-page">
-<h1>Hello-{{logdinUser?.username}}!</h1>
+    <ng-container *ngIf="logdinUser; else welcomeMessage">
+      <h1>Hello-{{logdinUser.username}}!</h1>
+    </ng-container>
+    <ng-template #welcomeMessage>
+      <h1>Welcome</h1>
+    </ng-template>
 <!-- <section class="status">
     <img src="../../../assets/images/coins.png" alt="coins-image">
     <h2> <span>Coins:</span>  {{user.coins}}</h2>

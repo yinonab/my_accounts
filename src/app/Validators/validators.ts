@@ -22,3 +22,15 @@ export function nameTaken(control: AbstractControl) {
         })
     );
 }
+
+export function emailValidator(): ValidatorFn {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/; // Basic email regex
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) {
+        return null; // No value, no error
+      }
+      const valid = emailRegex.test(value);
+      return valid ? null : { email: true };
+    };
+  }

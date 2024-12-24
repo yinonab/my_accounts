@@ -39,46 +39,28 @@ export class LoginSignupComponent implements OnInit {
 
   onSubmit(): void {
     this.errorMessage = '';
-    if (!this.user.username || !this.user.password || (this.isSignupMode && !this.user.email)) {
-      this.errorMessage = 'Please fill in all required fields.';
-      return;
-    }
-
+    
     if (this.isSignupMode) {
       this.userService.saveUser(this.user).subscribe({
-        next: (newUser) => {
+        next: () => {
           this.userService.login(this.user.username, this.user.password).subscribe({
-            next: (loggedInUser) => {
-              if (loggedInUser) {
-                console.log('Auto-login successful:', loggedInUser);
-                this.router.navigate(['/contact']);
-              } else {
-                this.errorMessage = 'Auto-login failed. Please log in manually.';
-              }
-            },
-            error: (err) => {
+            next: () => this.router.navigate(['/contact']),
+            error: () => {
               this.errorMessage = 'Signup successful, but login failed. Please log in manually.';
-            }
+            },
           });
         },
-        error: (err) => {
+        error: () => {
           this.errorMessage = 'Signup failed. Please try again.';
-        }
+        },
       });
     } else {
       this.userService.login(this.user.username, this.user.password).subscribe({
-        next: (loggedInUser) => {
-          if (loggedInUser) {
-            console.log('Login successful:', loggedInUser);
-            this.router.navigate(['/contact']);
-          } else {
-            this.errorMessage = 'Invalid username or password.';
-          }
+        next: () => this.router.navigate(['/contact']),
+        error: () => {
+          this.errorMessage = 'Invalid username or password.';
         },
-        error: (err) => {
-          this.errorMessage = 'Login failed. Please try again.';
-        }
       });
     }
   }
-}
+}  

@@ -1,52 +1,77 @@
 <div class="login-signup-container">
-    <h4>{{ isSignupMode ? 'Create an Account' : 'Sign In' }}</h4>
-  
-    <form (ngSubmit)="onSubmit()">
-      <label for="username">Username:</label>
+  <h4>{{ isSignupMode ? 'Create an Account' : 'Sign In' }}</h4>
+
+  <form (ngSubmit)="onSubmit()" #form="ngForm">
+    <!-- Username Field -->
+    <label for="username">Username:</label>
+    <input
+      id="username"
+      type="text"
+      name="username"
+      [(ngModel)]="user.username"
+      #username="ngModel"
+      required
+      minlength="3"
+    />
+    <div *ngIf="username.touched && username.invalid" class="error-message">
+      <span *ngIf="username.errors?.['required']">Username is required.</span>
+      <span *ngIf="username.errors?.['minlength']">
+        Username must be at least 3 characters long.
+      </span>
+    </div>
+    <br />
+
+    <!-- Password Field -->
+    <label for="password">Password:</label>
+    <input
+      id="password"
+      type="password"
+      name="password"
+      [(ngModel)]="user.password"
+      #password="ngModel"
+      required
+      minlength="6"
+    />
+    <div *ngIf="password.touched && password.invalid" class="error-message">
+      <span *ngIf="password.errors?.['required']">Password is required.</span>
+      <span *ngIf="password.errors?.['minlength']">
+        Password must be at least 6 characters long.
+      </span>
+    </div>
+    <br />
+
+    <!-- Email Field (only for signup mode) -->
+    <ng-container *ngIf="isSignupMode">
+      <label for="email">Email:</label>
       <input
-        id="username"
-        type="text"
-        #usernameInput
-        [value]="user.username"
-        (input)="handleInputChange('username', usernameInput.value)"
-        required
+      id="email"
+      type="text"
+      name="email"
+      [(ngModel)]="user.email"
+      #email="ngModel"
+      [ngModelOptions]="{ updateOn: 'blur' }"
+      required
+      [ngModel]="user.email"
+      appEmailValidator
       />
+      <div *ngIf="email.touched && email.invalid" class="error-message">
+        <span *ngIf="email.errors?.['required']">Email is required.</span>
+        <span *ngIf="email.errors?.['email']">Please enter a valid email address.</span>
+      </div>
       <br />
-  
-      <label for="password">Password:</label>
-      <input
-        id="password"
-        type="password"
-        #passwordInput
-        [value]="user.password"
-        (input)="handleInputChange('password', passwordInput.value)"
-        required
-      />
-      <br />
-  
-      <ng-container *ngIf="isSignupMode">
-        <label for="email">Email:</label>
-        <input
-          id="email"
-          type="email"
-          #emailInput
-          [value]="user.email"
-          (input)="handleInputChange('email', emailInput.value)"
-          required
-        />
-        <br />
-      </ng-container>
-  
-      <button type="submit">{{ isSignupMode ? 'Sign Up' : 'Log In' }}</button>
-      <p>
-        {{ isSignupMode ? 'Already have an account?' : 'Don’t have an account?' }}
-        <a href="#" (click)="toggleMode(); $event.preventDefault()">
-          {{ isSignupMode ? 'Sign in here' : 'Create an account' }}
-        </a>
-      </p>
-    </form>
-  
-    <!-- Error Message -->
-    <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
-  </div>
-  
+    </ng-container>
+
+    <button type="submit" [disabled]="form.invalid">
+      {{ isSignupMode ? 'Sign Up' : 'Log In' }}
+    </button>
+    <p>
+      {{ isSignupMode ? 'Already have an account?' : 'Don’t have an account?' }}
+      <a href="#" (click)="toggleMode(); $event.preventDefault()">
+        {{ isSignupMode ? 'Sign in here' : 'Create an account' }}
+      </a>
+    </p>
+  </form>
+
+  <!-- Global Error Message -->
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+</div>

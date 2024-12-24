@@ -18,6 +18,7 @@ import { NgChartsModule } from 'ng2-charts';
 import { ModalComponent } from './shared/modal/modal.component';
 import { LoaderComponent } from './loader/loader.component';
 import { LoginSignupComponent } from './cmps/login-sign-up/login-sign-up.component';
+import { EmailValidatorDirective } from './directives/email-validator.directive';
 
 
 @NgModule({
@@ -35,6 +36,7 @@ import { LoginSignupComponent } from './cmps/login-sign-up/login-sign-up.compone
     ModalComponent,
     LoaderComponent,
     LoginSignupComponent,
+    EmailValidatorDirective,
   ],
   imports: [
     BrowserModule,

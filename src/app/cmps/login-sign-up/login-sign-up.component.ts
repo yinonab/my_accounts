@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { User } from '../../models/user.model.ts';
 import { UserService } from '../../services/user.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'login-sign-up',
@@ -13,12 +13,16 @@ export class LoginSignupComponent implements OnInit {
   isSignupMode: boolean = false; // Toggles between login and signup
   errorMessage: string = ''; // For displaying error messages
 
-  constructor(private userService: UserService, private router: Router) {
+  constructor(private userService: UserService, private router: Router,  private route: ActivatedRoute
+  ) {
     this.user = this.userService.getEmptyUser(); // Use getEmptyUser for initialization
   }
 
   ngOnInit(): void {
-    console.log('Initialized user:', this.user);
+    // Listen for route changes to toggle mode dynamically
+    this.route.url.subscribe((url) => {
+      this.isSignupMode = url[0]?.path === 'signup';
+    });
   }
 
   handleInputChange(field: keyof User, value: string | Date): void {
@@ -27,15 +31,16 @@ export class LoginSignupComponent implements OnInit {
 
   toggleMode(): void {
     this.isSignupMode = !this.isSignupMode; // Toggle mode
-    this.errorMessage = ''; // Clear error message on mode toggle
+    this.errorMessage = ''; // Clear any error message
   
     // Navigate to the appropriate route
-    if (this.isSignupMode) {
-      this.router.navigate(['/signup']);
-    } else {
-      this.router.navigate(['/login']);
-    }
+    const targetRoute = this.isSignupMode ? '/signup' : '/login';
+    this.router.navigate([targetRoute]).then(() => {
+      // Optionally, manually update Angular's change detection
+      this.isSignupMode = targetRoute === '/signup';
+    });
   }
+  
 
   onSubmit(): void {
     this.errorMessage = '';

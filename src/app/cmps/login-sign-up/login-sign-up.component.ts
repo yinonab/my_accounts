@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { User } from '../../models/user.model.ts';
 import { UserService } from '../../services/user.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MsgService } from '../../services/msg.service.js';
 
 @Component({
   selector: 'login-sign-up',
@@ -13,7 +14,7 @@ export class LoginSignupComponent implements OnInit {
   isSignupMode: boolean = false; // Toggles between login and signup
   errorMessage: string = ''; // For displaying error messages
 
-  constructor(private userService: UserService, private router: Router,  private route: ActivatedRoute
+  constructor(private userService: UserService, private router: Router, private msgService: MsgService, private route: ActivatedRoute
   ) {
     this.user = this.userService.getEmptyUser(); // Use getEmptyUser for initialization
   }
@@ -49,7 +50,10 @@ export class LoginSignupComponent implements OnInit {
       this.userService.saveUser(this.user).subscribe({
         next: () => {
           this.userService.login(this.user.username, this.user.password).subscribe({
-            next: () => this.router.navigate(['/contact']),
+            next: () => {
+              this.msgService.setSuccessMsg(`Signup successful! ${this.user.username} is now logged in.`);
+              this.router.navigate(['/contact']);
+            },
             error: () => {
               this.errorMessage = 'Signup successful, but login failed. Please log in manually.';
             },
@@ -61,7 +65,10 @@ export class LoginSignupComponent implements OnInit {
       });
     } else {
       this.userService.login(this.user.username, this.user.password).subscribe({
-        next: () => this.router.navigate(['/contact']),
+        next: () => {
+          this.msgService.setSuccessMsg(`Login successful! ${this.user.username} is now logged in.`);
+          this.router.navigate(['/contact']);
+        },
         error: () => {
           this.errorMessage = 'Invalid username or password.';
         },

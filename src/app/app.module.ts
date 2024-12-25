@@ -19,6 +19,9 @@ import { ModalComponent } from './shared/modal/modal.component';
 import { LoaderComponent } from './loader/loader.component';
 import { LoginSignupComponent } from './cmps/login-sign-up/login-sign-up.component';
 import { EmailValidatorDirective } from './directives/email-validator.directive';
+import { MsgComponent } from './cmps/msg/msg.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 
 
 @NgModule({
@@ -37,6 +40,9 @@ import { EmailValidatorDirective } from './directives/email-validator.directive'
     LoaderComponent,
     LoginSignupComponent,
     EmailValidatorDirective,
+    MsgComponent,
+
+
   ],
   imports: [
     BrowserModule,
@@ -44,7 +50,8 @@ import { EmailValidatorDirective } from './directives/email-validator.directive'
     HttpClientModule,
     FormsModule, 
     ReactiveFormsModule,
-    NgChartsModule
+    NgChartsModule,
+    BrowserAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Contact } from '../../../models/contact.model';
 import { Router } from '@angular/router';
+import { MsgService } from '../../../services/msg.service';
 
 @Component({
   selector: 'contact-preview',
@@ -12,7 +13,7 @@ export class ContactPreviewComponent {
   @Output() remove = new EventEmitter<string>(); // Output to emit delete action
   showDeleteModal: boolean = false; // Controls modal visibility
 
-  constructor(private router: Router) {} // Inject the Router service
+  constructor(private router: Router,private msgService: MsgService,) {} // Inject the Router service
 
   // Navigate to the contact details page
   onPreviewClick(): void {
@@ -48,6 +49,7 @@ export class ContactPreviewComponent {
   confirmDelete(): void {
     console.log(this.contact.name + ' - was deleted');
     this.remove.emit(this.contact._id); // Emit the contact ID for removal
+    this.msgService.setSuccessMsg(`Delete Contact ${this.contact.name} successful!`);
     this.showDeleteModal = false; // Hide the modal
   }
 

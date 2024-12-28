@@ -6,6 +6,7 @@ import { Contact } from '../../models/contact.model';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { nonEnglishLetters } from '../../Validators/validators';
+import { MsgService } from '../../services/msg.service';
 
 
 @Component({
@@ -19,7 +20,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
   IsLastName: boolean = false
   form!: FormGroup
   showDeleteModal: boolean = false; // State for controlling modal visibility
-  constructor(private fb: FormBuilder, private datePipe: DatePipe) { }
+  constructor(private fb: FormBuilder, private datePipe: DatePipe,private msgService: MsgService,) { }
 
   formatDate(date: Date): string {
     return this.datePipe.transform(date, 'yyyy-MM-dd') || ''; // Format as '2024-12-16'
@@ -150,6 +151,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroySubject$))
       .subscribe({
         next: () => {
+          this.msgService.setSuccessMsg(`Contact ${this.contact.name} saved successfully.`);
           console.log('Contact saved successfully.');
           this.onBack(); // Close modal and navigate back
         },

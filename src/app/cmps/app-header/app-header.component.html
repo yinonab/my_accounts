@@ -1,5 +1,9 @@
 <header>
+  <div class="logo-wrapper">
     <img class="logo" src="../../../assets/images/logo.png" alt="bitcoin img">
+  </div>
+
+  <div class="nav-wrapper">
     <nav>
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
         <img src="../../../assets/images/home.png" alt="Home">
@@ -11,6 +15,9 @@
         <img src="../../../assets/images/increase.png" alt="Charts">
       </a>
     </nav>
+  </div>
+
+  <div class="auth-wrapper">
     <div class="auth-links">
       <ng-container *ngIf="!loggedInUser; else loggedIn">
         <a routerLink="/login">Login</a>
@@ -21,5 +28,5 @@
         <button (click)="onLogout()">Logout</button>
       </ng-template>
     </div>
-  </header>
-  
+  </div>
+</header>

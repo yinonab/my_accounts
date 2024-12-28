@@ -27,16 +27,16 @@ export class UserService {
     if (loggedInUser) this._loggedInUser$.next(loggedInUser);
   }
 
-  public login(username: string, password: string): Observable<User | null> {
+  public login(username: string, password: string): Observable<User> {
     return from(storageService.query<User>(ENTITY)).pipe(
       map(users => {
         const user = users.find(u => u.username === username && u.password === password);
-        if (user) {
-          this._loggedInUser$.next(user);
-          localStorage.setItem(LOGGEDIN_USER, JSON.stringify(user));
-          return user;
+        if (!user) {
+          throw new Error('Invalid username or password');
         }
-        return null;
+        this._loggedInUser$.next(user);
+        localStorage.setItem(LOGGEDIN_USER, JSON.stringify(user));
+        return user;
       }),
       catchError(this._handleError)
     );

@@ -65,14 +65,15 @@ export class LoginSignupComponent implements OnInit {
       });
     } else {
       this.userService.login(this.user.username, this.user.password).subscribe({
-        next: () => {
-          this.msgService.setSuccessMsg(`Login successful! ${this.user.username} is now logged in.`);
+        next: (user) => {
+          this.msgService.setSuccessMsg(`Login successful! ${user.username} is now logged in.`);
           this.router.navigate(['/contact']);
         },
-        error: () => {
-          this.errorMessage = 'Invalid username or password.';
+        error: (error) => {
+          this.errorMessage = error.message || 'Invalid username or password.';
+          this.msgService.setErrorMsg(this.errorMessage);
         },
       });
     }
   }
-}  
+}

@@ -22,6 +22,7 @@ import { EmailValidatorDirective } from './directives/email-validator.directive'
 import { MsgComponent } from './cmps/msg/msg.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { EvStopDirective } from './directives/ev-stop.directive';
+import { EmailTakenValidatorDirective } from './directives/EmailTakenValidatorDirective';
 
 
 
@@ -42,7 +43,8 @@ import { EvStopDirective } from './directives/ev-stop.directive';
     LoginSignupComponent,
     EmailValidatorDirective,
     MsgComponent,
-    EvStopDirective
+    EvStopDirective,
+    EmailTakenValidatorDirective
 
 
   ],

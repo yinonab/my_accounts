@@ -4,15 +4,8 @@
   <form (ngSubmit)="onSubmit()" #form="ngForm">
     <!-- Username Field -->
     <label for="username">Username:</label>
-    <input
-      id="username"
-      type="text"
-      name="username"
-      [(ngModel)]="user.username"
-      #username="ngModel"
-      required
-      minlength="3"
-    />
+    <input id="username" type="text" name="username" [(ngModel)]="user.username" #username="ngModel" required
+      minlength="3" />
     <div *ngIf="username.touched && username.invalid" class="error-message">
       <span *ngIf="username.errors?.['required']">Username is required.</span>
       <span *ngIf="username.errors?.['minlength']">
@@ -23,15 +16,8 @@
 
     <!-- Password Field -->
     <label for="password">Password:</label>
-    <input
-      id="password"
-      type="password"
-      name="password"
-      [(ngModel)]="user.password"
-      #password="ngModel"
-      required
-      minlength="6"
-    />
+    <input id="password" type="password" name="password" [(ngModel)]="user.password" #password="ngModel" required
+      minlength="6" />
     <div *ngIf="password.touched && password.invalid" class="error-message">
       <span *ngIf="password.errors?.['required']">Password is required.</span>
       <span *ngIf="password.errors?.['minlength']">
@@ -43,20 +29,15 @@
     <!-- Email Field (only for signup mode) -->
     <ng-container *ngIf="isSignupMode">
       <label for="email">Email:</label>
-      <input
-      id="email"
-      type="text"
-      name="email"
-      [(ngModel)]="user.email"
-      #email="ngModel"
-      [ngModelOptions]="{ updateOn: 'blur' }"
-      required
-      [ngModel]="user.email"
-      appEmailValidator
-      />
+      <input id="email" type="text" name="email" [(ngModel)]="user.email" #email="ngModel"
+        [ngModelOptions]="{ updateOn: 'change' }" required [ngModel]="user.email" appEmailValidator appEmailTaken />
       <div *ngIf="email.touched && email.invalid" class="error-message">
         <span *ngIf="email.errors?.['required']">Email is required.</span>
         <span *ngIf="email.errors?.['email']">Please enter a valid email address.</span>
+        <span *ngIf="email.errors?.['emailTaken']">This email is already registered.</span>
+      </div>
+      <div *ngIf="email.pending" class="validation-pending">
+        Checking email availability...
       </div>
       <br />
     </ng-container>
@@ -70,6 +51,7 @@
         {{ isSignupMode ? 'Sign in here' : 'Create an account' }}
       </a>
     </p>
+    <br>
   </form>
 
   <!-- Global Error Message -->

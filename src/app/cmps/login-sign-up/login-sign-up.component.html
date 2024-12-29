@@ -17,13 +17,13 @@
     <!-- Password Field -->
     <label for="password">Password:</label>
     <input id="password" type="password" name="password" [(ngModel)]="user.password" #password="ngModel" required
-      minlength="6" />
+    appPasswordValidator  />
     <div *ngIf="password.touched && password.invalid" class="error-message">
       <span *ngIf="password.errors?.['required']">Password is required.</span>
-      <span *ngIf="password.errors?.['minlength']">
-        Password must be at least 6 characters long.
-      </span>
-    </div>
+      <span *ngIf="password.errors?.['minlength']">Password must be at least 6 characters long.</span>
+      <span *ngIf="password.errors?.['noCapitalLetter']">Password must contain at least one capital letter.</span>
+      <span *ngIf="password.errors?.['noSpecialChar']">Password must contain at least one special character.</span>
+  </div>
     <br />
 
     <!-- Email Field (only for signup mode) -->

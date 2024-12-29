@@ -23,6 +23,7 @@ import { MsgComponent } from './cmps/msg/msg.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { EvStopDirective } from './directives/ev-stop.directive';
 import { EmailTakenValidatorDirective } from './directives/EmailTakenValidatorDirective';
+import { PasswordValidatorDirective } from './directives/PasswordValidatorDirective';
 
 
 
@@ -44,7 +45,8 @@ import { EmailTakenValidatorDirective } from './directives/EmailTakenValidatorDi
     EmailValidatorDirective,
     MsgComponent,
     EvStopDirective,
-    EmailTakenValidatorDirective
+    EmailTakenValidatorDirective,
+    PasswordValidatorDirective
 
 
   ],

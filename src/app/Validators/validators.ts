@@ -61,3 +61,35 @@ export function emailTakenValidator(userService: UserService) {
         });
     };
 }
+
+export function passwordValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+        const value = control.value;
+        
+        if (!value) {
+            return null; // No value, no error
+        }
+
+        const minLength = 6;
+        const hasCapital = /[A-Z]/.test(value);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+        const errors: ValidationErrors = {};
+        
+        if (value.length < minLength) {
+            errors['minlength'] = {
+                requiredLength: minLength,
+                actualLength: value.length
+            };
+        }
+        
+        if (!hasCapital) {
+            errors['noCapitalLetter'] = true;
+        }
+        
+        if (!hasSpecialChar) {
+            errors['noSpecialChar'] = true;
+        }
+
+        return Object.keys(errors).length === 0 ? null : errors;
+    };
+}

@@ -1,6 +1,6 @@
 <header>
   <div class="logo-wrapper">
-    <img class="logo" src="../../../assets/images/logo.png" alt="bitcoin img">
+    <img class="logo" src="../../../assets/images/acc1.png" alt="bitcoin img">
   </div>
 
   <div class="nav-wrapper">
@@ -24,7 +24,7 @@
         <a routerLink="/signup">Sign Up</a>
       </ng-container>
       <ng-template #loggedIn>
-        <span>Welcome, {{ loggedInUser?.username }}</span>
+        <span> Welcome: {{ loggedInUser?.username }}</span>
         <button (click)="onLogout()">Logout</button>
       </ng-template>
     </div>

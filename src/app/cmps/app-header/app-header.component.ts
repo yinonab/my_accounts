@@ -23,7 +23,7 @@ export class HeaderComponent implements OnInit {
 
   onLogout(): void {
     console.log('Setting success message');
-    this.msgService.setSuccessMsg('Logout successful! You have been logged out.');
+    this.msgService.setSuccessMsg('Logout successful!!! You have been logged out.');
     setTimeout(() => {
       this.userService.logout();
       this.router.navigate(['/login']);

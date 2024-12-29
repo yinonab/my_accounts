@@ -14,13 +14,13 @@
     animation: slideIn 0.3s ease-in-out;
   
     &.success {
-      background-color: $clr4; // Success background color
-      color: $clr1; // Text color for success
+      background-color: $clr10; // Success background color
+      color: $clr11; // Text color for success
     }
   
     &.error {
       background-color: $clr9; // Error background color
-      color: $clr4; // Text color for errors
+      color: $clr11; // Text color for errors
     }
   
     h4 {

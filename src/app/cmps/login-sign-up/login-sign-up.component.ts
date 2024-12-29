@@ -66,7 +66,7 @@ export class LoginSignupComponent implements OnInit {
     } else {
       this.userService.login(this.user.username, this.user.password).subscribe({
         next: (user) => {
-          this.msgService.setSuccessMsg(`Login successful! ${user.username} is now logged in.`);
+          this.msgService.setSuccessMsg(`Login successful!!! ${user.username} is now logged in.`);
           this.router.navigate(['/contact']);
         },
         error: (error) => {

@@ -17,19 +17,51 @@
         color: $clr8;
         font-size: rem(30px);
         font-weight: 700;
+        text-align: center;
+
+        .arrow {
+            display: inline-block;
+            font-size: rem(40px);
+            margin-top: 15px;
+        }
     }
     
-    .status {
+    // Rename this class to be more specific
+    .auth-buttons {
         color: $clr9;
         display: flex;
         align-items: center;
+        justify-content: center;
+        gap: 20px;
 
-        span {
+        a {
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
             font-weight: 600;
-        }
-
-        img {
-            margin-inline-end: 20px;
+            transition: all 0.3s ease;
+            
+            &.login-btn { // Use specific classes instead of :first-child
+                border: 2px solid $clr8;
+                color: $clr8;
+                
+                &:hover {
+                    background-color: $clr8;
+                    color: white;
+                    transform: translateY(-2px);
+                }
+            }
+            
+            &.signup-btn { // Use specific classes instead of :last-child
+                border: 2px solid $clr8;
+                color: $clr8;
+                
+                &:hover {
+                    background-color: $clr8;
+                    color: white;
+                    transform: translateY(-2px);
+                }
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ export class ContactPreviewComponent {
   @Output() remove = new EventEmitter<string>(); // Output to emit delete action
   showDeleteModal: boolean = false; // Controls modal visibility
 
-  constructor(private router: Router,private msgService: MsgService,) {} // Inject the Router service
+  constructor(private router: Router, private msgService: MsgService,) { } // Inject the Router service
 
   // Navigate to the contact details page
   onPreviewClick(): void {
@@ -29,20 +29,16 @@ export class ContactPreviewComponent {
     }
     return contact.facebookToken;
   }
-  public loginWithFacebook(event: MouseEvent,contact: Contact): void {
-    event.stopPropagation();
+  public loginWithFacebook(contact: Contact): void {
     const token = this.getFacebookToken(contact);
     if (!token) return;
-  
+
     const facebookLoginUrl = `https://facebook.com/login?token=${token}`;
     window.open(facebookLoginUrl, '_blank');
   }
-  
 
-  // Triggered when the delete button is clicked
-  onDeleteClick(event: MouseEvent): void {
-    event.stopPropagation(); // Prevent triggering navigation
-    this.showDeleteModal = true; // Show the delete confirmation modal
+  onDeleteClick(): void {
+    this.showDeleteModal = true;
   }
 
   // Confirm the deletion and emit the remove event
@@ -59,10 +55,8 @@ export class ContactPreviewComponent {
   }
 
   // Triggered when the edit button is clicked
-  onEditClick(event: MouseEvent): void {
-    event.stopPropagation(); // Prevent triggering navigation
+  onEditClick(): void {
     console.log('Edit clicked:', this.contact.name);
-    // Navigation for edit is handled by [routerLink]
   }
   get isLongName(): boolean {
     return this.contact.name.length > 10;

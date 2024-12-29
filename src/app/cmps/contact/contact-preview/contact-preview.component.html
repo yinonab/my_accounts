@@ -8,34 +8,25 @@
       {{ contact.lastName }}
     </h1>
   </div>
-  
-  
+
+
 
   <div class="button-container">
     <!-- Delete Button -->
-    <button class="delete-button" (click)="onDeleteClick($event)">
+    <button class="delete-button" evStop (click)="onDeleteClick()">
       <img src="../../../assets/images/delete.png" alt="delete image" />
     </button>
     <!-- Edit Button -->
-    <button
-      class="edit-button"
-      (click)="onEditClick($event)"
-      [routerLink]="['/contact/edit', contact._id]"
-    >
+    <button class="edit-button" evStop (click)="onEditClick()" [routerLink]="['/contact/edit', contact._id]">
       <img src="../../../assets/images/edit.png" alt="edit contact" />
     </button>
-    <button class="delete-button" (click)="loginWithFacebook($event,contact)">
+    <button class="delete-button" evStop (click)="loginWithFacebook(contact)">
       <img class="fb-img" src="../../../assets/images/fb.png" alt="delete image" />
     </button>
   </div>
 
   <!-- Reusable Modal -->
-  <app-modal
-    (click)="$event.stopPropagation()"
-    [isVisible]="showDeleteModal"
-    [message]="'Are you sure you want to delete this contact?'"
-    (confirmed)="confirmDelete()"
-    (canceled)="cancelDelete()"
-  ></app-modal>
+  <app-modal evStop [isVisible]="showDeleteModal" [message]="'Are you sure you want to delete this contact?'"
+    (confirmed)="confirmDelete()" (canceled)="cancelDelete()"></app-modal>
 </article>
-<router-outlet/>
+<router-outlet />

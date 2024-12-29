@@ -21,6 +21,7 @@ import { LoginSignupComponent } from './cmps/login-sign-up/login-sign-up.compone
 import { EmailValidatorDirective } from './directives/email-validator.directive';
 import { MsgComponent } from './cmps/msg/msg.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { EvStopDirective } from './directives/ev-stop.directive';
 
 
 
@@ -41,6 +42,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     LoginSignupComponent,
     EmailValidatorDirective,
     MsgComponent,
+    EvStopDirective
 
 
   ],
@@ -48,7 +50,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    FormsModule, 
+    FormsModule,
     ReactiveFormsModule,
     NgChartsModule,
     BrowserAnimationsModule

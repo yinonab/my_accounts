@@ -1,10 +1,9 @@
-<div class="modal" *ngIf="isVisible">
-    <div class="modal-content">
-      <p>{{ message }}</p>
-      <div class="modal-actions">
-        <button (click)="confirm()">Yes</button>
-        <button (click)="cancel()">No</button>
-      </div>
+<div class="modal" clickOutsideCapture (clickOutsideCapture)="cancel()" *ngIf="isVisible">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <p>{{ message }}</p>
+    <div class="modal-actions">
+      <button (click)="confirm()">Yes</button>
+      <button (click)="cancel()">No</button>
     </div>
   </div>
-  
+</div>

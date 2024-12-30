@@ -1,15 +1,13 @@
-import { Directive, ElementRef, EventEmitter, HostBinding, OnDestroy, OnInit, Output } from '@angular/core';
+import { Directive, ElementRef, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 
 @Directive({
     selector: '[clickOutsideCapture]',
     standalone: false
 })
 export class ClickOutsideCaptureDirective implements OnInit, OnDestroy {
-    @Output() clickOutsideCapture = new EventEmitter();
-    @HostBinding('class') class = 'click-outside-capture';
+    @Output() clickOutsideCapture = new EventEmitter<void>();
 
     private hostEl: HTMLElement;
-    private isMounting = true;
     private documentClickListener: ((event: MouseEvent) => void) | null = null;
 
     constructor(private elementRef: ElementRef) {
@@ -17,23 +15,24 @@ export class ClickOutsideCaptureDirective implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        setTimeout(() => this.isMounting = false);
-        
         this.documentClickListener = (event: MouseEvent) => {
-            if (this.isMounting) return;
+            const target = event.target as HTMLElement;
             
-            const isClickOutside = !this.hostEl.contains(event.target as Node);
-            if (isClickOutside) {
+            // Check if the click is on the modal backdrop (the outer div)
+            if (target === this.hostEl) {
+                event.preventDefault();
+                event.stopPropagation();
                 this.clickOutsideCapture.emit();
             }
         };
 
-        document.addEventListener('click', this.documentClickListener, true);
+        // Add listener for mousedown
+        document.addEventListener('mousedown', this.documentClickListener, true);
     }
 
     ngOnDestroy() {
         if (this.documentClickListener) {
-            document.removeEventListener('click', this.documentClickListener, true);
+            document.removeEventListener('mousedown', this.documentClickListener, true);
         }
     }
 }

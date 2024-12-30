@@ -1,5 +1,5 @@
 <div class="contact-edit-container" *ngIf="contact">
-  <section class="flex column contact-edit">
+  <section (clickOutside)="onBack()" class="flex column contact-edit">
     <section class="contact-actions">
       <a routerLink="/contact">
         <img src="../../../assets/images/back.png" alt="go back" />
@@ -91,5 +91,5 @@
 </div>
 
 <!-- Reusable Modal for Delete Confirmation -->
-<app-modal [isVisible]="showDeleteModal" [message]="'Are you sure you want to delete this contact?'"
+<app-modal evStop [isVisible]="showDeleteModal" [message]="'Are you sure you want to delete this contact?'"
   (confirmed)="confirmDelete()" (canceled)="cancelDelete()"></app-modal>

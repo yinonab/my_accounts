@@ -24,6 +24,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { EvStopDirective } from './directives/ev-stop.directive';
 import { EmailTakenValidatorDirective } from './directives/EmailTakenValidatorDirective';
 import { PasswordValidatorDirective } from './directives/PasswordValidatorDirective';
+import { ClickOutsideDirective } from './directives/click-outside.directive';
 
 
 
@@ -46,7 +47,8 @@ import { PasswordValidatorDirective } from './directives/PasswordValidatorDirect
     MsgComponent,
     EvStopDirective,
     EmailTakenValidatorDirective,
-    PasswordValidatorDirective
+    PasswordValidatorDirective,
+    ClickOutsideDirective,
 
 
   ],

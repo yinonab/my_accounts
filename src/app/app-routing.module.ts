@@ -7,20 +7,24 @@ import { contactResolver } from './resolvers/contact.resolver';
 import { ChartsComponent } from './pages/charts/charts.component';
 import { ContactEditComponent } from './pages/contact-edit/contact-edit.component';
 import { LoginSignupComponent } from './cmps/login-sign-up/login-sign-up.component';
+import { authGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   {
     path: 'contact',
     component: ContactIndexComponent,
+    canActivate: [authGuard],
     children: [
       {
         path: 'edit', // Create new contact
-        component: ContactEditComponent
+        component: ContactEditComponent,
+        canActivate: [authGuard],
       },
       {
         path: 'edit/:id', // Edit existing contact
         component: ContactEditComponent,
-        resolve: { contact: contactResolver }
+        resolve: { contact: contactResolver },
+        canActivate: [authGuard],
       }
     ]
   },
@@ -28,11 +32,13 @@ const routes: Routes = [
     path: 'contact/:id',
     component: ContactDetailsComponent,
     outlet: 'modal', // Define this as a modal outlet
-    resolve: { contact: contactResolver }
+    resolve: { contact: contactResolver },
+    canActivate: [authGuard]
   },
   {
     path: 'chart',
-    component: ChartsComponent
+    component: ChartsComponent,
+    canActivate: [authGuard],
   },
   {
     path: 'login', // Route for Login

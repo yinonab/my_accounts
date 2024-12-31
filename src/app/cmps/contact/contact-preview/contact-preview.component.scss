@@ -57,8 +57,8 @@
       .edit-button,
       .facebook-login-button {
         background-color: $clr5;
-        height: 40px;
-        width: 40px;
+        height: 2.3em;
+        width: 2.3em;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -67,8 +67,34 @@
         cursor: pointer;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         .fb-img{
-            width: 40px; // Increase width
-            height: 40px; // Increase height
+            width: 1.8em; // Increase width
+            height: 1.8em; // Increase height
+        }
+        img {
+          height: 1.6em;
+          width: 1.6em;
+        }
+
+        &:hover {
+          scale: 1.1;
+          background-color: $clr6;
+        }
+      }
+
+      .facebook-login-button {
+        background-color: $clr5;
+        height: 2.3em;
+        width: 2.3em;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .fb-img{
+            width: 1.8em; // Increase width
+            height: 1.8em; // Increase height
         }
         img {
           width: 20px;
@@ -79,21 +105,7 @@
           scale: 1.1;
           background-color: $clr6;
         }
-      }
-
-      .facebook-login-button {
-        background-color: #3b5998; // Facebook blue
-        color: white;
-        font-size: 1rem;
-        height: auto;
-        width: auto;
-        padding: 10px 20px;
-        border-radius: 8px;
-        text-align: center;
-
-        &:hover {
-          background-color: #2d4373;
-        }
+      
       }
     }
   }

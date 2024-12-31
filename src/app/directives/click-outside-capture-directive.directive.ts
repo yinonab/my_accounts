@@ -17,7 +17,7 @@ export class ClickOutsideCaptureDirective implements OnInit, OnDestroy {
     ngOnInit() {
         this.documentClickListener = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
-            
+
             // Check if the click is on the modal backdrop (the outer div)
             if (target === this.hostEl) {
                 event.preventDefault();

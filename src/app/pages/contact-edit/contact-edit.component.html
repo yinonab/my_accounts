@@ -5,7 +5,7 @@
         <img src="../../../assets/images/back.png" alt="go back" />
       </a>
       <button *ngIf="contact._id" (click)="onDeleteClick()">
-        <img src="../../../assets/images/delete.png" alt="delete image" />
+        <img class="delete-img" src="../../../assets/images/delete1.png" alt="delete image" />
       </button>
     </section>
     <img class="contact-image" src="../../../assets/images/contact.png" alt="contact image" />
@@ -78,8 +78,8 @@
         </ng-container>
 
         <!-- Buttons -->
-        <div class="form-actions">
-          <button *ngIf="!(IsLastName || contact.lastName)" (click)="onAddLastNameClick()" class="add-btn"
+        <div evStop class="form-actions">
+          <button *ngIf="!(IsLastName || contact.lastName)" (click)="onAddLastNameClick()" class="save-btn"
             type="button">
             Add Last Name
           </button>

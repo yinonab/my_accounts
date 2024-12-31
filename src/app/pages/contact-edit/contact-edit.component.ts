@@ -20,7 +20,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
   IsLastName: boolean = false
   form!: FormGroup
   showDeleteModal: boolean = false; // State for controlling modal visibility
-  constructor(private fb: FormBuilder, private datePipe: DatePipe,private msgService: MsgService,) { }
+  constructor(private fb: FormBuilder, private datePipe: DatePipe, private msgService: MsgService,) { }
 
   formatDate(date: Date): string {
     return this.datePipe.transform(date, 'yyyy-MM-dd') || ''; // Format as '2024-12-16'
@@ -101,9 +101,16 @@ export class ContactEditComponent implements OnInit, OnDestroy {
   onDeleteClick(): void {
     this.showDeleteModal = true;
   }
-  onAddLastNameClick(): void {
-    this.IsLastName = true;
+  // onAddLastNameClick(): void {
+  //   this.IsLastName = true;
+  // }
+
+  onToggleLastName(event: Event) {
+    // Cast in the TS code
+    const input = event.target as HTMLInputElement;
+    this.IsLastName = input.checked;
   }
+
 
   // Confirm deletion
   confirmDelete(): void {

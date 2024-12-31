@@ -25,10 +25,12 @@
         </ng-container>
 
         <!-- Last Name Input -->
+        <!-- Last Name Input -->
         <div *ngIf="IsLastName || contact.lastName" class="form-input">
           <label for="lastName">Last Name</label>
           <input formControlName="lastName" placeholder="Contact Last Name" id="lastName" />
         </div>
+
         <ng-container *ngIf="form.controls['lastName'] as lastNameInput">
           <p *ngIf="lastNameInput.errors && lastNameInput.touched" class="errors">
             <span *ngIf="lastNameInput.errors['required']">Last name is required!</span>
@@ -79,12 +81,22 @@
 
         <!-- Buttons -->
         <div evStop class="form-actions">
-          <button *ngIf="!(IsLastName || contact.lastName)" (click)="onAddLastNameClick()" class="save-btn"
-            type="button">
-            Add Last Name
+          <!-- A container for the switch and the text underneath it -->
+          <div *ngIf="!(contact.lastName)" class="switch-container">
+            <label class="switch">
+              <input type="checkbox" [checked]="IsLastName || contact.lastName" (change)="onToggleLastName($event)" />
+              <span class="slider round"></span>
+            </label>
+            <!-- Text below the switch -->
+            <span class="switch-label">Add Last Name</span>
+          </div>
+
+          <!-- Save button to the right of the switch container -->
+          <button [disabled]="form.invalid" class="save-btn" type="submit">
+            Save
           </button>
-          <button [disabled]="form.invalid" class="save-btn" type="submit">Save</button>
         </div>
+
       </div> <!-- Added closing </div> for .flex.column -->
     </form>
   </section>

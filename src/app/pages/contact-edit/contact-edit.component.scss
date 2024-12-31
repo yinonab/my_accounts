@@ -15,8 +15,7 @@
 }
 
 .contact-edit {
-  min-width: 350px;
-  width: max-content;
+  width: 25em;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   font-family: monospace;
   padding: 20px;
@@ -49,9 +48,10 @@
       }
     }
   }
+
   .delete-img {
-    width: 3em;
-    height: 3em;
+    width: 2.5em;
+    height: 2.5em;
   }
 
   form {
@@ -85,25 +85,20 @@
         &.ng-touched {
           border-color: $clr5;
         }
-
         &.ng-untouched {
           border-color: $clr8;
         }
-
         &.ng-valid {
           border-color: green;
           background-color: #f6fff6;
         }
-
         &.ng-invalid {
           border-color: red;
           background-color: #fff6f6;
         }
-
         &.ng-dirty {
           font-weight: bold;
         }
-
         &.ng-pristine {
           font-weight: normal;
         }
@@ -136,6 +131,20 @@
           cursor: not-allowed;
         }
       }
+
+      /* NEW: Container that stacks switch + label vertically */
+      .switch-container {
+        display: flex;
+        flex-direction: column; /* Stack vertically */
+        align-items: flex-start;    /* Center horizontally */
+        margin-right: 20px;     /* Optional spacing to the right */
+
+        .switch-label {
+          margin-top: 5px;      /* Space between switch and text */
+          font-weight: 600;
+          font-size: rem(16px);
+        }
+      }
     }
   }
 
@@ -161,5 +170,63 @@
   .errors {
     color: red;
     margin: 0 0 10px 0;
+  }
+}
+
+/* Toggle switch styles */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+
+  /* Hide the default checkbox */
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:focus + .slider {
+      box-shadow: 0 0 1px #2196f3;
+    }
+    &:checked + .slider {
+      background-color: #2196f3;
+    }
+    &:checked + .slider::before {
+      transform: translateX(26px);
+    }
+    &:disabled + .slider {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+
+    &::before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+  }
+
+  /* Rounded slider */
+  .slider.round {
+    border-radius: 34px;
+    &::before {
+      border-radius: 50%;
+    }
   }
 }

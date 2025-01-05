@@ -14,7 +14,7 @@ export const authGuard: CanActivateFn = (route, state) => {
         map(user => {
             if (!user) {
                 msgService.setErrorMsg('Please login to access this page');
-                return router.createUrlTree(['/home']);
+                return router.createUrlTree(['/login']);
             }
             return true;
         })

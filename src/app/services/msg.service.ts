@@ -13,18 +13,26 @@ export class MsgService {
     private _msg = new BehaviorSubject<Msg | null>(null)
     public msg$ = this._msg.asObservable().pipe(distinctUntilChanged())
 
-    private _msgQueue$ = new Subject<Msg>()
+    private _msgQueue$ = new Subject<Msg>();
+    private _currentMsg: Msg | null = null;
+
     private _msgQueueTimeout$ = this._msgQueue$.pipe(
         concatMap(msg => {
+            if (this._currentMsg?.txt === msg.txt && this._currentMsg?.type === msg.type) {
+                // Skip duplicate messages
+                return of(null);
+            }
+            this._currentMsg = msg;
             return of(msg).pipe(
-                delay(0),
-                tap(msg => this._msg.next(msg)),
-                delay(3000),
-                tap(() => this._msg.next(null)),
-            )
+                tap(() => this._msg.next(msg)),
+                delay(6500),
+                tap(() => {
+                    this._msg.next(null);
+                    this._currentMsg = null;
+                })
+            );
         }),
     );
-
     constructor() {
         this._msgQueueTimeout$.pipe(takeUntilDestroyed()).subscribe()
     }

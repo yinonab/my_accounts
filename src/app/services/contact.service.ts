@@ -85,7 +85,8 @@ export class ContactService {
             name: '',
             lastName: '',
             email: '',
-            phone: ''
+            phone: '',
+            owner: '',
         }
     }
 

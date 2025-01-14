@@ -3,7 +3,8 @@ import { Observable, BehaviorSubject, from, throwError, tap, catchError, map } f
 import { User } from '../models/user.model.ts';
 import { storageService } from './async-storage.service'; // Replace with your async storage service
 
-const ENTITY = 'users';
+const ENTITY_AUTH = 'auth';
+const ENTITY = 'user';
 const LOGGEDIN_USER = 'loggedInUser';
 
 
@@ -19,30 +20,47 @@ export class UserService {
 
   constructor() {
     // Initialize users in local storage if not present
-    const users = JSON.parse(localStorage.getItem(ENTITY) || 'null');
-    if (!users || users.length === 0) {
-      localStorage.setItem(ENTITY, JSON.stringify(this._createDemoUsers()));
-    }
+    // const users = JSON.parse(localStorage.getItem(ENTITY) || 'null');
+    // if (!users || users.length === 0) {
+    //   localStorage.setItem(ENTITY, JSON.stringify(this._createDemoUsers()));
+    // }
     const loggedInUser = JSON.parse(localStorage.getItem(LOGGEDIN_USER) || 'null');
     if (loggedInUser) this._loggedInUser$.next(loggedInUser);
   }
 
+  // public login(username: string, password: string): Observable<User> {
+  //   return from(storageService.query<User>(ENTITY)).pipe(
+  //     map(users => {
+  //       const user = users.find(u => u.username === username && u.password === password);
+  //       if (!user) {
+  //         throw new Error('Invalid username or password');
+  //       }
+  //       this._loggedInUser$.next(user);
+  //       localStorage.setItem(LOGGEDIN_USER, JSON.stringify(user));
+  //       return user;
+  //     }),
+  //     catchError(this._handleError)
+  //   );
+  // }
+
   public login(username: string, password: string): Observable<User> {
-    return from(storageService.query<User>(ENTITY)).pipe(
-      map(users => {
-        const user = users.find(u => u.username === username && u.password === password);
-        if (!user) {
-          throw new Error('Invalid username or password');
-        }
-        this._loggedInUser$.next(user);
-        localStorage.setItem(LOGGEDIN_USER, JSON.stringify(user));
-        return user;
+    const loginData = { username, password }; // Prepare login payload
+    return from(storageService.login<User>('auth/login', loginData)).pipe(
+      tap((loggedInUser: User) => {
+        // Update logged-in user BehaviorSubject and localStorage
+        this._loggedInUser$.next(loggedInUser);
+        localStorage.setItem(LOGGEDIN_USER, JSON.stringify(loggedInUser));
       }),
-      catchError(this._handleError)
+      catchError(this._handleError) // Handle errors
     );
   }
-  
-  
+
+
+
+
+
+
+
 
   // Logout method
   public logout(): void {
@@ -90,16 +108,17 @@ export class UserService {
 
   // Get an empty user structure
   // Get an empty user structure
-public getEmptyUser(): User {
-  return {
-    _id: '', // Default ID is empty for new users
-    username: '',
-    password: '',
-    email: '',
-    createdAt: new Date(),
-    img: ''
-  };
-}
+  public getEmptyUser(): User {
+    return {
+      _id: '', // Default ID is empty for new users
+      username: '',
+      password: '',
+      email: '',
+      createdAt: new Date(),
+      img: '',
+      isAdmin: false
+    };
+  }
 
 
   // Create demo users for initialization
@@ -111,7 +130,8 @@ public getEmptyUser(): User {
         password: '12345',
         email: 'john.doe@example.com',
         createdAt: new Date('2020-01-01'),
-        img: ''
+        img: '',
+        isAdmin: false
       },
       {
         _id: this._getRandomId(),
@@ -119,7 +139,8 @@ public getEmptyUser(): User {
         password: 'password',
         email: 'jane.smith@example.com',
         createdAt: new Date('2021-01-01'),
-        img: ''
+        img: '',
+        isAdmin: false
       }
     ];
   }
@@ -132,7 +153,7 @@ public getEmptyUser(): User {
   // Add a new user
   private _addUser(user: User): Observable<User> {
     const newUser = { ...user, _id: this._getRandomId() }; // Ensure `_id` is assigned
-    return from(storageService.post(ENTITY, newUser)).pipe(
+    return from(storageService.post('auth/signup', newUser)).pipe(
       tap(savedUser => {
         const users = this._users$.value;
         this._users$.next([...users, savedUser]); // Update users BehaviorSubject
@@ -140,7 +161,7 @@ public getEmptyUser(): User {
       catchError(this._handleError)
     );
   }
-  
+
 
   // Update an existing user
   private _updateUser(user: User): Observable<User> {

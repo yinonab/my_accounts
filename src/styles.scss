@@ -1,1 +1,10 @@
-/* You can add global styles to this file, and also import other style files */
+body:has(.click-outside) {
+    .click-outside,
+    .click-outside * {
+        pointer-events: all;
+    }
+    
+    :not(.click-outside, .click-outside *) {
+        pointer-events: none;
+    }
+}

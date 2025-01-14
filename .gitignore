@@ -122,3 +122,5 @@ coverage/
 # Other
 *.swp
 >>>>>>> 91807e24f1cc25ba000353b5b351b16defc79311
+
+.codegpt

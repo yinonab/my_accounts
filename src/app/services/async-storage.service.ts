@@ -14,18 +14,51 @@ interface EntityId {
     _id?: string
 }
 
+// async function query<T>(entityType: string, delay = 200): Promise<T[]> {
+//     if (useBackend) {
+//         // Backend version
+//         const response = await fetch(`http://localhost:3030/api/${entityType}`);
+//         if (!response.ok) throw new Error(`Failed to query entities: ${response.statusText}`);
+//         return response.json();
+//     } else {
+//         // Local storage version
+//         var entities = JSON.parse(localStorage.getItem(entityType) as string) || []
+//         return new Promise(resolve => setTimeout(() => resolve(entities), delay))
+//     }
+// }
 async function query<T>(entityType: string, delay = 200): Promise<T[]> {
     if (useBackend) {
-        // Backend version
-        const response = await fetch(`http://localhost:3030/api/${entityType}`);
-        if (!response.ok) throw new Error(`Failed to query entities: ${response.statusText}`);
+        // Retrieve the token
+        const loginToken = getAuthToken();
+        console.log('loginToken:', loginToken); // Debugging to ensure token is retrieved
+
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json',
+        };
+
+        // Add Authorization header if token exists
+        if (loginToken) {
+            headers['Authorization'] = `Bearer ${loginToken}`;
+        }
+
+        const url = `http://localhost:3030/api/${entityType}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers, // Include headers with the token
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to query entities from ${entityType}: ${response.statusText}`);
+        }
+
         return response.json();
     } else {
         // Local storage version
-        var entities = JSON.parse(localStorage.getItem(entityType) as string) || []
-        return new Promise(resolve => setTimeout(() => resolve(entities), delay))
+        const entities = JSON.parse(localStorage.getItem(entityType) as string) || [];
+        return new Promise(resolve => setTimeout(() => resolve(entities), delay));
     }
 }
+
 
 async function get<T extends EntityId>(entityType: string, entityId: string): Promise<T> {
     if (useBackend) {

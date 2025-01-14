@@ -192,4 +192,24 @@ export class UserService {
     console.error('An error occurred:', err);
     return throwError(() => new Error(err));
   }
+
+  public syncLoggedInUser(): Observable<User> {
+    // Get the logged-in user from local storage
+    const loggedInUser = this.getLoggedInUser();
+
+    if (!loggedInUser) {
+      return throwError(() => new Error('No logged-in user found in local storage'));
+    }
+
+    // Send the logged-in user to the back-end service
+    return from(storageService.put('user/updateProfile', loggedInUser)).pipe(
+      tap((updatedUser: User) => {
+        // Update the local logged-in user with the response from the server
+        this._loggedInUser$.next(updatedUser);
+        localStorage.setItem(LOGGEDIN_USER, JSON.stringify(updatedUser));
+      }),
+      catchError(this._handleError)
+    );
+  }
+
 }

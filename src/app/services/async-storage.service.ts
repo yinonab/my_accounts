@@ -44,7 +44,8 @@ async function query<T>(entityType: string, delay = 200): Promise<T[]> {
         const url = `http://localhost:3030/api/${entityType}`;
         const response = await fetch(url, {
             method: 'GET',
-            headers, // Include headers with the token
+            headers, // Include headers for Bearer token
+            credentials: 'include', // Ensure cookies are included
         });
 
         if (!response.ok) {
@@ -131,6 +132,7 @@ async function post<T extends object>(
             method: 'POST',
             headers,
             body: JSON.stringify(newEntity),
+            credentials: 'include',
         });
 
         if (!response.ok) throw new Error(`Failed to save entity: ${response.statusText}`);
@@ -167,6 +169,7 @@ async function put<T extends EntityId>(entityType: string, updatedEntity: T): Pr
             method: 'PUT',
             headers,
             body: JSON.stringify(updatedEntity),
+            credentials: 'include',
         });
 
         if (!response.ok) throw new Error(`Failed to update entity with id ${updatedEntity._id}: ${response.statusText}`);
@@ -201,6 +204,7 @@ async function remove<T extends EntityId>(entityType: string, entityId: string):
         const response = await fetch(url, {
             method: 'DELETE',
             headers, // Include headers with the token
+            credentials: 'include', // Ensure cookies are included
         });
 
         if (!response.ok) {

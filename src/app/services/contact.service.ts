@@ -3,7 +3,7 @@ import { Observable, BehaviorSubject, throwError, from, tap, retry, catchError, 
 import { Contact, ContactFilter } from '../models/contact.model';
 import { storageService } from './async-storage.service';
 import { HttpErrorResponse } from '@angular/common/http';
-const ENTITY = 'contacts'
+const ENTITY = 'contact'
 
 @Injectable({
     providedIn: 'root'
@@ -18,10 +18,22 @@ export class ContactService {
 
     constructor() {
         // Handling Demo Data, fetching from storage || saving to storage 
-        const contacts = JSON.parse(localStorage.getItem(ENTITY) || 'null')
-        if (!contacts || contacts.length === 0) {
-            localStorage.setItem(ENTITY, JSON.stringify(this._createContacts()))
-        }
+        // const contacts = JSON.parse(localStorage.getItem(ENTITY) || 'null')
+        // if (!contacts || contacts.length === 0) {
+        //     localStorage.setItem(ENTITY, JSON.stringify(this._createContacts()))
+        // }
+        this._loadContactsFromDB();
+    }
+    private _loadContactsFromDB(): void {
+        from(storageService.query<Contact>(ENTITY))
+            .pipe(
+                tap(contacts => {
+                    // Update BehaviorSubject with contacts loaded from the DB
+                    this._contacts$.next(this._sort(contacts));
+                }),
+                catchError(this._handleError)
+            )
+            .subscribe();
     }
 
     public loadContacts() {
@@ -73,7 +85,8 @@ export class ContactService {
             name: '',
             lastName: '',
             email: '',
-            phone: ''
+            phone: '',
+            owner: '',
         }
     }
 
@@ -86,16 +99,20 @@ export class ContactService {
     }
 
     private _updateContact(contact: Contact) {
-        return from(storageService.put<Contact>(ENTITY, contact))
+        console.log('Updating contact:', contact); // Debug log
+        return from(storageService.put<Contact>('contact/edit', contact))
             .pipe(
                 tap(updatedContact => {
-                    const contacts = this._contacts$.value
-                    this._contacts$.next([...contacts.map(contact => contact._id === updatedContact._id ? updatedContact : contact)])
+                    const contacts = this._contacts$.value;
+                    this._contacts$.next([
+                        ...contacts.map(c => (c._id === updatedContact._id ? updatedContact : c))
+                    ]);
                 }),
                 retry(1),
                 catchError(this._handleError)
-            )
+            );
     }
+
 
     private _addContact(contact: Contact) {
         return from(storageService.post(ENTITY, contact))

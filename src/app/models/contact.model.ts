@@ -5,6 +5,7 @@ export interface Contact {
     phone: string;
     _id: string;
     birthday: string;
+    owner: string;
     facebookToken?: string; // New property
 }
 

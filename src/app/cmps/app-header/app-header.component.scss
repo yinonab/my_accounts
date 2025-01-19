@@ -40,7 +40,8 @@
       margin-inline-end: 20px;
 
       a {
-        margin: 0 10px 0 10px;
+        margin: 0 10px;
+
         img {
           width: 40px;
           height: 40px;
@@ -76,7 +77,8 @@
       align-items: center;
       gap: 15px;
 
-      a, button {
+      a,
+      button {
         background-color: $clr9;
         color: $clr1;
         text-decoration: none;
@@ -102,6 +104,88 @@
       span {
         color: $clr4;
         font-weight: bold;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    header {
+      flex-direction: column;
+      height: auto;
+      padding: 10px;
+      font-size: 1.2em;
+
+      .logo-wrapper {
+        justify-content: center;
+        margin-bottom: 10px;
+      }
+
+      .nav-wrapper {
+        justify-content: center;
+        flex-wrap: wrap;
+
+        nav {
+          margin-inline-end: 0;
+
+          a {
+            margin: 5px;
+
+            img {
+              width: 30px;
+              height: 30px;
+            }
+          }
+        }
+      }
+
+      .auth-wrapper {
+        justify-content: center;
+        margin-top: 10px;
+
+        .auth-links {
+          gap: 10px;
+          margin-right: 0;
+
+          a,
+          button {
+            font-size: 0.9em;
+            padding: 0.3em 0.5em;
+          }
+        }
+      }
+
+      .logo {
+        height: 50px;
+        margin-left: 0;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    header {
+      font-size: 1em;
+
+      .nav-wrapper {
+        nav {
+          a {
+            font-size: 0.8em;
+
+            img {
+              width: 25px;
+              height: 25px;
+            }
+          }
+        }
+      }
+
+      .auth-wrapper {
+        .auth-links {
+          a,
+          button {
+            font-size: 0.8em;
+            padding: 0.2em 0.4em;
+          }
+        }
       }
     }
   }

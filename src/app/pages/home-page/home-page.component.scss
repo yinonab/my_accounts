@@ -2,62 +2,62 @@
 @import "../../../assets/scss/setup/variables";
 
 .home-page {
-    min-width: 350px;
-    min-height: 350px;
-    width: max-content;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    font-family: monospace;
-    padding: 20px;
+    min-width: 100%; // Default for small screens
+    min-height: 100vh; // Use full height for better UX on small screens
+    padding: 16px; // Adjusted for smaller screens
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    margin: auto;
-    
+    margin: 0 auto;
+    font-family: monospace;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+
     h1 {
         color: $clr8;
-        font-size: rem(30px);
+        font-size: rem(24px); // Smaller default font size
         font-weight: 700;
         text-align: center;
 
         .arrow {
             display: inline-block;
-            font-size: rem(40px);
-            margin-top: 15px;
+            font-size: rem(30px); // Adjust for small screens
+            margin-top: 10px;
             width: 1em;
             height: 1em;
         }
     }
-    
-    // Rename this class to be more specific
+
     .auth-buttons {
         color: $clr9;
         display: flex;
+        flex-direction: column; // Stack buttons vertically on small screens
         align-items: center;
-        justify-content: center;
-        gap: 20px;
+        gap: 12px; // Smaller gap for compact view
 
         a {
-            padding: 10px 24px;
+            width: 100%; // Full width for better tap target size
+            text-align: center; // Center-align text
+            padding: 10px;
             border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
             transition: all 0.3s ease;
-            
-            &.login-btn { // Use specific classes instead of :first-child
+
+            &.login-btn {
                 border: 2px solid $clr8;
                 color: $clr8;
-                
+
                 &:hover {
                     background-color: $clr8;
                     color: white;
                     transform: translateY(-2px);
                 }
             }
-            
-            &.signup-btn { // Use specific classes instead of :last-child
+
+            &.signup-btn {
                 border: 2px solid $clr8;
                 color: $clr8;
-                
+
                 &:hover {
                     background-color: $clr8;
                     color: white;
@@ -65,5 +65,37 @@
                 }
             }
         }
+    }
+}
+
+// Media queries for larger screens
+@media (min-width: 768px) {
+    .home-page {
+        min-width: 350px;
+        width: max-content;
+        padding: 20px;
+    }
+
+    .auth-buttons {
+        flex-direction: row; // Place buttons side by side
+        gap: 20px;
+
+        a {
+            width: auto; // Revert to auto width for larger screens
+        }
+    }
+}
+
+@media (min-width: 1024px) {
+    .home-page {
+        font-size: rem(18px); // Slightly increase base font size for larger screens
+    }
+
+    h1 {
+        font-size: rem(30px); // Larger heading size
+    }
+
+    .auth-buttons a {
+        padding: 12px 28px; // Larger padding for more space
     }
 }

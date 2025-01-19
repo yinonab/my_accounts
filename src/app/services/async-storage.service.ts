@@ -1,3 +1,4 @@
+import { config } from './config.service';
 import { getAuthToken } from './util.service';
 
 export const storageService = {
@@ -41,7 +42,8 @@ async function query<T>(entityType: string, delay = 200): Promise<T[]> {
             headers['Authorization'] = `Bearer ${loginToken}`;
         }
 
-        const url = `http://localhost:3030/api/${entityType}`;
+        //const url = `http://localhost:3030/api/${entityType}`;
+        const url = `${config.baseURL}/${entityType}`;
         const response = await fetch(url, {
             method: 'GET',
             headers, // Include headers for Bearer token
@@ -64,7 +66,9 @@ async function query<T>(entityType: string, delay = 200): Promise<T[]> {
 async function get<T extends EntityId>(entityType: string, entityId: string): Promise<T> {
     if (useBackend) {
         // Backend version
-        const response = await fetch(`http://localhost:3030/api/${entityType}/${entityId}`);
+        // const response = await fetch(`http://localhost:3030/api/${entityType}/${entityId}`);
+        const response = await fetch(`${config.baseURL}/${entityType}/${entityId}`);
+
         if (!response.ok) throw new Error(`Failed to get entity with id ${entityId}: ${response.statusText}`);
         return response.json();
     } else {
@@ -99,7 +103,9 @@ async function get<T extends EntityId>(entityType: string, entityId: string): Pr
 // }
 
 async function login<T>(path: string, data: any): Promise<T> {
-    const url = `http://localhost:3030/api/${path}`;
+    // const url = `http://localhost:3030/api/${path}`;
+    const url = `${config.baseURL}/${path}`;
+
     const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -118,7 +124,8 @@ async function post<T extends object>(
     customPath?: string
 ): Promise<T> {
     if (useBackend) {
-        const url = customPath || `http://localhost:3030/api/${entityType}`;
+        // const url = customPath || `http://localhost:3030/api/${entityType}`;
+        const url = customPath ? `${config.baseURL}/${customPath}` : `${config.baseURL}/${entityType}`;
 
         const headers: HeadersInit = {
             'Content-Type': 'application/json',
@@ -156,7 +163,8 @@ async function post<T extends object>(
 async function put<T extends EntityId>(entityType: string, updatedEntity: T): Promise<T> {
     if (useBackend) {
         // Backend version
-        const url = `http://localhost:3030/api/${entityType}/${updatedEntity._id}`;
+        // const url = `http://localhost:3030/api/${entityType}/${updatedEntity._id}`;
+        const url = `${config.baseURL}/${entityType}/${updatedEntity._id}`;
         const headers: HeadersInit = {
             'Content-Type': 'application/json',
         };
@@ -200,7 +208,8 @@ async function remove<T extends EntityId>(entityType: string, entityId: string):
             headers['Authorization'] = `Bearer ${loginToken}`;
         }
 
-        const url = `http://localhost:3030/api/${entityType}/${entityId}`;
+        // const url = `http://localhost:3030/api/${entityType}/${entityId}`;
+        const url = `${config.baseURL}/${entityType}/${entityId}`;
         const response = await fetch(url, {
             method: 'DELETE',
             headers, // Include headers with the token

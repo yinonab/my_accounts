@@ -16,7 +16,7 @@ export class ContactDetailsComponent implements OnInit, OnDestroy {
   subscription!: Subscription
 
   contact$!: Observable<Contact>;
-  
+
   ngOnInit(): void {
     this.contact$ = this.route.data.pipe(
       map(data => {
@@ -33,15 +33,19 @@ export class ContactDetailsComponent implements OnInit, OnDestroy {
       })
     );
   }
-  
-  
+
+
 
   onBack(): void {
     this.router.navigate([{ outlets: { modal: null } }]); // Clear the 'modal' outlet
   }
-  
+
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe()
   }
+  isLongField(value: string | null | undefined, maxLength: number): boolean {
+    return value ? value.length > maxLength : false;
+  }
+
 }

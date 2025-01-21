@@ -21,12 +21,14 @@
   <!-- Contact details -->
   <div class="det">
     <img src="../../../assets/images/contact.png" alt="contact-img" />
-    <h2>Name: {{ contact.name }}</h2>
-    <h2>Last Name: {{ contact.lastName }}</h2>
-    <h2>Phone: {{ contact.phone }}</h2>
-    <h2>Email: {{ contact.email }}</h2>
-    <h2>Birthday: {{ contact.birthday | date: 'longDate' }}</h2>
+    <h2 [ngClass]="{ 'long-name': isLongField(contact.name, 10) }">Name: {{ contact.name }}</h2>
+    <h2 [ngClass]="{ 'long-name': isLongField(contact.lastName, 10) }">Last Name: {{ contact.lastName }}</h2>
+    <h2 [ngClass]="{ 'long-name': isLongField(contact.phone, 10) }">Phone: {{ contact.phone }}</h2>
+    <h2 [ngClass]="{ 'long-name': isLongField(contact.email, 10) }">Email: {{ contact.email }}</h2>
+    <h2 [ngClass]="{ 'long-name': isLongField((contact.birthday | date: 'longDate'), 10) }">Birthday: {{
+      contact.birthday | date: 'longDate' }}</h2>
   </div>
+
 </section>
 
-<router-outlet/>
+<router-outlet />

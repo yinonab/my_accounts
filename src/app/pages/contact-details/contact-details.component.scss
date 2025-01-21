@@ -1,37 +1,56 @@
 @import "../../../assets/scss/setup/variables";
 
+// Base (mobile-first) modal styles
 .contact-details {
-  position: fixed; /* Position the modal relative to the viewport */
-  top: 10%; /* Adjust vertical position */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%, 0); /* Align horizontally to center */
-  z-index: 1000; /* Ensure it's above other content */
-  background: white; /* Background color for the modal */
-  margin: 0; /* Remove unnecessary margin */
-  min-width: 350px; /* Minimum width for the modal */
-  width: max-content;
-  height: max-content;
-  padding: 25px;
-  border-radius: 8px; /* Rounded corners for the modal */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhance shadow for better modal effect */
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  width: 90%; // Use a percentage width on mobile
+  max-width: 400px; // Constrain how large it can get
+  height: auto;
+  margin: 0;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 15px;
   font-family: monospace;
+  font-size: 0.95rem;
 
   .det {
-    display: flex; /* Use flexbox */
-    flex-direction: column; /* Stack elements vertically */
-    align-items: center; /* Center elements horizontally */
-    gap: 10px; /* Add spacing between elements */
-    width: 100%; /* Adjust width for responsive behavior */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+
+    h2 {
+      font-size: 1rem;
+      margin: 0;
+      text-align: center;
+      word-break: break-word;
+
+      &.long-name {
+        font-size: 0.85rem; // Reduce font size for long names
+        //color: $clr6; // Use a distinct color for better visibility
+      }
+    }
+
+    img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+    }
   }
 
   .contact-actions {
-    display: grid;
+    display: flex;
     justify-content: center;
-    align-items: center; /* Align vertically */
-    margin: 0;
+    align-items: center;
 
     button {
       border: none;
@@ -39,12 +58,12 @@
       cursor: pointer;
 
       img {
-        height: 40px;
-        width: 40px;
+        height: 30px;
+        width: 30px;
 
         &:hover {
-          transform: scale(1.1); /* Add hover effect */
-          transition: transform 0.2s ease-in-out; /* Smooth transition */
+          transform: scale(1.1);
+          transition: transform 0.2s ease-in-out;
         }
       }
     }
@@ -54,20 +73,82 @@
     border: none;
     height: 1px;
     background-color: $clr6;
-    margin: 20px 0;
-  }
-
-  img {
-    width: 150px;
+    margin: 10px 0;
   }
 }
 
+// ------------ Breakpoints ------------
+
+// 1) Small (>= 480px)
+@media (min-width: 480px) {
+  .contact-details {
+    width: 80%;
+    max-width: 380px;
+    padding: 20px;
+    font-size: 1rem;
+  }
+  .det h2 {
+    font-size: 1.1rem;
+
+    &.long-name {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// 2) Medium (>= 768px)
+@media (min-width: 768px) {
+  .contact-details {
+    width: auto;
+    max-width: 450px;
+    padding: 25px;
+    font-size: 1rem;
+  }
+  .det h2 {
+    font-size: 1.2rem;
+
+    &.long-name {
+      font-size: 1rem;
+    }
+  }
+}
+
+// 3) Large (>= 1024px)
+@media (min-width: 1024px) {
+  .contact-details {
+    max-width: 500px;
+    padding: 30px;
+  }
+  .det h2 {
+    font-size: 1.3rem;
+
+    &.long-name {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+// 4) Extra Large (>= 1280px)
+@media (min-width: 1280px) {
+  .contact-details {
+    max-width: 600px;
+  }
+  .det h2 {
+    font-size: 1.4rem;
+
+    &.long-name {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+// Backdrop styling
 .backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5); /* Dim the background */
-  z-index: 999; /* Ensure it is behind the modal */
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
 }

@@ -7,20 +7,27 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="facebook-domain-verification" content="60v0jbkyd34dc29of1ng9rbb13cq0e" />
 
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
 
   <script>
-    // Initialize the Facebook SDK after it loads
     window.fbAsyncInit = function () {
       FB.init({
-        appId: '2280747752304909', // Replace with your Facebook App ID
-        cookie: true, // Enable cookies to allow the server to access the session
-        xfbml: true, // Parse social plugins on this page
-        version: 'v16.0' // Use the latest version of the SDK
+        appId: '2280747752304909',
+        xfbml: true,
+        version: 'v21.0'
       });
-      FB.AppEvents.logPageView(); // Log a page view for analytics
+      FB.AppEvents.logPageView();
     };
+
+    (function (d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) { return; }
+      js = d.createElement(s); js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
   </script>
 
 </head>

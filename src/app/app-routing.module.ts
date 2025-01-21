@@ -8,6 +8,7 @@ import { ChartsComponent } from './pages/charts/charts.component';
 import { ContactEditComponent } from './pages/contact-edit/contact-edit.component';
 import { LoginSignupComponent } from './cmps/login-sign-up/login-sign-up.component';
 import { authGuard } from './guards/auth.guard';
+import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy.component';
 
 const routes: Routes = [
   {
@@ -47,6 +48,10 @@ const routes: Routes = [
   {
     path: 'signup', // Route for Signup
     component: LoginSignupComponent
+  },
+  {
+    path: 'privacy-policy',
+    component: PrivacyPolicyComponent
   },
   {
     path: '',

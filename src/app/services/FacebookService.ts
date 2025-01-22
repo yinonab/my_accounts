@@ -13,7 +13,7 @@ export class FacebookService {
     private initFacebookSDK(): void {
         (window as any).fbAsyncInit = function () {
             FB.init({
-                appId: '584996800678250',
+                appId: '2280747752304909',
                 cookie: true,
                 xfbml: true,
                 version: 'v16.0',

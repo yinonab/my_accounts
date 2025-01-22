@@ -3,7 +3,7 @@
 
 .home-page {
     min-width: 100%; // Default for small screens
-    min-height: 30vh; // Use full height for better UX on small screens
+    min-height: 40vh; // Use full height for better UX on small screens
     padding: 16px; // Adjusted for smaller screens
     display: flex;
     flex-direction: column;
@@ -65,6 +65,34 @@
                 }
             }
         }
+    }
+}
+button.facebook-login-button {
+    background-color: $clr5;
+    height: 3em; // Slightly larger for better visibility
+    width: 3em;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, background-color 0.3s ease;
+
+    .fb-img {
+        width: 1.6em; // Adjust size to fit perfectly
+        height: 1.6em;
+    }
+
+    &:hover {
+        transform: scale(1.1); // Zoom effect
+        background-color: $clr6; // Darker color on hover
+    }
+
+    &:active {
+        transform: scale(1);
+        background-color: darken($clr6, 10%);
     }
 }
 

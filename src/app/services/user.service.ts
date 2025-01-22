@@ -55,6 +55,23 @@ export class UserService {
     );
   }
 
+  public loginWithFacebook(fbUser: {
+    facebookId: string;
+    name: string;
+    email?: string;
+    accessToken: string;
+  }): Observable<User> {
+    return from(storageService.login<User>('auth/facebook', fbUser)).pipe(
+      tap((loggedInUser: User) => {
+        // Save the user as the currently logged-in user
+        this._loggedInUser$.next(loggedInUser)
+        localStorage.setItem(LOGGEDIN_USER, JSON.stringify(loggedInUser))
+      }),
+      catchError(this._handleError)
+    )
+  }
+
+
 
 
 

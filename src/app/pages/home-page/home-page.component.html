@@ -6,11 +6,16 @@
     <h1>
       Welcome !!!<br>
       Please login / sign up<br>
-      <span [@bounceArrow]="arrowState" (@bounceArrow.done)="onAnimationDone()" class="arrow"><img class="arrow" src="../../../assets/images/arrow-down1.png" alt="arrow down"></span>
+      <span [@bounceArrow]="arrowState" (@bounceArrow.done)="onAnimationDone()" class="arrow"><img class="arrow"
+          src="../../../assets/images/arrow-down1.png" alt="arrow down"></span>
     </h1>
     <section class="auth-buttons">
       <a routerLink="/login" class="login-btn">Login</a>
       <a routerLink="/signup" class="signup-btn">Sign Up</a>
+      <button class="facebook-login-button" evStop (click)="loginWithFacebook()">
+        <img class="fb-img" src="../../../assets/images/fb2.png" alt="Facebook login" />
+      </button>
+
     </section>
   </ng-template>
 </section>

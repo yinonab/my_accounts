@@ -68,33 +68,53 @@
     }
 }
 button.facebook-login-button {
-    background-color: $clr5;
-    height: 3em; // Slightly larger for better visibility
-    width: 3em;
-    border-radius: 50%;
+    background-color: $clr8; // Default background color
+    color: white; // Default text color
     display: flex;
     align-items: center;
     justify-content: center;
-    border: none;
+    padding: 10px 20px; // Add padding for text and image
+    border: 2px solid $clr8; // Border style
+    border-radius: 8px; // Match the border radius
+    font-weight: 600; // Font weight for consistency
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, background-color 0.3s ease;
+    gap: 10px; // Add space between text and image
+    transition: background-color 0.3s ease, transform 0.2s ease;
+
+    .facebook-text {
+        font-size: rem(16px); // Adjust text size
+    }
 
     .fb-img {
-        width: 1.6em; // Adjust size to fit perfectly
+        width: 1.6em; // Adjust image size
         height: 1.6em;
     }
 
     &:hover {
-        transform: scale(1.1); // Zoom effect
-        background-color: $clr6; // Darker color on hover
+        background-color: $clr8; // Change background color on hover
+        color: white; // Change text color on hover
+        transform: translateY(-2px); // Add hover effect
     }
 
     &:active {
-        transform: scale(1);
-        background-color: darken($clr6, 10%);
+        transform: translateY(0); // Reset translation on active state
+        background-color: darken($clr8, 10%);
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+    &:not(:hover):not(:active):not(:focus) {
+        background-color: white; // Ensure default state
+        color: $clr8; // Reset text color
+        transform: none; // Reset transformation
     }
 }
+
+
+
 
 // Media queries for larger screens
 @media (min-width: 768px) {

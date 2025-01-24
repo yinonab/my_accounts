@@ -12,7 +12,7 @@ import { MsgService } from '../../services/msg.service';
 export class HeaderComponent implements OnInit {
   loggedInUser: User | null = null;
 
-  constructor(private userService: UserService, private router: Router,private msgService: MsgService,) {}
+  constructor(private userService: UserService, private router: Router, private msgService: MsgService,) { }
 
   ngOnInit(): void {
     // Subscribe to logged-in user state
@@ -26,8 +26,8 @@ export class HeaderComponent implements OnInit {
     this.msgService.setSuccessMsg('Logout successful!!! You have been logged out.');
     setTimeout(() => {
       this.userService.logout();
-      this.router.navigate(['/login']);
+      this.router.navigate(['/']);
     }, 600);
   }
-  
+
 }

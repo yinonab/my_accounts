@@ -21,7 +21,7 @@ export const contactResolver: ResolveFn<Contact | null> = (route, state) => {
 
   // Fetch contact by ID and handle potential errors
   return contactService.getById(id).pipe(
-    delay(800), // Simulate loading delay (optional)
+    delay(250), // Simulate loading delay (optional)
     catchError(error => {
       console.error('Error fetching contact:', error);
       return of(null); // Return null on error

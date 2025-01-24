@@ -54,7 +54,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
       ],
       email: [
         contactExists ? this.contact.email : '',
-        [Validators.required, Validators.email, nonEnglishLetters] // Corrected here
+        [Validators.required, Validators.email] // Corrected here
       ],
       birth: [
         contactExists && this.contact.birthday

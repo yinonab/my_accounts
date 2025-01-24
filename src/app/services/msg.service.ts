@@ -7,7 +7,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
     providedIn: 'root'
 })
 export class MsgService {
-    
+
     destroyRef = inject(DestroyRef)
 
     private _msg = new BehaviorSubject<Msg | null>(null)
@@ -25,7 +25,7 @@ export class MsgService {
             this._currentMsg = msg;
             return of(msg).pipe(
                 tap(() => this._msg.next(msg)),
-                delay(6500),
+                delay(1100),
                 tap(() => {
                     this._msg.next(null);
                     this._currentMsg = null;

@@ -16,7 +16,7 @@ export class FacebookService {
                 appId: '2280747752304909',
                 cookie: true,
                 xfbml: true,
-                version: 'v16.0',
+                version: 'v21.0',
             });
             FB.AppEvents.logPageView();
         };

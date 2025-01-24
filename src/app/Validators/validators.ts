@@ -44,7 +44,7 @@ export function emailTakenValidator(userService: UserService) {
 
         return new Promise((resolve) => {
             control.valueChanges.pipe(
-                debounceTime(300),
+                debounceTime(200),
                 distinctUntilChanged(),
                 switchMap(value => userService.loadUsers())
             ).subscribe({
@@ -65,7 +65,7 @@ export function emailTakenValidator(userService: UserService) {
 export function passwordValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
         const value = control.value;
-        
+
         if (!value) {
             return null; // No value, no error
         }
@@ -74,18 +74,18 @@ export function passwordValidator(): ValidatorFn {
         const hasCapital = /[A-Z]/.test(value);
         const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
         const errors: ValidationErrors = {};
-        
+
         if (value.length < minLength) {
             errors['minlength'] = {
                 requiredLength: minLength,
                 actualLength: value.length
             };
         }
-        
+
         if (!hasCapital) {
             errors['noCapitalLetter'] = true;
         }
-        
+
         if (!hasSpecialChar) {
             errors['noSpecialChar'] = true;
         }

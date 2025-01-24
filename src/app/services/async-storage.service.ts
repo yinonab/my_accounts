@@ -232,6 +232,7 @@ async function remove<T extends EntityId>(entityType: string, entityId: string):
 }
 
 
+
 // Private functions
 function _save<T>(entityType: string, entities: T[]): void {
     localStorage.setItem(entityType, JSON.stringify(entities))

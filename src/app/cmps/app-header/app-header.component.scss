@@ -2,134 +2,186 @@
 
 :host {
   header {
-    background-color: $clr1;
+    // עיצוב בסיסי אלגנטי
+    background: linear-gradient(90deg, #34495e, #2c3e50); // כחול כהה ואלגנטי
     height: 80px;
     display: flex;
     align-items: center;
-    color: $clr3;
+    color: #ffffff;
+    font-family: 'Roboto', sans-serif;
     margin-bottom: 30px;
-    font-size: 1.5em;
-    font-family: monospace;
+    padding: 0 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 
     .logo-wrapper,
     .nav-wrapper,
     .auth-wrapper {
       flex: 1;
       display: flex;
+      align-items: center;
     }
 
     .logo-wrapper {
       justify-content: flex-start;
+
+      .logo {
+        height: 50px;
+        width: auto;
+      }
     }
 
     .nav-wrapper {
       justify-content: center;
+
+      nav {
+        display: flex;
+        gap: 20px;
+
+        a {
+          color: #ffffff;
+          font-size: 1.2em;
+          font-weight: 500;
+          text-decoration: none;
+          transition: transform 0.2s, color 0.3s;
+
+          &:hover {
+            transform: scale(1.1);
+            color: #f1c40f; // זהב להדגשה
+          }
+
+          img {
+            width: 35px;
+            height: 35px;
+          }
+        }
+
+        a.active {
+          color: #f1c40f; // זהב להבלטה
+          font-weight: bold;
+
+          img {
+            border: 2px solid #f1c40f;
+            border-radius: 50%;
+            padding: 5px;
+          }
+        }
+      }
     }
 
     .auth-wrapper {
       justify-content: flex-end;
-    }
 
-    .logo {
-      margin-left: 20px;
-      height: 65px;
-      width: auto;
-    }
+      .auth-links {
+        display: flex;
+        align-items: center;
+        gap: 15px;
 
-    nav {
-      margin-inline-end: 20px;
-
-      a {
-        margin: 0 10px;
-
-        img {
-          width: 40px;
-          height: 40px;
-          object-fit: cover;
+        a,
+        button {
+          background: #f1c40f; // זהב אלגנטי
+          color: #2c3e50; // כחול כהה
+          text-decoration: none;
+          font-size: 1em;
+          font-weight: bold;
+          padding: 0.4em 0.8em;
+          border: none;
+          border-radius: 20px;
+          cursor: pointer;
+          transition: background-color 0.3s, transform 0.2s;
 
           &:hover {
-            scale: 1.1;
+            background: #ffffff;
+            color: #34495e;
+            transform: scale(1.05);
           }
         }
 
-        color: $clr3;
-
-        &:not(:last-child) {
-          margin-right: 10px;
-        }
-
-        &.active {
-          color: $clr4;
+        .user-avatar {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background-color: #f1c40f; // רקע ברירת מחדל לאווטאר
+          color: #2c3e50; // צבע הטקסט
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 1.2em;
           font-weight: bold;
+          cursor: pointer;
+          position: relative;
 
           img {
-            border: 2px solid $clr9;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            padding: 7px;
+            object-fit: cover;
+          }
+
+          &:hover {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
           }
         }
-      }
-    }
 
-    .auth-links {
-      margin-right: 20px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
+        .upload-container {
+          position: absolute;
+          top: 60px;
+          right: 0;
+          background-color: #ffffff;
+          color: #2c3e50;
+          padding: 10px;
+          border-radius: 8px;
+          box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+          z-index: 1000;
 
-      a,
-      button {
-        background-color: $clr9;
-        color: $clr1;
-        text-decoration: none;
-        font-size: 1em;
-        font-weight: bold;
-        padding: 0.2em 0.4em;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
+          input[type='file'] {
+            display: none;
+          }
 
-        &:hover {
-          background-color: $clr3;
-          transform: scale(1.05);
+          label {
+            cursor: pointer;
+            background-color: #f1c40f;
+            color: #2c3e50;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: background-color 0.3s;
+
+            &:hover {
+              background-color: #34495e;
+              color: #ffffff;
+            }
+          }
         }
-
-        &:focus {
-          outline: 2px solid $clr9;
-          outline-offset: 2px;
-        }
-      }
-
-      span {
-        color: $clr4;
-        font-weight: bold;
       }
     }
   }
 
+  // עיצוב למסכים קטנים
   @media (max-width: 768px) {
     header {
       flex-direction: column;
       height: auto;
       padding: 10px;
-      font-size: 1.2em;
+      text-align: center;
 
       .logo-wrapper {
         justify-content: center;
-        margin-bottom: 10px;
+
+        .logo {
+          height: 40px;
+        }
       }
 
       .nav-wrapper {
         justify-content: center;
-        flex-wrap: wrap;
 
         nav {
-          margin-inline-end: 0;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
 
           a {
-            margin: 5px;
-
             img {
               width: 30px;
               height: 30px;
@@ -143,48 +195,49 @@
         margin-top: 10px;
 
         .auth-links {
+          flex-wrap: wrap;
           gap: 10px;
-          margin-right: 0;
+
+          .user-avatar {
+            width: 40px;
+            height: 40px;
+            font-size: 1em;
+          }
+
+          .upload-container {
+            top: 50px;
+          }
 
           a,
           button {
             font-size: 0.9em;
-            padding: 0.3em 0.5em;
+            padding: 0.3em 0.6em;
           }
         }
-      }
-
-      .logo {
-        height: 50px;
-        margin-left: 0;
       }
     }
   }
 
   @media (max-width: 480px) {
     header {
-      font-size: 1em;
+      font-size: 0.9em;
 
-      .nav-wrapper {
-        nav {
-          a {
-            font-size: 0.8em;
-
-            img {
-              width: 25px;
-              height: 25px;
-            }
-          }
-        }
+      .nav-wrapper nav a img {
+        width: 25px;
+        height: 25px;
       }
 
-      .auth-wrapper {
-        .auth-links {
-          a,
-          button {
-            font-size: 0.8em;
-            padding: 0.2em 0.4em;
-          }
+      .auth-wrapper .auth-links {
+        .user-avatar {
+          width: 35px;
+          height: 35px;
+          font-size: 0.9em;
+        }
+
+        a,
+        button {
+          font-size: 0.8em;
+          padding: 0.3em 0.5em;
         }
       }
     }

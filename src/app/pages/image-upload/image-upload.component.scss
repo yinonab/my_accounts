@@ -1,0 +1,43 @@
+.image-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  
+    h2 {
+      margin-bottom: 1rem;
+    }
+  
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+  
+      button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s;
+  
+        &:hover {
+          background-color: #0056b3;
+        }
+  
+        &:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
+        }
+      }
+    }
+  
+    img {
+      margin-top: 1rem;
+      max-width: 300px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+  

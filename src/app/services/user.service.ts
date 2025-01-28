@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, from, throwError, tap, catchError, map } from 'rxjs';
+import { Observable, BehaviorSubject, from, throwError, tap, catchError, map, switchMap, pipe } from 'rxjs';
 import { User } from '../models/user.model.ts';
 import { storageService } from './async-storage.service'; // Replace with your async storage service
+import { CloudinaryService } from './cloudinary.service';
+
 
 const ENTITY_AUTH = 'auth';
 const ENTITY = 'user';
 const LOGGEDIN_USER = 'loggedInUser';
+const FACEBOOK_ID = 'facebookId';
+const FACEBOOK_ACCESS_TOKEN = 'facebookAccessToken';
+
 
 
 @Injectable({
@@ -18,7 +23,7 @@ export class UserService {
   private _loggedInUser$ = new BehaviorSubject<User | null>(null);
   public loggedInUser$ = this._loggedInUser$.asObservable();
 
-  constructor() {
+  constructor(private cloudinaryService: CloudinaryService) {
     // Initialize users in local storage if not present
     // const users = JSON.parse(localStorage.getItem(ENTITY) || 'null');
     // if (!users || users.length === 0) {
@@ -66,6 +71,8 @@ export class UserService {
         // Save the user as the currently logged-in user
         this._loggedInUser$.next(loggedInUser)
         localStorage.setItem(LOGGEDIN_USER, JSON.stringify(loggedInUser))
+        localStorage.setItem(FACEBOOK_ID, fbUser.facebookId);
+        localStorage.setItem(FACEBOOK_ACCESS_TOKEN, fbUser.accessToken);
       }),
       catchError(this._handleError)
     )
@@ -83,6 +90,8 @@ export class UserService {
   public logout(): void {
     this._loggedInUser$.next(null);
     localStorage.removeItem(LOGGEDIN_USER);
+    localStorage.removeItem(FACEBOOK_ID);
+    localStorage.removeItem(FACEBOOK_ACCESS_TOKEN);
   }
 
   // Get logged-in user from local storage
@@ -192,6 +201,11 @@ export class UserService {
       catchError(this._handleError)
     );
   }
+  public setLoggedInUser(user: User): void {
+    this._loggedInUser$.next(user); // עדכון ה-BehaviorSubject
+    localStorage.setItem(LOGGEDIN_USER, JSON.stringify(user)); // עדכון ה-localStorage
+  }
+
 
   // Generate a random ID
   private _getRandomId(length = 8): string {
@@ -228,5 +242,30 @@ export class UserService {
       catchError(this._handleError)
     );
   }
+  public updateUserImage(file: File): Observable<User> {
+    return this.cloudinaryService.uploadImage(file).pipe(
+      switchMap((imageUrl: string) => {
+        console.log('Image URL from Cloudinary:', imageUrl); // בדוק את ה-URL
 
+        const loggedInUser = this.getLoggedInUser();
+        if (!loggedInUser) {
+          return throwError(() => new Error('No logged-in user found. Please log in.'));
+        }
+
+        // עדכון נתוני המשתמש
+        const updatedUser: User = { ...loggedInUser, img: imageUrl };
+
+        return this.saveUser(updatedUser).pipe(
+          tap((savedUser) => {
+            console.log('Updated user sent to the server:', savedUser);
+            this.setLoggedInUser(savedUser); // שימוש בפונקציה החדשה
+          })
+        );
+      }),
+      catchError((err) => {
+        console.error('Error updating user image:', err.message || err);
+        return throwError(() => new Error('Failed to update user image. Please try again later.'));
+      })
+    );
+  }
 }

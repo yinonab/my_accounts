@@ -87,7 +87,9 @@ export class HomePageComponent implements OnDestroy {
           this.userService.loginWithFacebook(fbUser).subscribe({
             next: (loggedInUser) => {
               console.log('User logged in via Facebook:', loggedInUser);
-              localStorage.setItem('facebookAccessToken', fbUser.accessToken);
+              //localStorage.setItem('facebookId', fbUser.facebookId);
+
+              //localStorage.setItem('facebookAccessToken', fbUser.accessToken);
               // Show success message:
               this.msgService.setSuccessMsg(`Login successful!!! ${loggedInUser.username} is now logged in.`);
               // Navigate to '/contact':

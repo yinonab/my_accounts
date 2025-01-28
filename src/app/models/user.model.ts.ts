@@ -3,7 +3,7 @@ export interface User {
   password: string; // Change type to `string` instead of `number`
   email: string;
   createdAt: Date;
-  img: string; // Fix from `imgUrl` to `img`
+  img?: string;  // Fix from `imgUrl` to `img`
   _id: string;
   isAdmin?: boolean;
 }

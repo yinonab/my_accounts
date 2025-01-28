@@ -20,7 +20,7 @@
     <button class="edit-button" evStop (click)="onEditClick()" [routerLink]="['/contact/edit', contact._id]">
       <img src="../../../assets/images/edit2.png" alt="edit contact" />
     </button>
-    <button class="facebook-login-button" evStop (click)="loginWithFacebook(contact)">
+    <button class="facebook-login-button" evStop (click)="loginWithFacebookOrRedirect(contact)">
       <img class="fb-img" src="../../../assets/images/fb2.png" alt="delete image" />
     </button>
   </div>

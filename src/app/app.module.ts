@@ -27,6 +27,7 @@ import { PasswordValidatorDirective } from './directives/PasswordValidatorDirect
 import { ClickOutsideDirective } from './directives/click-outside.directive';
 import { ClickOutsideCaptureDirective } from './directives/click-outside-capture-directive.directive';
 import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy.component';
+import { ImageUploadComponent } from './pages/image-upload/image-upload.component';
 
 
 
@@ -53,7 +54,8 @@ import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy.co
     ClickOutsideDirective,
     PasswordValidatorDirective,
     ClickOutsideCaptureDirective,
-    PrivacyPolicyComponent
+    PrivacyPolicyComponent,
+    ImageUploadComponent
 
 
   ],

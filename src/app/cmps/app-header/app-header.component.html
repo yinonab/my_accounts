@@ -1,8 +1,10 @@
 <header>
+  <!-- לוגו -->
   <div class="logo-wrapper">
     <img class="logo" src="../../../assets/images/acc1.png" alt="bitcoin img">
   </div>
 
+  <!-- ניווט -->
   <div class="nav-wrapper">
     <nav>
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
@@ -17,6 +19,7 @@
     </nav>
   </div>
 
+  <!-- כפתורים והתחברות -->
   <div class="auth-wrapper">
     <div class="auth-links">
       <ng-container *ngIf="!loggedInUser; else loggedIn">
@@ -24,9 +27,21 @@
         <a routerLink="/signup">Sign Up</a>
       </ng-container>
       <ng-template #loggedIn>
-        <span> Welcome: {{ loggedInUser?.username }}</span>
+        <div class="user-avatar" (click)="toggleUpload = !toggleUpload">
+          <ng-container *ngIf="loggedInUser?.img; else defaultAvatar">
+            <img [src]="loggedInUser?.img" alt="User Image">
+          </ng-container>
+          <ng-template #defaultAvatar>
+            {{ getUserInitial() }}
+          </ng-template>
+        </div>
         <button (click)="onLogout()">Logout</button>
       </ng-template>
     </div>
+  </div>
+
+  <!-- העלאת תמונה -->
+  <div *ngIf="toggleUpload">
+    <image-upload (imageUploaded)="onImageUploaded($event)"></image-upload>
   </div>
 </header>

@@ -1,149 +1,162 @@
 @import "../../../assets/scss/setup/functions";
 @import "../../../assets/scss/setup/variables";
 
+body {
+    background: url('/assets/images/keith-misner-h0Vxgz5tyXA-unsplash.jpg') no-repeat center center fixed !important;
+    background-size: cover !important;
+    margin: 0 !important;
+    min-height: 100vh !important;
+    font-family: "Arial", sans-serif !important;
+}
+
 .home-page {
-    min-width: 100%; // Default for small screens
-    min-height: 40vh; // Use full height for better UX on small screens
-    padding: 16px; // Adjusted for smaller screens
+    max-width: 40vw;
+    margin: 0 auto;
+    min-height: 50vh; // Use 80% of the viewport height
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    margin: 0 auto;
-    font-family: monospace;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(255, 215, 181, 0.9), rgba(255, 165, 133, 0.9)); // חם ונעים
+    border-radius: 16px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2); // צל כהה קל
+    font-family: "Arial", sans-serif;
 
     h1 {
-        color: $clr8;
-        font-size: rem(24px); // Smaller default font size
-        font-weight: 700;
+        color: #4E342E; // חום כהה
+        font-size: rem(32px); // Bigger text for headings
         text-align: center;
+        margin-bottom: 24px;
 
         .arrow {
             display: inline-block;
-            font-size: rem(30px); // Adjust for small screens
             margin-top: 10px;
-            width: 1em;
-            height: 1em;
+            width: 30px;
+            height: 30px;
+            animation: bounce 1.5s infinite;
         }
     }
 
     .auth-buttons {
-        color: $clr9;
         display: flex;
-        flex-direction: column; // Stack buttons vertically on small screens
+        flex-direction: column; // Stack buttons vertically by default
+        gap: 14px;
+        width: 100%;
+        max-width: 350px;
         align-items: center;
-        gap: 12px; // Smaller gap for compact view
 
-        a {
-            width: 100%; // Full width for better tap target size
-            text-align: center; // Center-align text
-            padding: 10px;
+        a,
+        button {
+            width: 100%;
+            padding: 12px;
             border-radius: 8px;
+            font-size: rem(16px);
+            font-weight: bold;
+            text-align: center;
             text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.85); // רקע לבן שקוף
+            color: #4E342E; // טקסט כהה
+            border: 2px solid #4E342E; // מסגרת כהה
 
-            &.login-btn {
-                border: 2px solid $clr8;
-                color: $clr8;
+            &:hover {
+                background-color: #4E342E; // כהה על hover
+                color: white;
+                transform: translateY(-2px);
+            }
+        }
 
-                &:hover {
-                    background-color: $clr8;
-                    color: white;
-                    transform: translateY(-2px);
-                }
+        .login-btn {
+            &:hover {
+                background-color: #6B4226; // גוון כהה יותר של חום
+            }
+        }
+
+        .signup-btn {
+            &:hover {
+                background-color: #6B4226;
+            }
+        }
+
+        .facebook-login-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1877f2;
+            color: white;
+            gap: 10px;
+            border: 2px solid #4E342E;
+
+            .fb-img {
+                width: 20px;
+                height: 20px;
             }
 
-            &.signup-btn {
-                border: 2px solid $clr8;
-                color: $clr8;
-
-                &:hover {
-                    background-color: $clr8;
-                    color: white;
-                    transform: translateY(-2px);
-                }
+            &:hover {
+                background-color: darken(#1877f2, 10%);
+                transform: translateY(-2px);
             }
         }
     }
 }
-button.facebook-login-button {
-    background-color: $clr8; // Default background color
-    color: white; // Default text color
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px; // Add padding for text and image
-    border: 2px solid $clr8; // Border style
-    border-radius: 8px; // Match the border radius
-    font-weight: 600; // Font weight for consistency
-    cursor: pointer;
-    gap: 10px; // Add space between text and image
-    transition: background-color 0.3s ease, transform 0.2s ease;
 
-    .facebook-text {
-        font-size: rem(16px); // Adjust text size
+/* Bounce Animation */
+@keyframes bounce {
+    0%,
+    100% {
+        transform: translateY(0);
     }
-
-    .fb-img {
-        width: 1.6em; // Adjust image size
-        height: 1.6em;
-    }
-
-    &:hover {
-        background-color: $clr8; // Change background color on hover
-        color: white; // Change text color on hover
-        transform: translateY(-2px); // Add hover effect
-    }
-
-    &:active {
-        transform: translateY(0); // Reset translation on active state
-        background-color: darken($clr8, 10%);
-    }
-
-    &:focus {
-        outline: none;
-        box-shadow: none;
-    }
-
-    &:not(:hover):not(:active):not(:focus) {
-        background-color: white; // Ensure default state
-        color: $clr8; // Reset text color
-        transform: none; // Reset transformation
+    50% {
+        transform: translateY(-10px);
     }
 }
 
+/* Media Queries */
+@media (max-width: 768px) {
+  .home-page {
+    max-width: 90%; // הגבלת רוחב ל-90%
+    max-height: 40vh; // הגבלת גובה ל-70% מגובה המסך
+    padding: 20px; // ריווח פנימי אחיד
+    margin-bottom: 30px; // ריווח נוסף מלמטה
+  }
 
+  h1 {
+    font-size: rem(20px); // כותרת קטנה יותר
+  }
 
+  .auth-buttons {
+    gap: 16px; // רווח בין הכפתורים
+  }
 
-// Media queries for larger screens
-@media (min-width: 768px) {
-    .home-page {
-        min-width: 350px;
-        width: max-content;
-        padding: 20px;
-    }
-
-    .auth-buttons {
-        flex-direction: row; // Place buttons side by side
-        gap: 20px;
-
-        a {
-            width: auto; // Revert to auto width for larger screens
-        }
-    }
+  .auth-buttons a,
+  .auth-buttons button {
+    font-size: rem(14px);
+    padding: 12px 20px; // התאמה לגודל הכפתורים
+  }
 }
 
-@media (min-width: 1024px) {
-    .home-page {
-        font-size: rem(18px); // Slightly increase base font size for larger screens
-    }
+@media (max-width: 480px) {
+  .home-page {
+    max-width: 85%; // הגבלת רוחב ל-85%
+    max-height: 40vh; // הגבלת גובה ל-65% מגובה המסך
+    padding: 15px; // ריווח פנימי קטן יותר
+    margin-bottom: 20px; // ריווח נוסף מלמטה
+  }
 
-    h1 {
-        font-size: rem(30px); // Larger heading size
-    }
+  h1 {
+    font-size: rem(18px); // כותרת קטנה יותר
+  }
 
-    .auth-buttons a {
-        padding: 12px 28px; // Larger padding for more space
-    }
+  .auth-buttons {
+    gap: 12px;
+  }
+
+  .auth-buttons a,
+  .auth-buttons button {
+    font-size: rem(12px);
+    padding: 10px 15px; // התאמת גודל הכפתורים
+  }
 }
+

@@ -1,23 +1,22 @@
 <section class="home-page">
   <ng-container *ngIf="logdinUser; else welcomeMessage">
-    <h1>Hello {{logdinUser.username}}!</h1>
+    <h1>Hello {{ logdinUser.username }}!</h1>
   </ng-container>
   <ng-template #welcomeMessage>
     <h1>
-      Welcome !!!<br>
-      Please login / sign up<br>
-      <span [@bounceArrow]="arrowState" (@bounceArrow.done)="onAnimationDone()" class="arrow"><img class="arrow"
-          src="../../../assets/images/arrow-down1.png" alt="arrow down"></span>
+      Welcome!<br />
+      Please login or sign up<br />
+      <span class="arrow">
+        <img class="arrow" src="../../../assets/images/arrow-down1.png" alt="arrow down" />
+      </span>
     </h1>
     <section class="auth-buttons">
       <a routerLink="/login" class="login-btn">Login</a>
       <a routerLink="/signup" class="signup-btn">Sign Up</a>
       <button class="facebook-login-button" evStop (click)="loginWithFacebook()">
-        <span class="facebook-text">Login By</span>
         <img class="fb-img" src="../../../assets/images/fb2.png" alt="Facebook login" />
+        <span class="facebook-text">Login with Facebook</span>
       </button>
-
-
     </section>
   </ng-template>
 </section>

@@ -11,6 +11,7 @@ import { MsgService } from '../../services/msg.service';
 })
 export class HeaderComponent implements OnInit {
   loggedInUser: User | null = null;
+  toggleUpload: boolean = false;
 
   constructor(private userService: UserService, private router: Router, private msgService: MsgService,) { }
 
@@ -19,6 +20,13 @@ export class HeaderComponent implements OnInit {
     this.userService.loggedInUser$.subscribe(user => {
       this.loggedInUser = user;
     });
+  }
+
+  getUserInitial(): string {
+    if (this.loggedInUser?.username) {
+      return this.loggedInUser.username[0] || ''; // החזרת האות הראשונה אם קיימת
+    }
+    return ''; // אם אין שם משתמש, מחזיר מחרוזת ריקה
   }
 
   onLogout(): void {
@@ -30,4 +38,28 @@ export class HeaderComponent implements OnInit {
     }, 600);
   }
 
+  onImageUploaded(imageUrl: string): void {
+    if (!this.loggedInUser) return;
+
+    // עדכון תמונת המשתמש
+    const updatedUser: User = { ...this.loggedInUser, img: imageUrl };
+
+    this.userService.saveUser(updatedUser).subscribe({
+      next: (savedUser) => {
+        console.log('User image updated successfully:', savedUser);
+
+        // עדכון ה-loggedInUser עם הערך החדש
+        this.loggedInUser = savedUser;
+        this.userService.setLoggedInUser(savedUser); // עדכון ב-BehaviorSubject
+
+        this.msgService.setSuccessMsg('Profile picture updated successfully!');
+        this.toggleUpload = false; // סגירת המנגנון של העלאת התמונה
+      },
+      error: (err) => {
+        console.error('Failed to update user image:', err);
+        this.msgService.setErrorMsg('Failed to update profile picture.');
+      },
+    });
+  }
 }
+

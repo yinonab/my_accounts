@@ -1,0 +1,8 @@
+<form (submit)="onUpload()">
+    <label>
+        <input type="file" (change)="onFileSelect($event)" />
+    </label>
+    <button type="submit" [disabled]="isLoading || !selectedFile">
+        {{ isLoading ? 'Uploading...' : 'Upload Image' }}
+    </button>
+</form>

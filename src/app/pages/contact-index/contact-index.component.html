@@ -1,8 +1,16 @@
 <section class="contact-index">
-    <contact-filter></contact-filter>
-    <button class="add-contact-btn" routerLink="/contact/edit">
-        <img src="../../../../assets/images/add-contact.png" alt="Add contact image">
-        <span>Add contact</span>
-      </button>
-    <contact-list (remove)="onRemoveContact($event)" [contacts]="contacts$ | async"></contact-list>
+  <!-- שדה חיפוש -->
+  <contact-filter>
+    <input type="text" placeholder="Search contact..." />
+  </contact-filter>
+
+  <!-- כפתור הוספת איש קשר -->
+  <button class="add-contact-btn" routerLink="/contact/edit">
+    <img src="../../../../assets/images/add-contact.png" alt="Add contact image" />
+    <span>Add Contact</span>
+  </button>
+
+  <!-- רשימת אנשי קשר -->
+  <contact-list (remove)="onRemoveContact($event)" [contacts]="contacts$ | async">
+  </contact-list>
 </section>

@@ -1,33 +1,115 @@
-
 @import "../../../assets/scss/setup/functions";
 @import "../../../assets/scss/setup/variables";
-.add-contact-btn {
+
+.contact-index {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  font-family: 'Roboto', sans-serif;
+
+  contact-filter {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 10px; // מרווח קטן יותר בין שורת החיפוש לכפתור ההוספה
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 20px;
+      font-size: rem(16px);
+      border: 2px solid $clr8;
+      border-radius: 30px;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+      &::placeholder {
+        color: $clr6;
+        font-style: italic;
+      }
+
+      &:focus {
+        border-color: $clr6;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+
+  .add-contact-btn {
     padding: 0;
     border: none;
-    margin: auto;
+    margin: 10px 0 40px; // קרוב יותר לשורת החיפוש ורחוק יותר מהרשימה
     display: flex;
-    background-color: $clr9;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-    width: 300px;
-    height: 70px;
-    border-radius: 50px;
     align-items: center;
-    font-family: monospace;
+    justify-content: center;
+    background: linear-gradient(135deg, $clr9, $clr6);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    width: 320px;
+    height: 80px;
+    border-radius: 50px;
     font-weight: 700;
     font-size: rem(20px);
-    margin-bottom: 1em;
+    color: #ffffff;
+    text-transform: uppercase;
     cursor: pointer;
-    color: white;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+
     span {
-        margin-inline-end: 30px;
+      margin-inline-end: 20px;
     }
+
     img {
-        height: 70px;
-        margin-inline-end: 10px;
+      height: 50px;
+      margin-inline-end: 10px;
     }
+
     &:hover {
-        scale: 1.1;
-        background-color: $clr6;
-        color: $clr8;
+      transform: scale(1.1);
+      background: $clr6;
+      color: $clr8;
     }
+
+    &:active {
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  /* התאמות למסכים קטנים */
+  @media (max-width: 768px) {
+    contact-filter {
+      input[type="text"] {
+        font-size: rem(14px);
+        padding: 8px 16px;
+      }
+    }
+
+    .add-contact-btn {
+      width: 250px;
+      height: 60px;
+      font-size: rem(18px);
+
+      img {
+        height: 40px;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    contact-filter {
+      input[type="text"] {
+        font-size: rem(12px);
+        padding: 6px 12px;
+      }
+    }
+
+    .add-contact-btn {
+      width: 200px;
+      height: 50px;
+      font-size: rem(16px);
+
+      img {
+        height: 30px;
+      }
+    }
+  }
 }

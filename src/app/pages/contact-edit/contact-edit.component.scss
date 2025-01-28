@@ -10,48 +10,44 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.4); // רקע כהה עם שקיפות
   z-index: 1000;
 }
 
 .contact-edit {
   width: 25em;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  font-family: monospace;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  font-family: 'Roboto', sans-serif;
   padding: 20px;
-  background-color: white;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.95));
   display: flex;
   flex-direction: column;
-  border-radius: 10px;
+  border-radius: 12px;
   z-index: 1001;
 
   .contact-actions {
     display: flex;
     justify-content: space-between;
-
-    a {
-      display: flex;
-      place-items: center;
-      margin-inline-start: 10px;
-      &:hover {
-        transform: scale(1.1);
-      }
-    }
+    align-items: center;
 
     button {
       padding: 0;
       cursor: pointer;
       background: none;
       border: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      img {
+        width: 30px; // גודל קבוע של האייקון
+        height: 30px; // גודל קבוע של האייקון
+      }
+
       &:hover {
         transform: scale(1.1);
       }
     }
-  }
-
-  .delete-img {
-    width: 2.5em;
-    height: 2.5em;
   }
 
   form {
@@ -59,71 +55,72 @@
       margin-block-end: 30px;
       font-weight: 700;
       font-size: rem(24px);
+      color: #34495e; // כותרת בצבע כהה
     }
 
     .form-input {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-block-end: 10px;
+      flex-direction: column; // עריכת השדות אנכית גם בדסקטופ
+      align-items: flex-start; // יישור לשמאל
+      margin-block-end: 15px;
 
       label {
         font-weight: 600;
         font-size: rem(18px);
+        color: #34495e;
+        margin-bottom: 5px; // רווח בין התווית לשדה
       }
 
       input {
-        padding: 5px;
+        padding: 8px;
         font-size: rem(16px);
-        height: 40px;
-        width: 250px;
-        border: 1px solid $clr8;
-        color: $clr8;
-        border-radius: 3px;
+        width: 100%; // תמיד מתאים לרוחב המיכל
+        border: 1px solid #bdc3c7;
+        border-radius: 6px;
+        color: #34495e;
 
-        // Angular reactive form states
-        &.ng-touched {
-          border-color: $clr5;
+        &::placeholder {
+          color: #bdc3c7;
         }
-        &.ng-untouched {
-          border-color: $clr8;
+
+        &:focus {
+          border-color: #f1c40f;
+          outline: none;
         }
+
         &.ng-valid {
           border-color: green;
           background-color: #f6fff6;
         }
+
         &.ng-invalid {
           border-color: red;
           background-color: #fff6f6;
-        }
-        &.ng-dirty {
-          font-weight: bold;
-        }
-        &.ng-pristine {
-          font-weight: normal;
         }
       }
     }
 
     .form-actions {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column; // עריכה אנכית לכל הכפתורים
       align-items: center;
-      width: 100%;
-      margin-top: 20px;
+      gap: 20px; // ריווח בין הכפתורים
 
       .add-btn,
       .save-btn {
-        flex-shrink: 0;
-        padding: 5px 15px;
-        border-radius: 3px;
-        border: 1px solid $clr8;
+        padding: 10px 20px;
+        border-radius: 6px;
         font-weight: 600;
-        transition: background-color 0.2s ease, color 0.2s ease;
+        font-size: rem(16px);
+        background-color: #f1c40f;
+        color: #2c3e50;
+        border: none;
+        transition: background-color 0.2s ease, transform 0.2s ease;
 
         &:hover {
-          background-color: $clr9;
-          color: white;
+          background-color: #34495e;
+          color: #ffffff;
+          transform: scale(1.05);
         }
 
         &:disabled {
@@ -131,102 +128,124 @@
           cursor: not-allowed;
         }
       }
+    }
 
-      /* NEW: Container that stacks switch + label vertically */
-      .switch-container {
-        display: flex;
-        flex-direction: column; /* Stack vertically */
-        align-items: flex-start;    /* Center horizontally */
-        margin-right: 20px;     /* Optional spacing to the right */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start; // יישור לשמאל
+      gap: 10px; // ריווח בין הכפתור לתווית
+      margin-top: 10px;
 
-        .switch-label {
-          margin-top: 5px;      /* Space between switch and text */
-          font-weight: 600;
-          font-size: rem(16px);
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+
+        input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+
+          &:checked + .slider {
+            background-color: #f1c40f;
+          }
+          &:checked + .slider::before {
+            transform: translateX(26px);
+          }
+        }
+
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          inset: 0;
+          background-color: #bdc3c7;
+          transition: 0.4s;
+          border-radius: 34px;
+
+          &::before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+          }
         }
       }
+
+      .switch-label {
+        font-weight: 600;
+        font-size: rem(16px);
+        color: #34495e;
+      }
     }
-  }
-
-  .save-btn {
-    font-size: rem(18px);
-    background-color: $clr5;
-    width: 70px;
-    height: 30px;
-  }
-
-  .add-btn {
-    font-size: rem(12px);
-    background-color: $clr5;
-    width: auto;
   }
 
   .contact-image {
     width: 100px;
     height: 100px;
-    margin: 10px 0 20px 20px;
-  }
-
-  .errors {
-    color: red;
-    margin: 0 0 10px 0;
+    margin: 10px auto;
+    border-radius: 50%;
+    border: 3px solid #f1c40f;
+    object-fit: cover;
   }
 }
 
-/* Toggle switch styles */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
+@media (max-width: 768px) {
+  .contact-edit {
+    width: 90%;
+    padding: 15px;
 
-  /* Hide the default checkbox */
-  input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+    form {
+      .form-input {
+        input {
+          font-size: rem(14px);
+        }
+      }
 
-    &:focus + .slider {
-      box-shadow: 0 0 1px #2196f3;
-    }
-    &:checked + .slider {
-      background-color: #2196f3;
-    }
-    &:checked + .slider::before {
-      transform: translateX(26px);
-    }
-    &:disabled + .slider {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
+      .form-actions {
+        gap: 15px;
 
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    inset: 0;
-    background-color: #ccc;
-    transition: 0.4s;
-    border-radius: 34px;
+        .add-btn,
+        .save-btn {
+          font-size: rem(14px);
+          width: 100%; // מתאים את הכפתור למובייל
+        }
+      }
+    }
 
-    &::before {
-      position: absolute;
-      content: "";
-      height: 26px;
-      width: 26px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: 0.4s;
-      border-radius: 50%;
+    .switch-container {
+      flex-direction: column; // עריכה אנכית במובייל
+      align-items: flex-start; // יישור השדה
+      gap: 5px; // ריווח קטן יותר
     }
   }
+}
 
-  /* Rounded slider */
-  .slider.round {
-    border-radius: 34px;
-    &::before {
-      border-radius: 50%;
+@media (max-width: 480px) {
+  .contact-edit {
+    form {
+      .form-input {
+        input {
+          font-size: rem(12px);
+        }
+      }
+
+      .form-actions {
+        .add-btn,
+        .save-btn {
+          font-size: rem(12px);
+        }
+      }
+
+      .switch-container {
+        gap: 3px; // ריווח קטן יותר
+      }
     }
   }
 }

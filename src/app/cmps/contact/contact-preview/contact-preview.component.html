@@ -1,5 +1,5 @@
 <article class="contact-preview" (click)="onPreviewClick()">
-  <img src="../../../assets/images/contact.png" alt="contact-image" />
+  <img [src]="contact.img ? contact.img : '../../../assets/images/contact.png'" alt="contact-image" />
   <div class="contact-info">
     <h1 class="contact-name" [ngClass]="{ 'long-name': isLongName }">
       {{ contact.name }}

@@ -20,7 +20,7 @@
 
   <!-- Contact details -->
   <div class="det">
-    <img src="../../../assets/images/contact.png" alt="contact-img" />
+    <img [src]="contact.img ? contact.img : '../../../assets/images/contact.png'" alt="contact-image" />
     <h2 [ngClass]="{ 'long-name': isLongField(contact.name, 10) }">Name: {{ contact.name }}</h2>
     <h2 [ngClass]="{ 'long-name': isLongField(contact.lastName, 10) }">Last Name: {{ contact.lastName }}</h2>
     <h2 [ngClass]="{ 'long-name': isLongField(contact.phone, 10) }">Phone: {{ contact.phone }}</h2>

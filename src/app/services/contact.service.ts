@@ -36,6 +36,38 @@ export class ContactService {
             .subscribe();
     }
 
+    public updateContactImage(contactId: string, imageUrl: string): Observable<Contact> {
+        // חפש את הקשר הקיים
+        const existingContact = this._contacts$.value.find(contact => contact._id === contactId);
+
+        if (!existingContact) {
+            return throwError(() => new Error('Contact not found'));
+        }
+
+        // צור אובייקט חדש עם התמונה המעודכנת
+        const updatedContact: Contact = {
+            ...existingContact,
+            img: imageUrl
+        };
+
+        // שלח את האובייקט המלא לעדכון
+        return from(
+            storageService.put<Contact>('contact/edit', updatedContact)
+        ).pipe(
+            tap((contact: Contact) => {
+                // עדכן את ה-BehaviorSubject
+                const contacts = this._contacts$.value.map(c =>
+                    c._id === contact._id ? contact : c
+                );
+                this._contacts$.next(contacts);
+            }),
+            retry(1),
+            catchError((err) => this._handleError(err))
+        );
+    }
+
+
+
     public loadContacts() {
         return from(storageService.query<Contact>(ENTITY))
             .pipe(
@@ -72,7 +104,13 @@ export class ContactService {
     }
 
     public saveContact(contact: Contact) {
-        return contact._id ? this._updateContact(contact) : this._addContact(contact)
+        const existingContact = this._contacts$.value.find(c => c._id === contact._id);
+        if (existingContact && !contact.img) {
+            contact.img = existingContact.img; // שמירה על התמונה הקיימת
+        }
+
+        // קריאה לפונקציה המתאימה (עדכון או הוספה)
+        return contact._id ? this._updateContact(contact) : this._addContact(contact);
     }
 
     public setFilterBy(filterBy: ContactFilter) {
@@ -98,7 +136,7 @@ export class ContactService {
             )
     }
 
-    private _updateContact(contact: Contact) {
+    private _updateContact(contact: Contact): Observable<Contact> {
         console.log('Updating contact:', contact); // Debug log
         return from(storageService.put<Contact>('contact/edit', contact))
             .pipe(
@@ -114,10 +152,12 @@ export class ContactService {
     }
 
 
-    private _addContact(contact: Contact) {
+    private _addContact(contact: Contact): Observable<Contact> {
+        console.log('Adding new contact:', contact); // Debug log
         return from(storageService.post(ENTITY, contact))
             .pipe(
                 tap(newContact => {
+                    console.log('New contact added successfully:', newContact); // Debug log
                     const contacts = this._contacts$.value
                     this._contacts$.next([...contacts, newContact])
                 }),
@@ -314,6 +354,8 @@ export class ContactService {
     }
 }
 
+
+
 function _getRandomId(length = 8): string {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -323,3 +365,6 @@ function _getRandomId(length = 8): string {
     }
     return result;
 }
+
+
+

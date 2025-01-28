@@ -17,7 +17,7 @@
 .contact-edit {
   width: 25em;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   padding: 20px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.95));
   display: flex;
@@ -41,11 +41,85 @@
 
       img {
         width: 30px; // גודל קבוע של האייקון
-        height: 30px; // גודל קבוע של האייקון
+        height: 30px;
       }
 
       &:hover {
         transform: scale(1.1);
+      }
+    }
+  }
+
+  /* עיצוב תמונת איש הקשר */
+  .contact-image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 15px;
+
+    .contact-image {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #f1c40f;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+
+    /* סגנון עבור האות הראשונה במקרה שאין תמונה */
+    .default-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-color: #bdc3c7; // צבע רקע
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px; // גודל הפונט עבור האות
+      font-weight: bold;
+      color: #34495e; // צבע הטקסט
+      border: 3px solid #f1c40f;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+
+    /* כפתור העלאת תמונה */
+    .image-upload {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background-color: #f1c40f;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+
+      &:hover {
+        background-color: #34495e;
+        transform: scale(1.1);
+      }
+
+      input[type="file"] {
+        display: none;
+      }
+
+      img {
+        width: 20px;
+        height: 20px;
       }
     }
   }
@@ -55,26 +129,26 @@
       margin-block-end: 30px;
       font-weight: 700;
       font-size: rem(24px);
-      color: #34495e; // כותרת בצבע כהה
+      color: #34495e;
     }
 
     .form-input {
       display: flex;
-      flex-direction: column; // עריכת השדות אנכית גם בדסקטופ
-      align-items: flex-start; // יישור לשמאל
+      flex-direction: column;
+      align-items: flex-start;
       margin-block-end: 15px;
 
       label {
         font-weight: 600;
         font-size: rem(18px);
         color: #34495e;
-        margin-bottom: 5px; // רווח בין התווית לשדה
+        margin-bottom: 5px;
       }
 
       input {
         padding: 8px;
         font-size: rem(16px);
-        width: 100%; // תמיד מתאים לרוחב המיכל
+        width: 100%;
         border: 1px solid #bdc3c7;
         border-radius: 6px;
         color: #34495e;
@@ -102,9 +176,9 @@
 
     .form-actions {
       display: flex;
-      flex-direction: column; // עריכה אנכית לכל הכפתורים
+      flex-direction: column;
       align-items: center;
-      gap: 20px; // ריווח בין הכפתורים
+      gap: 20px;
 
       .add-btn,
       .save-btn {
@@ -133,8 +207,8 @@
     .switch-container {
       display: flex;
       align-items: center;
-      justify-content: flex-start; // יישור לשמאל
-      gap: 10px; // ריווח בין הכפתור לתווית
+      justify-content: flex-start;
+      gap: 10px;
       margin-top: 10px;
 
       .switch {
@@ -185,21 +259,35 @@
       }
     }
   }
-
-  .contact-image {
-    width: 100px;
-    height: 100px;
-    margin: 10px auto;
-    border-radius: 50%;
-    border: 3px solid #f1c40f;
-    object-fit: cover;
-  }
 }
 
+/* התאמות למובייל */
 @media (max-width: 768px) {
   .contact-edit {
     width: 90%;
     padding: 15px;
+
+    .contact-image-container {
+      .contact-image,
+      .default-avatar {
+        width: 100px;
+        height: 100px;
+      }
+
+      .default-avatar {
+        font-size: 36px; // גודל פונט קטן יותר
+      }
+
+      .image-upload {
+        width: 30px;
+        height: 30px;
+
+        img {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
 
     form {
       .form-input {
@@ -214,15 +302,15 @@
         .add-btn,
         .save-btn {
           font-size: rem(14px);
-          width: 100%; // מתאים את הכפתור למובייל
+          width: 100%;
         }
       }
     }
 
     .switch-container {
-      flex-direction: column; // עריכה אנכית במובייל
-      align-items: flex-start; // יישור השדה
-      gap: 5px; // ריווח קטן יותר
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
     }
   }
 }
@@ -244,7 +332,29 @@
       }
 
       .switch-container {
-        gap: 3px; // ריווח קטן יותר
+        gap: 3px;
+      }
+    }
+
+    .contact-image-container {
+      .contact-image,
+      .default-avatar {
+        width: 80px;
+        height: 80px;
+      }
+
+      .default-avatar {
+        font-size: 28px; // גודל פונט קטן יותר
+      }
+
+      .image-upload {
+        width: 25px;
+        height: 25px;
+
+        img {
+          width: 14px;
+          height: 14px;
+        }
       }
     }
   }

@@ -2,11 +2,10 @@ import { Directive, ElementRef, EventEmitter, OnDestroy, OnInit, Output } from '
 
 @Directive({
     selector: '[clickOutsideCapture]',
-    standalone: false
+    standalone: false,
 })
 export class ClickOutsideCaptureDirective implements OnInit, OnDestroy {
     @Output() clickOutsideCapture = new EventEmitter<void>();
-
     private hostEl: HTMLElement;
     private documentClickListener: ((event: MouseEvent) => void) | null = null;
 
@@ -18,15 +17,18 @@ export class ClickOutsideCaptureDirective implements OnInit, OnDestroy {
         this.documentClickListener = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
 
-            // Check if the click is on the modal backdrop (the outer div)
-            if (target === this.hostEl) {
-                event.preventDefault();
-                event.stopPropagation();
+            // בדיקה: האם הלחיצה הייתה מחוץ לאלמנט המארח
+            const clickedOutside = !this.hostEl.contains(target);
+
+            if (clickedOutside) {
+                // אם הלחיצה לא הייתה בתוך האלמנט, מפעילים את האירוע
+                //event.preventDefault();
+                //event.stopPropagation();
                 this.clickOutsideCapture.emit();
             }
         };
 
-        // Add listener for mousedown
+        // הוספת מאזין לקליקים על המסמך כולו
         document.addEventListener('mousedown', this.documentClickListener, true);
     }
 

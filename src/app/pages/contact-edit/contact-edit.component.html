@@ -1,5 +1,5 @@
 <div class="contact-edit-container" *ngIf="contact">
-  <section (clickOutside)="onBack()" class="flex column contact-edit">
+  <section (clickOutsideCapture)="onBack()" class="flex column contact-edit">
     <section class="contact-actions">
       <a routerLink="/contact">
         <img src="../../../assets/images/back.png" alt="go back" />
@@ -8,7 +8,32 @@
         <img class="delete-img" src="../../../assets/images/delete1.png" alt="delete image" />
       </button>
     </section>
-    <img class="contact-image" src="../../../assets/images/contact.png" alt="contact image" />
+    <div class="contact-image-container">
+      <!-- אם יש תמונה, מציגים אותה -->
+      <img *ngIf="contact.img; else fallback" [src]="contact.img" alt="Contact Image" class="contact-image"
+        (click)="toggleImageUpload()" />
+
+      <!-- תבנית חלופית -->
+      <ng-template #fallback>
+        <!-- אם יש שם, מציגים אות ראשונה -->
+        <div *ngIf="contact.name; else defaultAvatar" class="default-avatar" (click)="toggleImageUpload()">
+          {{ getInitials(contact.name) }}
+        </div>
+
+        <!-- אם אין שם, מציגים תמונת דיפולט -->
+        <ng-template #defaultAvatar>
+          <img class="contact-image" src="../../../assets/images/contact.png" alt="Default Contact Image"
+            (click)="toggleImageUpload()" />
+        </ng-template>
+      </ng-template>
+
+      <div *ngIf="showImageUpload" class="image-upload-section">
+        <image-upload (imageUploaded)="onImageUploaded($event)" (uploadError)="onUploadError($event)">
+        </image-upload>
+      </div>
+    </div>
+
+
     <form [formGroup]="form" (ngSubmit)="onSaveContact()" class="flex column">
       <h2>{{ contact._id ? 'Edit' : 'Add' }} Contact</h2>
       <div class="flex column">
@@ -101,7 +126,8 @@
     </form>
   </section>
 </div>
-
+<section>
+  <app-modal evStop [isVisible]="showDeleteModal" [message]="'Are you sure you want to delete this contact?'"
+    (confirmed)="confirmDelete()" (canceled)="cancelDelete()"></app-modal>
+</section>
 <!-- Reusable Modal for Delete Confirmation -->
-<app-modal evStop [isVisible]="showDeleteModal" [message]="'Are you sure you want to delete this contact?'"
-  (confirmed)="confirmDelete()" (canceled)="cancelDelete()"></app-modal>

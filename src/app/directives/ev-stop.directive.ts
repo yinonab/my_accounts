@@ -9,6 +9,7 @@ export class EvStopDirective {
 
     @HostListener('click', ['$event'])
     onClick(ev: MouseEvent) {
+        console.log('evStop clicked, stopping propagation');
         ev.stopPropagation()
     }
 

@@ -18,6 +18,7 @@ import { MsgService } from '../../services/msg.service';
 export class ContactEditComponent implements OnInit, OnDestroy {
 
   IsLastName: boolean = false
+  showImageUpload = false;
   form!: FormGroup
   showDeleteModal: boolean = false; // State for controlling modal visibility
   constructor(private fb: FormBuilder, private datePipe: DatePipe, private msgService: MsgService,) { }
@@ -62,6 +63,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
           : this.formatDate(new Date()), // Default to today's date if no contact
         [Validators.required]
       ],
+      img: [contactExists ? this.contact.img : ''],
       _id: [contactExists ? this.contact._id : null]
     });
 
@@ -153,7 +155,11 @@ export class ContactEditComponent implements OnInit, OnDestroy {
     const formValue = { ...this.form.value };
     // Convert 'birth' back to timestamp
     formValue.birth = new Date(formValue.birth).getTime();
+    if (!formValue.img && this.contact.img) {
+      formValue.img = this.contact.img;
+    }
     console.log('Form values before saving:', formValue); // Debug log
+    console.log('Data being sent to saveContact:', formValue); // Debug log
     this.contactService.saveContact(formValue as Contact)
       .pipe(takeUntil(this.destroySubject$))
       .subscribe({
@@ -184,6 +190,63 @@ export class ContactEditComponent implements OnInit, OnDestroy {
     this.destroySubject$.complete();
     this.contact = this.contactService.getEmptyContact(); // Reset the contact state
   }
+
+  onImageUploaded(imageUrl: string): void {
+    console.log('Image uploaded successfully, URL:', imageUrl);
+
+    // עדכון התמונה באובייקט המקומי
+    if (!this.contact) {
+      console.warn('No contact object available. Initializing a new contact.');
+      this.contact = this.contactService.getEmptyContact() as Contact;
+    }
+
+    this.contact.img = imageUrl;
+
+    // עדכון התמונה בטופס
+    if (this.form.contains('img')) {
+      this.form.patchValue({ img: imageUrl });
+    } else {
+      console.warn('The form does not contain an "img" control.');
+    }
+
+    // שליחת עדכון לשרת רק אם יש ID
+    if (this.contact._id) {
+      this.contactService.updateContactImage(this.contact._id, imageUrl).subscribe({
+        next: (updatedContact) => {
+          console.log('Contact image updated successfully:', updatedContact);
+          this.contact = updatedContact;
+          this.msgService.setSuccessMsg('Contact picture updated successfully!');
+        },
+        error: (err) => {
+          console.error('Failed to update contact image:', err);
+          this.msgService.setErrorMsg('Failed to update contact picture.');
+        },
+      });
+    } else {
+      console.log('Contact does not have an ID yet. Image update will be saved with the form submission.');
+    }
+  }
+
+
+
+  onUploadError(errorMsg: string): void {
+    console.error('Image upload error:', errorMsg);
+    this.msgService.setErrorMsg(errorMsg);
+  }
+  toggleImageUpload(): void {
+    this.showImageUpload = !this.showImageUpload;
+  }
+  getInitials(name: string): string {
+    if (!name || !name.trim()) {
+      return ''; // אם אין שם, מחזיר מחרוזת ריקה
+    }
+    return name.charAt(0).toUpperCase(); // האות הראשונה, באות גדולה
+  }
+
+
+
+
+
 
 
 }

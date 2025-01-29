@@ -8,7 +8,7 @@
   flex-wrap: wrap;
   gap: 20px;
 
-  .contact-preview {
+  .user-preview {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -37,12 +37,12 @@
     img {
       width: 70px;
       height: 70px;
-      // border-radius: 50%;
-      // border: 3px solid $clr8;
-      object-fit: fill
+      border-radius: 50%;
+      border: 3px solid $clr8;
+      object-fit: cover;
     }
 
-    h1 {
+    .user-info {
       flex: 1;
       margin: 0 auto;
       font-size: rem(20px);
@@ -54,7 +54,7 @@
 
       &.long-name {
         font-size: rem(16px);
-        line-height: 1.2;
+        line-height: 0.9;
         word-break: break-word;
       }
     }
@@ -67,8 +67,7 @@
       gap: 10px;
 
       .delete-button,
-      .edit-button,
-      .facebook-login-button {
+      .edit-button {
         background-color: $clr5;
         height: 2.5em;
         width: 2.5em;
@@ -76,7 +75,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid black;
+        border: none;
         cursor: pointer;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
         transition: transform 0.3s ease, background-color 0.3s ease;
@@ -100,7 +99,7 @@
   }
 
   @media (max-width: 600px) {
-    .contact-preview {
+    .user-preview {
       flex-direction: row;
       align-items: center;
 
@@ -113,7 +112,7 @@
         height: 60px;
       }
 
-      h1 {
+      .user-info {
         font-size: rem(18px);
         min-width: unset;
       }
@@ -125,3 +124,7 @@
     }
   }
 }
+.long-field {
+    font-size: 0.9em;
+  }
+  

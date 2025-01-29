@@ -96,4 +96,5 @@ export class ContactPreviewComponent implements OnInit {
   get isLongName(): boolean {
     return this.contact.name.length > 10;
   }
+
 }

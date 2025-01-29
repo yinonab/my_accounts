@@ -1,0 +1,116 @@
+@import "../../../../assets/scss/setup/functions";
+@import "../../../../assets/scss/setup/_variables";
+
+// רקע כהה שמופיע מאחורי המודל
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+// מודל הפרטים של המשתמש
+.user-details {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  width: 28em;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.95));
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  font-family: "Roboto", sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+// כותרת והחץ
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+
+  h1 {
+    font-size: 1.5rem;
+    text-align: center;
+    flex-grow: 1;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    img {
+      width: 30px;
+      height: 30px;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// תמונת המשתמש
+.user-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 15px 0;
+
+  img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #f1c40f;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+// פרטי המשתמש
+.user-fields {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  font-size: 1.1rem;
+  padding: 10px 20px;
+
+  p {
+    margin: 5px 0;
+    font-weight: 500;
+    color: #34495e;
+
+    strong {
+      font-weight: 600;
+    }
+  }
+}
+
+// התאמות למובייל
+@media (max-width: 768px) {
+  .user-details {
+    width: 90%;
+    padding: 15px;
+  }
+
+  .user-image-container img {
+    width: 100px;
+    height: 100px;
+  }
+}

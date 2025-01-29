@@ -28,6 +28,11 @@ import { ClickOutsideDirective } from './directives/click-outside.directive';
 import { ClickOutsideCaptureDirective } from './directives/click-outside-capture-directive.directive';
 import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy.component';
 import { ImageUploadComponent } from './pages/image-upload/image-upload.component';
+import { UserIndexComponent } from './cmps/user/user-index/user-index.component';
+import { UserListComponent } from './cmps/user/user-list/user-list.component';
+import { UserPreviewComponent } from './cmps/user/user-preview/user-preview.component';
+import { UserDetailsComponent } from './cmps/user/user-details/user-details.component';
+import { UserFilterComponent } from './cmps/user/user-filter/user-filter.component';
 
 
 
@@ -55,7 +60,12 @@ import { ImageUploadComponent } from './pages/image-upload/image-upload.componen
     PasswordValidatorDirective,
     ClickOutsideCaptureDirective,
     PrivacyPolicyComponent,
-    ImageUploadComponent
+    ImageUploadComponent,
+    UserIndexComponent,
+    UserListComponent,
+    UserPreviewComponent,
+    UserDetailsComponent,
+    UserFilterComponent
 
 
   ],

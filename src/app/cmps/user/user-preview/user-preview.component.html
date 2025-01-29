@@ -1,0 +1,23 @@
+<article class="user-preview" (click)="onPreviewClick()">
+    <img [src]="user.img ? user.img : '../../../assets/images/user-placeholder.png'" alt="user-image" />
+
+    <div class="user-info">
+        <h1 [title]=(user.username) class="user-name" [ngClass]="{'long-field': isLongField(user.username, 15)}">{{
+            user.username }}</h1>
+        <h1 [title]=(user.email) class="user-email" [ngClass]="{'long-field': isLongField(user.email, 15)}">{{
+            user.email.substring(0, 15)
+            }}...</h1>
+    </div>
+
+    <div class="button-container">
+        <!-- כפתור מחיקה -->
+        <!-- תיקן את הקריאה -->
+        <!-- <button class="delete-button" (click)="onDeleteClick($event, user._id)">
+            <img src="../../../assets/images/delete1.png" alt="delete image" />
+        </button> -->
+
+
+
+    </div>
+</article>
+<router-outlet />

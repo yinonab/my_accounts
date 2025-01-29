@@ -1,0 +1,38 @@
+<!-- רקע כהה שמכסה את המסך -->
+<div class="backdrop" (click)="onBack()"></div>
+
+<!-- קונטיינר המודל -->
+<section *ngIf="user$ | async as user" class="user-details">
+
+    <!-- כותרת וחץ חזור -->
+    <section class="user-header">
+        <button (click)="onBack()">
+            <img src="../../../assets/images/back.png" alt="go back" />
+        </button>
+        <h1>User Details</h1>
+    </section>
+
+    <!-- תמונת המשתמש -->
+    <div class="user-image-container">
+        <img [src]="user.img ? user.img : '../../../assets/images/user-placeholder.png'" alt="user-image" />
+    </div>
+
+    <!-- פרטי המשתמש -->
+    <div class="user-fields">
+        <p>
+            <strong>Username:</strong>
+            <span *ngIf="!isLongField(user.username, 15)">{{ user.username }}</span>
+            <span *ngIf="isLongField(user.username, 15)">{{ user.username.substring(0, 15) }}...</span>
+        </p>
+
+        <p>
+            <strong>Email:</strong>
+            <span *ngIf="!isLongField(user.email, 20)">{{ user.email }}</span>
+            <span *ngIf="isLongField(user.email, 20)">{{ user.email.substring(0, 20) }}...</span>
+        </p>
+        <!-- <p><strong>Created At:</strong> {{ user.createdAt | date: 'longDate' }}</p>
+        <p *ngIf="user.isAdmin"><strong>Role:</strong> Admin</p> -->
+    </div>
+
+</section>
+<router-outlet />

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, from, throwError, tap, catchError, map, switchMap, pipe } from 'rxjs';
+import { Observable, BehaviorSubject, from, throwError, tap, catchError, map, switchMap, pipe, retry, take } from 'rxjs';
 import { User } from '../models/user.model.ts';
 import { storageService } from './async-storage.service'; // Replace with your async storage service
 import { CloudinaryService } from './cloudinary.service';
@@ -20,6 +20,9 @@ export class UserService {
   private _users$ = new BehaviorSubject<User[]>([]);
   public users$ = this._users$.asObservable();
 
+  private _filterBy$ = new BehaviorSubject<string>(''); // פילטר למשתמשים
+  public filterBy$ = this._filterBy$.asObservable();
+
   private _loggedInUser$ = new BehaviorSubject<User | null>(null);
   public loggedInUser$ = this._loggedInUser$.asObservable();
 
@@ -29,8 +32,20 @@ export class UserService {
     // if (!users || users.length === 0) {
     //   localStorage.setItem(ENTITY, JSON.stringify(this._createDemoUsers()));
     // }
+    this._loadUsersFromDB();
     const loggedInUser = JSON.parse(localStorage.getItem(LOGGEDIN_USER) || 'null');
     if (loggedInUser) this._loggedInUser$.next(loggedInUser);
+  }
+  /** טוען את רשימת המשתמשים מהדאטה בייס */
+  private _loadUsersFromDB(): void {
+    from(storageService.query<User>(ENTITY))
+      .pipe(
+        tap(users => {
+          this._users$.next(this._sort(users));
+        }),
+        catchError(this._handleError)
+      )
+      .subscribe();
   }
 
   // public login(username: string, password: string): Observable<User> {
@@ -100,18 +115,38 @@ export class UserService {
   }
 
   // Load users from storage and apply sorting
+  // public loadUsers(): Observable<User[]> {
+  //   return from(storageService.query<User>(ENTITY)).pipe(
+  //     tap(users => {
+  //       this._users$.next(this._sort(users));
+  //     }),
+  //     catchError(this._handleError)
+  //   );
+  // }
+
+  /** טוען משתמשים עם תמיכה בפילטר */
   public loadUsers(): Observable<User[]> {
-    return from(storageService.query<User>(ENTITY)).pipe(
-      tap(users => {
-        this._users$.next(this._sort(users));
-      }),
-      catchError(this._handleError)
-    );
+    return from(storageService.query<User>(ENTITY))
+      .pipe(
+        map(users => {
+          const filterBy = this._filterBy$.value.toLowerCase();
+          return users.filter(user => user.username.toLowerCase().includes(filterBy));
+        }),
+        tap(users => this._users$.next(users)),
+        retry(3),
+        catchError(this._handleError)
+      );
   }
 
   // Save a user (add or update)
   public saveUser(user: User): Observable<User> {
     return user._id ? this._updateUser(user) : this._addUser(user);
+  }
+
+  /** מסנן את המשתמשים לפי שם */
+  public setFilterBy(filterBy: string) {
+    this._filterBy$.next(filterBy);
+    this.loadUsers().pipe(take(1)).subscribe();
   }
 
   // Delete a user by ID
@@ -121,15 +156,24 @@ export class UserService {
         const users = this._users$.value.filter(user => user._id !== userId);
         this._users$.next(users);
       }),
+      retry(2),
       catchError(this._handleError)
     );
   }
 
   // Get a single user by ID
+  // public getUserById(userId: string): Observable<User> {
+  //   return from(storageService.get<User>(ENTITY, userId)).pipe(
+  //     catchError(this._handleError)
+  //   );
+  // }
+
   public getUserById(userId: string): Observable<User> {
-    return from(storageService.get<User>(ENTITY, userId)).pipe(
-      catchError(this._handleError)
-    );
+    return from(storageService.get<User>(ENTITY, userId))
+      .pipe(
+        retry(3),
+        catchError(this._handleError)
+      );
   }
 
   // Get an empty user structure
@@ -184,6 +228,7 @@ export class UserService {
         const users = this._users$.value;
         this._users$.next([...users, savedUser]); // Update users BehaviorSubject
       }),
+      retry(3),
       catchError(this._handleError)
     );
   }
@@ -198,6 +243,7 @@ export class UserService {
         );
         this._users$.next(users);
       }),
+      retry(3),
       catchError(this._handleError)
     );
   }

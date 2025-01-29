@@ -1,0 +1,7 @@
+<section class="user-filter">
+    <div class="input-wrapper">
+        <input class="filter-container" [(ngModel)]="filterBy" (ngModelChange)="onSetFilter($event)" type="text"
+            placeholder="Search user" />
+        <button *ngIf="filterBy" (click)="onClearFilter()" class="clear-button">✖</button>
+    </div>
+</section>

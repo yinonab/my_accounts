@@ -1,19 +1,9 @@
 <section class="contact-filter">
-    <div class="input-wrapper">
-      <input
-        [(ngModel)]="filterBy.name"
-        (ngModelChange)="onSetFilter($event)"
-        type="text"
-        placeholder="Search contact"
-      />
-      <button
-        *ngIf="filterBy?.name"
-        class="clear-button"
-        (click)="onClearFilter()"
-        aria-label="Clear search"
-      >
-        &times;
-      </button>
-    </div>
-  </section>
-  
+  <div class="input-wrapper">
+    <input class="filter-container" [(ngModel)]="filterBy.name" (ngModelChange)="onSetFilter($event)" type="text"
+      placeholder="Search contact" />
+    <button *ngIf="filterBy?.name" class="clear-button" (click)="onClearFilter()" aria-label="Clear search">
+      ✖
+    </button>
+  </div>
+</section>

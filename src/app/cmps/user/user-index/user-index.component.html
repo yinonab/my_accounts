@@ -1,0 +1,11 @@
+<section class="user-index">
+    <!-- שדה חיפוש -->
+    <user-filter class="filter-container"></user-filter>
+
+    <!-- רשימת משתמשים -->
+    <user-list *ngIf="users$ | async as users" (remove)="onRemoveUser($event)" [users]="users ?? []">
+    </user-list>
+
+
+
+</section>

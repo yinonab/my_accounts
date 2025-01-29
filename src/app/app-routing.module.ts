@@ -9,6 +9,10 @@ import { ContactEditComponent } from './pages/contact-edit/contact-edit.componen
 import { LoginSignupComponent } from './cmps/login-sign-up/login-sign-up.component';
 import { authGuard } from './guards/auth.guard';
 import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy.component';
+import { UserListComponent } from './cmps/user/user-list/user-list.component';
+import { UserIndexComponent } from './cmps/user/user-index/user-index.component';
+import { UserDetailsComponent } from './cmps/user/user-details/user-details.component';
+import { userResolver } from './resolvers/user.resolver';
 
 const routes: Routes = [
   {
@@ -52,6 +56,18 @@ const routes: Routes = [
   {
     path: 'privacy-policy',
     component: PrivacyPolicyComponent
+  },
+  {
+    path: 'users',
+    component: UserIndexComponent,  // ✅ עמוד רשימת המשתמשים כחלק מהאפליקציה הראשית
+    canActivate: [authGuard]
+  },
+  {
+    path: 'user/:id',
+    component: UserDetailsComponent,
+    outlet: 'modal', // הגדרת הנתיב כמודל
+    resolve: { user: userResolver }, // שימוש ברזולבר
+    canActivate: [authGuard]
   },
   {
     path: '',

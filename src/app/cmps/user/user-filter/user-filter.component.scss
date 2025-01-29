@@ -1,7 +1,7 @@
 @import "../../../../assets/scss/setup/variables";
 @import "../../../../assets/scss/setup/functions";
 
-.contact-filter {
+.user-filter {
   display: flex;
   justify-content: center;
   width: 100%;
@@ -17,7 +17,7 @@
 
 .filter-container {
   width: 100%;
-  padding: 10px 40px 10px 15px; // מקום לכפתור ה-✖ בצד ימין
+  padding: 10px 40px 10px 15px; // ריווח בצד ימין בשביל הכפתור
   font-size: rem(16px);
   border: 2px solid $clr8;
   border-radius: 30px;

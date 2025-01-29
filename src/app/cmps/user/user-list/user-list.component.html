@@ -1,0 +1,15 @@
+<section class="user-list">
+    <!-- <h2>User List</h2> -->
+
+    <!-- שדה חיפוש -->
+    <!-- <input [(ngModel)]="filterBy" (ngModelChange)="onSetFilter()" placeholder="Search users"> -->
+
+    <!-- רשימת משתמשים -->
+    <user-preview *ngFor="let user of users" [user]="user" (remove)="onRemoveUser(user._id)">
+    </user-preview>
+
+
+    <ng-template #noUsers>
+        <p>No users found.</p>
+    </ng-template>
+</section>

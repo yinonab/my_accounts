@@ -1,0 +1,36 @@
+@import "../../../../assets/scss/setup/functions";
+@import "../../../../assets/scss/setup/variables";
+
+.user-index {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  font-family: 'Roboto', sans-serif;
+
+  .filter-container {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 10px; // מרווח קטן יותר בין שורת החיפוש לכפתור ההוספה
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 20px;
+      font-size: rem(16px);
+      border: 2px solid $clr8;
+      border-radius: 30px;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+      &::placeholder {
+        color: $clr6;
+        font-style: italic;
+      }
+
+      &:focus {
+        border-color: $clr6;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+      }
+    }
+    }
+}

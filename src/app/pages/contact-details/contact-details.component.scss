@@ -1,148 +1,6 @@
 @import "../../../assets/scss/setup/variables";
 
-// Base (mobile-first) modal styles
-.contact-details {
-  position: fixed;
-  top: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  width: 90%; // Use a percentage width on mobile
-  max-width: 400px; // Constrain how large it can get
-  height: auto;
-  margin: 0;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  font-family: monospace;
-  font-size: 0.95rem;
-
-  .det {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-
-    h2 {
-      font-size: 1rem;
-      margin: 0;
-      text-align: center;
-      word-break: break-word;
-
-      &.long-name {
-        font-size: 0.85rem; // Reduce font size for long names
-        //color: $clr6; // Use a distinct color for better visibility
-      }
-    }
-
-    img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-    }
-  }
-
-  .contact-actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    button {
-      border: none;
-      background: none;
-      cursor: pointer;
-
-      img {
-        height: 30px;
-        width: 30px;
-
-        &:hover {
-          transform: scale(1.1);
-          transition: transform 0.2s ease-in-out;
-        }
-      }
-    }
-  }
-
-  hr {
-    border: none;
-    height: 1px;
-    background-color: $clr6;
-    margin: 10px 0;
-  }
-}
-
-// ------------ Breakpoints ------------
-
-// 1) Small (>= 480px)
-@media (min-width: 480px) {
-  .contact-details {
-    width: 80%;
-    max-width: 380px;
-    padding: 20px;
-    font-size: 1rem;
-  }
-  .det h2 {
-    font-size: 1.1rem;
-
-    &.long-name {
-      font-size: 0.9rem;
-    }
-  }
-}
-
-// 2) Medium (>= 768px)
-@media (min-width: 768px) {
-  .contact-details {
-    width: auto;
-    max-width: 450px;
-    padding: 25px;
-    font-size: 1rem;
-  }
-  .det h2 {
-    font-size: 1.2rem;
-
-    &.long-name {
-      font-size: 1rem;
-    }
-  }
-}
-
-// 3) Large (>= 1024px)
-@media (min-width: 1024px) {
-  .contact-details {
-    max-width: 500px;
-    padding: 30px;
-  }
-  .det h2 {
-    font-size: 1.3rem;
-
-    &.long-name {
-      font-size: 1.1rem;
-    }
-  }
-}
-
-// 4) Extra Large (>= 1280px)
-@media (min-width: 1280px) {
-  .contact-details {
-    max-width: 600px;
-  }
-  .det h2 {
-    font-size: 1.4rem;
-
-    &.long-name {
-      font-size: 1.2rem;
-    }
-  }
-}
-
-// Backdrop styling
+// רקע כהה שמופיע מאחורי המודל
 .backdrop {
   position: fixed;
   top: 0;
@@ -151,4 +9,107 @@
   height: 100vh;
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
+}
+
+// מודל הפרטים של איש הקשר
+.contact-details {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  width: 28em;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.95));
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  font-family: "Roboto", sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+// כותרת והחץ
+.contact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px; // הפרדה מהפרטים
+  border-bottom: 1px solid #ddd; // קו הפרדה בין החלקים
+
+  h1 {
+    font-size: 1.5rem;
+    text-align: center;
+    flex-grow: 1; // ממורכז
+    margin: 0;
+    font-weight: 600;
+  }
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    img {
+      width: 30px;
+      height: 30px;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// תמונת איש הקשר
+.contact-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 15px 0;
+
+  img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #f1c40f;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+// פרטי איש הקשר
+.contact-fields {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; // מיושר לשמאל
+  text-align: left;
+  font-size: 1.1rem;
+  padding: 10px 20px;
+
+  p {
+    margin: 5px 0;
+    font-weight: 500;
+    color: #34495e;
+
+    strong {
+      font-weight: 600;
+    }
+  }
+}
+
+// התאמות למובייל
+@media (max-width: 768px) {
+  .contact-details {
+    width: 90%;
+    padding: 15px;
+  }
+
+  .contact-image-container img {
+    width: 100px;
+    height: 100px;
+  }
 }

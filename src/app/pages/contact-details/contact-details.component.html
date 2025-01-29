@@ -1,32 +1,29 @@
-<!-- Backdrop to dim the background -->
-<div class="backdrop" (click)="onBack()"></div>
+<!-- רקע כהה שמכסה את המסך -->
+<div class="backdrop"></div>
 
-<!-- Modal content -->
-<section *ngIf="contact$ | async as contact" class="contact-details">
-  <section class="contact-actions">
+<!-- קונטיינר המודל -->
+<section *ngIf="contact$ | async as contact" class="contact-details" evStop (clickOutsideCapture)="onBack()">
+
+  <!-- כותרת וחץ חזור -->
+  <section class="contact-header">
     <button (click)="onBack()">
       <img src="../../../assets/images/back.png" alt="go back" />
     </button>
-    <h1>Contact Details:</h1>
-    <!-- Optional edit button -->
-    <!--
-    <button [routerLink]="['/contact/edit', contact._id]" class="edit-button">
-      <img src="../../../assets/images/edit.png" alt="edit contact">
-    </button>
-    -->
+    <h1>Contact Details</h1>
   </section>
 
-  <hr />
-
-  <!-- Contact details -->
-  <div class="det">
+  <!-- תמונת איש הקשר -->
+  <div class="contact-image-container">
     <img [src]="contact.img ? contact.img : '../../../assets/images/contact.png'" alt="contact-image" />
-    <h2 [ngClass]="{ 'long-name': isLongField(contact.name, 10) }">Name: {{ contact.name }}</h2>
-    <h2 [ngClass]="{ 'long-name': isLongField(contact.lastName, 10) }">Last Name: {{ contact.lastName }}</h2>
-    <h2 [ngClass]="{ 'long-name': isLongField(contact.phone, 10) }">Phone: {{ contact.phone }}</h2>
-    <h2 [ngClass]="{ 'long-name': isLongField(contact.email, 10) }">Email: {{ contact.email }}</h2>
-    <h2 [ngClass]="{ 'long-name': isLongField((contact.birthday | date: 'longDate'), 10) }">Birthday: {{
-      contact.birthday | date: 'longDate' }}</h2>
+  </div>
+
+  <!-- פרטי איש הקשר -->
+  <div class="contact-fields">
+    <p><strong>Name:</strong> {{ contact.name }}</p>
+    <p *ngIf="contact.lastName"><strong>Last Name:</strong> {{ contact.lastName }}</p>
+    <p><strong>Phone:</strong> {{ contact.phone }}</p>
+    <p><strong>Email:</strong> {{ contact.email }}</p>
+    <p><strong>Birthday:</strong> {{ contact.birthday | date: 'longDate' }}</p>
   </div>
 
 </section>

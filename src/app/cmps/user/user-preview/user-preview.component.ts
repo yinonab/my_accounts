@@ -32,6 +32,40 @@ export class UserPreviewComponent {
   isLongField(value: string | null | undefined, maxLength: number): boolean {
     return value ? value.length > maxLength : false;
   }
+  openFacebookProfile(event: Event, user: User): void {
+    event.stopPropagation();
+    if (!user.username) {
+      console.error('Username is missing, cannot search on Facebook');
+      return;
+    }
+
+    const facebookSearchUrl = `https://www.facebook.com/search/top?q=${encodeURIComponent(user.username)}`;
+    window.open(facebookSearchUrl, '_blank');
+  }
+  // openFacebookProfile(event: Event, user: User): void {
+  //   event.stopPropagation(); // מונע מעבר אירוע ללחיצה על הקומפוננטה כולה
+
+  //   if (!user.username) {
+  //     console.error('Username is missing, cannot search on Facebook');
+  //     return;
+  //   }
+
+  //   const encodedUsername = encodeURIComponent(user.username);
+
+  //   // קישור לפתיחת חיפוש באפליקציה של פייסבוק
+  //   const fbAppUrl = `fb://facewebmodal/f?href=https://www.facebook.com/search/top?q=${encodedUsername}`;
+
+  //   // קישור לפתיחת חיפוש בדפדפן אם האפליקציה לא זמינה
+  //   const fbWebUrl = `https://www.facebook.com/search/top?q=${encodedUsername}`;
+
+  //   // ניסיון לפתוח את החיפוש באפליקציה
+  //   window.location.href = fbAppUrl;
+
+  //   // אם זה לא עובד, נפתח את הדפדפן לאחר שנייה
+  //   setTimeout(() => {
+  //     window.open(fbWebUrl, '_blank');
+  //   }, 1500);
+  // }
 
 
 }

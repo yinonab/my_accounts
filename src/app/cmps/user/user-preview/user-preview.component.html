@@ -1,12 +1,12 @@
 <article class="user-preview" (click)="onPreviewClick()">
-    <img [src]="user.img ? user.img : '../../../assets/images/user-placeholder.png'" alt="user-image" />
+    <img class="imgprofile" [src]="user.img ? user.img : '../../../assets/images/contact.png'" alt="user-image" />
 
     <div class="user-info">
         <h1 [title]=(user.username) class="user-name" [ngClass]="{'long-field': isLongField(user.username, 15)}">{{
             user.username }}</h1>
-        <h1 [title]=(user.email) class="user-email" [ngClass]="{'long-field': isLongField(user.email, 15)}">{{
+        <!-- <h1 [title]=(user.email) class="user-email" [ngClass]="{'long-field': isLongField(user.email, 15)}">{{
             user.email.substring(0, 15)
-            }}...</h1>
+            }}...</h1> -->
     </div>
 
     <div class="button-container">
@@ -19,5 +19,12 @@
 
 
     </div>
+    <div class="button-container">
+        <!-- כפתור פייסבוק -->
+        <button class="facebook-login-button" (click)="openFacebookProfile($event,user)">
+            <img class="fb-img" src="../../../assets/images/fb2.png" alt="Facebook Profile" />
+        </button>
+    </div>
+
 </article>
 <router-outlet />

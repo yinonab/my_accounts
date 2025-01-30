@@ -5,13 +5,17 @@
     <!-- Username Field -->
     <label for="username">Username:</label>
     <input id="username" type="text" name="username" [(ngModel)]="user.username" #username="ngModel" required
-      minlength="3" />
+      minlength="3" appFullNameValidator />
     <div *ngIf="username.touched && username.invalid" class="error-message">
       <span *ngIf="username.errors?.['required']">Username is required.</span>
       <span *ngIf="username.errors?.['minlength']">
         Username must be at least 3 characters long.
       </span>
+      <span>Enter your full name (first name and last name).</span>
     </div>
+    <!-- <div class="hint-message">
+      <span>Enter your full name (first name and last name).</span>
+    </div> -->
     <br />
 
     <!-- Password Field -->

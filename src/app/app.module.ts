@@ -33,6 +33,7 @@ import { UserListComponent } from './cmps/user/user-list/user-list.component';
 import { UserPreviewComponent } from './cmps/user/user-preview/user-preview.component';
 import { UserDetailsComponent } from './cmps/user/user-details/user-details.component';
 import { UserFilterComponent } from './cmps/user/user-filter/user-filter.component';
+import { FullNameValidatorDirective } from './directives/full-name-validator.directive';
 
 
 
@@ -65,7 +66,8 @@ import { UserFilterComponent } from './cmps/user/user-filter/user-filter.compone
     UserListComponent,
     UserPreviewComponent,
     UserDetailsComponent,
-    UserFilterComponent
+    UserFilterComponent,
+    FullNameValidatorDirective
 
 
   ],

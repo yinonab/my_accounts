@@ -34,11 +34,11 @@
       justify-content: center;
     }
 
-    img {
+    .imgprofile {
       width: 70px;
       height: 70px;
       border-radius: 50%;
-      border: 3px solid $clr8;
+      border: 1.5px solid $clr8;
       object-fit: cover;
     }
 
@@ -60,43 +60,44 @@
     }
 
     .button-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-
-      .delete-button,
-      .edit-button {
-        background-color: $clr5;
-        height: 2.5em;
-        width: 2.5em;
-        border-radius: 50%;
         display: flex;
-        align-items: center;
+        flex-direction: column;
         justify-content: center;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-        transition: transform 0.3s ease, background-color 0.3s ease;
-
-        img {
-          height: 1.8em;
-          width: 1.8em;
-        }
-
-        &:hover {
-          transform: scale(1.1);
-          background-color: $clr6;
-        }
-
-        &:active {
-          transform: scale(1.05);
-          box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        align-items: center;
+        gap: 10px;
+  
+        .delete-button,
+        .edit-button,
+        .facebook-login-button {
+          background-color: $clr5;
+          height: 2.5em;
+          width: 2.5em;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid black;
+          cursor: pointer;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+          transition: transform 0.3s ease, background-color 0.3s ease;
+  
+          img {
+            height: 1.8em;
+            width: 1.8em;
+          }
+  
+          &:hover {
+            transform: scale(1.1);
+            background-color: $clr6;
+          }
+  
+          &:active {
+            transform: scale(1.05);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+          }
         }
       }
     }
-  }
 
   @media (max-width: 600px) {
     .user-preview {

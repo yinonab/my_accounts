@@ -1,6 +1,8 @@
 <section class="home-page">
   <ng-container *ngIf="logdinUser; else welcomeMessage">
-    <h1>Hello {{ logdinUser.username }}!</h1>
+    <h1>Hello: {{ logdinUser.username }}!</h1>
+    <img class="imgprofile" [src]="logdinUser.img ? logdinUser.img : '../../../assets/images/contact.png'"
+      alt="user-image" />
   </ng-container>
   <ng-template #welcomeMessage>
     <h1>

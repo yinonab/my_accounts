@@ -42,6 +42,34 @@ export class UserPreviewComponent {
     const facebookSearchUrl = `https://www.facebook.com/search/top?q=${encodeURIComponent(user.username)}`;
     window.open(facebookSearchUrl, '_blank');
   }
+  openInstagramProfile(event: Event, user: User): void {
+    event.stopPropagation();
+    if (!user.username) {
+      console.error('Username is missing, cannot search on Instagram');
+      return;
+    }
+
+    // הסרת רווחים מהשם
+    const sanitizedUsername = user.username.replace(/\s+/g, '');
+
+    // בדיקה אם השם מכיל אותיות לא באנגלית (עברית, ערבית, וכו')
+    const isNonEnglish = /[^a-zA-Z0-9._]/.test(sanitizedUsername);
+
+    let targetUrl;
+    if (isNonEnglish) {
+      // חיפוש בגוגל אם השם לא באנגלית
+      targetUrl = `https://www.google.com/search?q=${encodeURIComponent(user.username + " site:instagram.com")}`;
+    } else {
+      // פתיחת פרופיל ישירות אם השם באנגלית
+      targetUrl = `https://www.instagram.com/${encodeURIComponent(sanitizedUsername)}`;
+    }
+
+    console.log('Opening URL:', targetUrl);
+    window.open(targetUrl, '_blank');
+  }
+
+
+
   // openFacebookProfile(event: Event, user: User): void {
   //   event.stopPropagation(); // מונע מעבר אירוע ללחיצה על הקומפוננטה כולה
 

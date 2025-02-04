@@ -3,6 +3,7 @@ import { Observable, BehaviorSubject, from, throwError, tap, catchError, map, sw
 import { User } from '../models/user.model.ts';
 import { storageService } from './async-storage.service'; // Replace with your async storage service
 import { CloudinaryService } from './cloudinary.service';
+import { SocketService } from './socket.service.js';
 
 
 const ENTITY_AUTH = 'auth';
@@ -26,7 +27,7 @@ export class UserService {
   private _loggedInUser$ = new BehaviorSubject<User | null>(null);
   public loggedInUser$ = this._loggedInUser$.asObservable();
 
-  constructor(private cloudinaryService: CloudinaryService) {
+  constructor(private cloudinaryService: CloudinaryService, private socketService: SocketService) {
     // Initialize users in local storage if not present
     // const users = JSON.parse(localStorage.getItem(ENTITY) || 'null');
     // if (!users || users.length === 0) {
@@ -34,7 +35,10 @@ export class UserService {
     // }
     this._loadUsersFromDB();
     const loggedInUser = JSON.parse(localStorage.getItem(LOGGEDIN_USER) || 'null');
-    if (loggedInUser) this._loggedInUser$.next(loggedInUser);
+    if (loggedInUser && loggedInUser._id) {
+      this._loggedInUser$.next(loggedInUser);
+      this.socketService.setup(); // מבצע חיבור ל-Socket רק אם יש משתמש מחובר
+    }
   }
   /** טוען את רשימת המשתמשים מהדאטה בייס */
   private _loadUsersFromDB(): void {
@@ -70,6 +74,7 @@ export class UserService {
         // Update logged-in user BehaviorSubject and localStorage
         this._loggedInUser$.next(loggedInUser);
         localStorage.setItem(LOGGEDIN_USER, JSON.stringify(loggedInUser));
+        this.socketService.login(loggedInUser._id);
       }),
       catchError(this._handleError) // Handle errors
     );
@@ -88,6 +93,7 @@ export class UserService {
         localStorage.setItem(LOGGEDIN_USER, JSON.stringify(loggedInUser))
         localStorage.setItem(FACEBOOK_ID, fbUser.facebookId);
         localStorage.setItem(FACEBOOK_ACCESS_TOKEN, fbUser.accessToken);
+        this.socketService.login(loggedInUser._id);
       }),
       catchError(this._handleError)
     )
@@ -107,6 +113,7 @@ export class UserService {
     localStorage.removeItem(LOGGEDIN_USER);
     localStorage.removeItem(FACEBOOK_ID);
     localStorage.removeItem(FACEBOOK_ACCESS_TOKEN);
+    this.socketService.logout();
   }
 
   // Get logged-in user from local storage

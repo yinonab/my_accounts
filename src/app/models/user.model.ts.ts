@@ -6,4 +6,5 @@ export interface User {
   img?: string;  // Fix from `imgUrl` to `img`
   _id: string;
   isAdmin?: boolean;
+  msgs?: string[];
 }

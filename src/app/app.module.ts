@@ -34,6 +34,7 @@ import { UserPreviewComponent } from './cmps/user/user-preview/user-preview.comp
 import { UserDetailsComponent } from './cmps/user/user-details/user-details.component';
 import { UserFilterComponent } from './cmps/user/user-filter/user-filter.component';
 import { FullNameValidatorDirective } from './directives/full-name-validator.directive';
+import { ChatComponent } from './chat/chat.component';
 
 
 
@@ -67,7 +68,8 @@ import { FullNameValidatorDirective } from './directives/full-name-validator.dir
     UserPreviewComponent,
     UserDetailsComponent,
     UserFilterComponent,
-    FullNameValidatorDirective
+    FullNameValidatorDirective,
+    ChatComponent
 
 
   ],

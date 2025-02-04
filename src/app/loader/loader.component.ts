@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 import { LoaderService } from '../services/loaderService/loader.service';
 
 @Component({
@@ -6,8 +7,12 @@ import { LoaderService } from '../services/loaderService/loader.service';
   templateUrl: './loader.component.html',
   styleUrls: ['./loader.component.scss'],
 })
-export class LoaderComponent {
-  isLoading = this.loaderService.isLoading$;
+export class LoaderComponent implements OnInit {
+  isLoading!: Observable<boolean>;
 
-  constructor(private loaderService: LoaderService) {}
+  constructor(private loaderService: LoaderService) { }
+
+  ngOnInit(): void {
+    this.isLoading = this.loaderService.isLoading$; // האתחול קורה אחרי שהקונסטרקטור רץ
+  }
 }

@@ -1,8 +1,8 @@
-import { animate, style, transition, trigger } from '@angular/animations';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Msg } from '../../models/msg.model';
 import { MsgService } from '../../services/msg.service';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
     selector: 'msg',
@@ -21,13 +21,17 @@ import { MsgService } from '../../services/msg.service';
         ])
     ]
 })
-export class MsgComponent {
+export class MsgComponent implements OnInit {
+
+    msg$: Observable<Msg | null> = of(null); // אתחול ריק למניעת שגיאות
 
     constructor(private msgService: MsgService) { }
 
-    msg$: Observable<Msg | null> = this.msgService.msg$;
+    ngOnInit(): void {
+        this.msg$ = this.msgService.msg$; // עכשיו `msgService` מאותחל ולכן אין שגיאה
+    }
 
     onCloseMsg() {
-        this.msgService.closeMsg()
+        this.msgService.closeMsg();
     }
 }

@@ -14,6 +14,7 @@ import { HeaderComponent } from './cmps/app-header/app-header.component';
 import { ChartsComponent } from './pages/charts/charts.component';
 import { ContactFilterComponent } from './cmps/contact/contact-filter/contact-filter.component';
 import { ContactEditComponent } from './pages/contact-edit/contact-edit.component';
+// import { NgChartsModule } from 'ng2-charts';
 import { NgChartsModule } from 'ng2-charts';
 import { ModalComponent } from './shared/modal/modal.component';
 import { LoaderComponent } from './loader/loader.component';

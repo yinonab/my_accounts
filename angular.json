@@ -3,28 +3,21 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "misterBitCoin": {
+    "my_accounts_temp": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss",
-          "standalone": false
-        },
-        "@schematics/angular:directive": {
-          "standalone": false
-        },
-        "@schematics/angular:pipe": {
-          "standalone": false
+          "style": "scss"
         }
       },
       "root": "",
       "sourceRoot": "src",
-      "prefix": "",
+      "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/mister-bit-coin",
+            "outputPath": "dist/my_accounts_temp",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -47,13 +40,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "2kB",
+                  "maximumError": "4kB"
                 }
               ],
               "outputHashing": "all"
@@ -70,19 +63,16 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "misterBitCoin:build:production"
+              "buildTarget": "my_accounts_temp:build:production"
             },
             "development": {
-              "buildTarget": "misterBitCoin:build:development"
+              "buildTarget": "my_accounts_temp:build:development"
             }
           },
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
-          "options": {
-            "buildTarget": "misterBitCoin:build"
-          }
+          "builder": "@angular-devkit/build-angular:extract-i18n"
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
@@ -98,6 +88,7 @@
               "src/assets"
             ],
             "styles": [
+              "src/assets/scss/global.scss",
               "src/styles.scss"
             ],
             "scripts": []
@@ -105,11 +96,5 @@
         }
       }
     }
-  },
-  "cli": {
-    "cache": {
-      "enabled": false
-    },
-    "analytics": false
   }
 }

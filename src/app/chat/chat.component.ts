@@ -17,6 +17,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   privateMessages: { sender: string; text: string }[] = []; // הודעות פרטיות
   private socketSubscription?: Subscription;
   private isPrivateMessageListenerActive = false; // דגל שמונע רישום כפול
+  private userCache: { [key: string]: string } = {}; // מטמון לשמות משתמשים
+
 
   constructor(private socketService: SocketService, private userService: UserService) { }
 
@@ -85,6 +87,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     console.log(`📩 Sending private message:`, privateMessage);
     this.socketService.emit('chat-send-private-msg', privateMessage);
+    this.privateMessages.push(privateMessage);
 
     this.newMessage = ''; // ניקוי השדה
   }

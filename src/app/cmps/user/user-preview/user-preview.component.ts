@@ -1,6 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { User } from '../../../models/user.model.ts';
 import { Router } from '@angular/router';
+import { SocketService } from '../../../services/socket.service.js';
+import { Observable } from 'rxjs';
+import { UserIndexComponent } from '../user-index/user-index.component.js';
 
 @Component({
   selector: 'user-preview',
@@ -10,9 +13,26 @@ import { Router } from '@angular/router';
 export class UserPreviewComponent {
   @Input() user!: User; // מקבל משתמש להצגה
   @Output() remove = new EventEmitter<string>(); // אירוע מחיקה
+  isPrivateChatOpen = false; // האם הצ'אט פתוח
+  unreadMessagesCount = 0; // ✅ מספר ההודעות שלא נקראו
+  unreadMessagesCount$!: Observable<number>;
 
-  constructor(private router: Router) { }
 
+  constructor(private router: Router, private socketService: SocketService, private userIndex: UserIndexComponent) { }
+  ngOnInit(): void {
+    this.unreadMessagesCount$ = this.userIndex.getUnreadMessagesCount(this.user._id);
+    // ✅ מאזין להודעות פרטיות
+    this.socketService.onPrivateMessage((msg: any) => {
+      if (msg.toUserId === this.user._id) {
+        console.log(`📩 New private message received for ${this.user.username}:`, msg);
+
+        // ✅ אם הצ'אט לא פתוח, נוסיף למונה ההודעות שלא נקראו
+        if (!this.isPrivateChatOpen) {
+          this.unreadMessagesCount++;
+        }
+      }
+    });
+  }
   /**
    * מעבר לפרטי המשתמש
    */
@@ -20,7 +40,19 @@ export class UserPreviewComponent {
     console.log('Navigating to:', { modal: ['user', this.user._id] });
     this.router.navigate([{ outlets: { modal: ['user', this.user._id] } }]);
   }
+  openPrivateChat(event: Event): void {
+    event.stopPropagation();
+    console.log(`🟢 Opening private chat with user: ${this.user._id}`);
+    this.isPrivateChatOpen = true;
+    this.userIndex.resetUnreadMessages(this.user._id);
+  }
 
+  /**
+   * סגירת הצ'אט הפרטי
+   */
+  closePrivateChat(): void {
+    this.isPrivateChatOpen = false;
+  }
 
   /**
    * מחיקת משתמש

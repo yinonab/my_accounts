@@ -1,6 +1,6 @@
 import { Component, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { User } from '../../../models/user.model.ts';
 import { UserService } from '../../../services/user.service';
 import { SocketService } from '../../../services/socket.service.js';
@@ -18,19 +18,39 @@ export class UserIndexComponent {
   isGroupChatOpen = false;
   isPrivateChatOpen = false;
   unreadPrivateMessagesCount = 0;
+  unreadMessagesMap = new Map<string, BehaviorSubject<number>>();
 
   ngOnInit(): void {
-    this.loadUsers(); // טעינת המשתמשים הראשונית
+    this.loadUsers();
 
-    // מאזין להודעות פרטיות
+    // ✅ מאזין להודעות פרטיות ומעדכן את ה-map
     this.socketService.onPrivateMessage((msg: any) => {
       console.log('📩 New private message received:', msg);
 
-      if (!this.isPrivateChatOpen) {
-        this.unreadPrivateMessagesCount++;
-        this.showNotification('New Private Message', msg.text);
+      if (!this.unreadMessagesMap.has(msg.sender)) {
+        this.unreadMessagesMap.set(msg.sender, new BehaviorSubject(0));
+      }
+
+      const unreadCount$ = this.unreadMessagesMap.get(msg.sender);
+      if (unreadCount$) {
+        unreadCount$.next(unreadCount$.value + 1);
       }
     });
+  }
+  getUnreadMessagesCount(userId: string): Observable<number> {
+    if (!this.unreadMessagesMap.has(userId)) {
+      this.unreadMessagesMap.set(userId, new BehaviorSubject(0));
+    }
+    return this.unreadMessagesMap.get(userId)!.asObservable();
+  }
+
+  /**
+   * איפוס מונה ההודעות עבור משתמש כשהצ'אט נפתח
+   */
+  resetUnreadMessages(userId: string): void {
+    if (this.unreadMessagesMap.has(userId)) {
+      this.unreadMessagesMap.get(userId)!.next(0);
+    }
   }
 
   /**

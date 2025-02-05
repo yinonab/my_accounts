@@ -11,13 +11,13 @@
 </section>
 <!-- כפתורים לפתיחת הצ'אט -->
 <button class="chat-button group-chat-btn" (click)="openChat('group')">Group Chat</button>
-<button class="chat-button private-chat-btn" (click)="openChat('private')">
+<!-- <button class="chat-button private-chat-btn" (click)="openChat('private')">
     Private Chat
     <span *ngIf="unreadPrivateMessagesCount > 0" class="badge">{{ unreadPrivateMessagesCount }}</span>
-</button>
+</button> -->
 
 <!-- מודל צ'אט קבוצתי -->
-<div class="chat-modal" *ngIf="isGroupChatOpen">
+<div class="chat-modal" *ngIf="isGroupChatOpen" evStop (clickOutsideCapture)="closeChat('group')">
     <div class="chat-content">
         <span class="close" (click)="closeChat('group')">&times;</span>
         <app-chat [chatType]="'group'"></app-chat>

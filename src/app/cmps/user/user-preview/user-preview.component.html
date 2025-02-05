@@ -1,49 +1,41 @@
 <article class="user-preview" (click)="onPreviewClick()">
-    <img class="imgprofile" [src]="user.img ? user.img : '../../../assets/images/contact.png'" alt="user-image" />
+    <div class="image-container">
+        <img class="imgprofile" [src]="user.img ? user.img : '../../../assets/images/contact.png'" alt="user-image" />
+    </div>
 
     <div class="user-info">
-        <h1 [title]=(user.username) class="user-name" [ngClass]="{'long-field': isLongField(user.username, 15)}">{{
-            user.username }}</h1>
-        <!-- <h1 [title]=(user.email) class="user-email" [ngClass]="{'long-field': isLongField(user.email, 15)}">{{
-            user.email.substring(0, 15)
-            }}...</h1> -->
+        <h1 [title]="user.username" class="user-name" [ngClass]="{'long-field': isLongField(user.username, 15)}">
+            {{ user.username }}
+        </h1>
     </div>
+
     <div class="button-container">
+        <!-- כפתור לפתיחת צ'אט פרטי -->
         <div class="message-button-container">
             <button class="message-button" (click)="openPrivateChat($event)">
-                <img src="../../../assets/images/message.png" alt="Send Private Message" />
+                <img src="../../../assets/images/chat.png" alt="Send Private Message" />
+                <ng-container *ngIf="unreadMessagesCount$ | async as unreadMessages">
+                    <span *ngIf="unreadMessages > 0" class="badge">{{ unreadMessages }}</span>
+                </ng-container>
             </button>
-            <ng-container *ngIf="unreadMessagesCount$ | async as unreadMessages">
-                <span *ngIf="unreadMessages > 0" class="badge">{{ unreadMessages }}</span>
-            </ng-container>
         </div>
-    </div>
 
-    <div class="button-container">
-        <!-- כפתור מחיקה -->
-        <!-- תיקן את הקריאה -->
-        <!-- <button class="delete-button" (click)="onDeleteClick($event, user._id)">
-            <img src="../../../assets/images/delete1.png" alt="delete image" />
-        </button> -->
-
-
-
-    </div>
-    <div class="button-container">
-        <!-- כפתור פייסבוק -->
-        <button class="facebook-login-button" (click)="openFacebookProfile($event,user)">
+        <!-- כפתורי רשתות חברתיות -->
+        <button class="social-button" (click)="openFacebookProfile($event, user)">
             <img class="fb-img" src="../../../assets/images/fb2.png" alt="Facebook Profile" />
         </button>
-        <button class="facebook-login-button" (click)="openInstagramProfile($event, user)">
+        <button class="social-button" (click)="openInstagramProfile($event, user)">
             <img class="insta-img" src="../../../assets/images/instagram.png" alt="Instagram Profile" />
         </button>
     </div>
-
 </article>
+
+<!-- מודל צ'אט פרטי -->
 <div class="chat-modal" *ngIf="isPrivateChatOpen" evStop (clickOutsideCapture)="closePrivateChat()">
     <div class="chat-content">
         <span class="close" (click)="closePrivateChat()">&times;</span>
         <app-chat [chatType]="'private'" [targetUserId]="user._id"></app-chat>
     </div>
 </div>
+
 <router-outlet />

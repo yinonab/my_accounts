@@ -23,6 +23,8 @@ const SOCKET_EMIT_LOGOUT = 'unset-user-socket';
 export class SocketService {
   private socket: Socket | null = null;
   private injector: Injector;
+  public privateMessagesBuffer: { sender: string; text: string }[] = []; // שמירת הודעות פרטיות שהתקבלו
+
 
   constructor(injector: Injector) {
     this.injector = injector;
@@ -127,15 +129,35 @@ export class SocketService {
 
 
   // ✅ שליחת הודעה פרטית
+  // public sendPrivateMessage(toUserId: string, msg: string): void {
+  //   if (!this.socket) this.setup();
+
+  //   const user = this.userService?.getLoggedInUser();
+  //   if (!user) return;
+
+  //   const privateMessage = { text: msg, to: toUserId }; // השרת יקבע sender
+  //   this.socket?.emit(SOCKET_EMIT_SEND_PRIVATE_MSG, privateMessage);
+  // }
+
   public sendPrivateMessage(toUserId: string, msg: string): void {
     if (!this.socket) this.setup();
 
     const user = this.userService?.getLoggedInUser();
-    if (!user) return;
+    if (!user || !toUserId || !msg.trim()) {
+      console.warn('⚠️ Missing required data for private message:', { user, toUserId, msg });
+      return;
+    }
 
-    const privateMessage = { text: msg, to: toUserId }; // השרת יקבע sender
+    const privateMessage = {
+      sender: user._id,  // הוספת המזהה של השולח
+      toUserId: toUserId, // מזהה הנמען
+      text: msg
+    };
+
+    console.log('✅ Sending private message:', privateMessage);
     this.socket?.emit(SOCKET_EMIT_SEND_PRIVATE_MSG, privateMessage);
   }
+
 
 
 
@@ -154,7 +176,32 @@ export class SocketService {
   // ✅ האזנה להודעות פרטיות
   public onPrivateMessage(callback: (msg: any) => void): void {
     if (!this.socket) this.setup();
-    this.socket?.on(SOCKET_EVENT_ADD_PRIVATE_MSG, callback);
+
+    this.socket?.on(SOCKET_EVENT_ADD_PRIVATE_MSG, (msg) => {
+      console.log('📩 Private message received:', msg);
+
+      // בדיקה אם ההודעה כבר קיימת כדי למנוע כפילויות
+      if (!this.privateMessagesBuffer.some(existingMsg => existingMsg.text === msg.text && existingMsg.sender === msg.sender)) {
+        this.privateMessagesBuffer.push(msg);
+      }
+
+      // שליחת ההודעה למאזין (קומפוננטת הצ'אט)
+      callback(msg);
+    });
+  }
+
+  /**
+   * מחזיר את כל ההודעות השמורות
+   */
+  public getPrivateMessages(): { sender: string; text: string }[] {
+    return [...this.privateMessagesBuffer]; // החזרת עותק כדי למנוע שינוי ישיר במערך
+  }
+
+  /**
+   * איפוס ההודעות הפרטיות (כשהן נטענות לממשק)
+   */
+  public clearPrivateMessages(): void {
+    this.privateMessagesBuffer = [];
   }
 
   // ✅ הפסקת האזנה להודעות

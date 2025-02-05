@@ -9,13 +9,25 @@
 
 
 </section>
-<!-- כפתור לפתיחת הצ'אט -->
-<button class="chat-button" (click)="openChat()">Chat</button>
+<!-- כפתורים לפתיחת הצ'אט -->
+<button class="chat-button group-chat-btn" (click)="openChat('group')">Group Chat</button>
+<button class="chat-button private-chat-btn" (click)="openChat('private')">
+    Private Chat
+    <span *ngIf="unreadPrivateMessagesCount > 0" class="badge">{{ unreadPrivateMessagesCount }}</span>
+</button>
 
-<!-- מודל של הצ'אט -->
-<div class="chat-modal" *ngIf="isChatOpen">
+<!-- מודל צ'אט קבוצתי -->
+<div class="chat-modal" *ngIf="isGroupChatOpen">
     <div class="chat-content">
-        <span class="close" (click)="closeChat()">&times;</span>
-        <app-chat></app-chat>
+        <span class="close" (click)="closeChat('group')">&times;</span>
+        <app-chat [chatType]="'group'"></app-chat>
+    </div>
+</div>
+
+<!-- מודל צ'אט פרטי -->
+<div class="chat-modal" *ngIf="isPrivateChatOpen">
+    <div class="chat-content">
+        <span class="close" (click)="closeChat('private')">&times;</span>
+        <app-chat [chatType]="'private'"></app-chat>
     </div>
 </div>

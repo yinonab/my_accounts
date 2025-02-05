@@ -8,11 +8,15 @@
             user.email.substring(0, 15)
             }}...</h1> -->
     </div>
-    <div evStop class="button-container">
-        <!-- כפתור לפתיחת צ'אט פרטי -->
-        <button class="message-button" (click)="openPrivateChat()">
-            <img src="../../../assets/images/message.png" alt="Send Private Message" />
-        </button>
+    <div class="button-container">
+        <div class="message-button-container">
+            <button class="message-button" (click)="openPrivateChat($event)">
+                <img src="../../../assets/images/message.png" alt="Send Private Message" />
+            </button>
+            <ng-container *ngIf="unreadMessagesCount$ | async as unreadMessages">
+                <span *ngIf="unreadMessages > 0" class="badge">{{ unreadMessages }}</span>
+            </ng-container>
+        </div>
     </div>
 
     <div class="button-container">

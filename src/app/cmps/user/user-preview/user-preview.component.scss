@@ -28,7 +28,7 @@
     }
 
     .image-container {
-      flex: 0 0 70px; // מבטיח שהתמונה תמיד תישאר בגודל קבוע
+      flex: 0 0 70px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -60,52 +60,102 @@
     }
 
     .button-container {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-  
-        .delete-button,
-        .edit-button,
-        .facebook-login-button {
-          background-color: $clr5;
-          height: 2.5em;
-          width: 2.5em;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+
+      .message-button-container {
+        position: relative;
+        display: inline-block;
+
+        .badge {
+          position: absolute;
+          top: -5px; // ✅ ממקם את הבאדג' מעל הכפתור
+          right: -5px;
+          background-color: red;
+          color: white;
+          font-size: 12px;
+          font-weight: bold;
           border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid black;
-          cursor: pointer;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-          transition: transform 0.3s ease, background-color 0.3s ease;
-  
-          img {
-            height: 1.8em;
-            width: 1.8em;
-          }
-  
-          &:hover {
-            transform: scale(1.1);
-            background-color: $clr6;
-          }
-  
-          &:active {
-            transform: scale(1.05);
-            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
-          }
+          padding: 4px 7px;
+          min-width: 20px;
+          text-align: center;
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      .message-button {
+        background-color: $clr5;
+        height: 2.5em;
+        width: 2.5em;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid black;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, background-color 0.3s ease;
+
+        img {
+          height: 1.8em;
+          width: 1.8em;
+        }
+
+        &:hover {
+          transform: scale(1.1);
+          background-color: $clr6;
+        }
+
+        &:active {
+          transform: scale(1.05);
+          box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+      }
+
+      .delete-button,
+      .edit-button,
+      .facebook-login-button {
+        background-color: $clr5;
+        height: 2.5em;
+        width: 2.5em;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid black;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, background-color 0.3s ease;
+
+        img {
+          height: 1.8em;
+          width: 1.8em;
+        }
+
+        &:hover {
+          transform: scale(1.1);
+          background-color: $clr6;
+        }
+
+        &:active {
+          transform: scale(1.05);
+          box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
         }
       }
     }
+  }
 
   @media (max-width: 600px) {
     .user-preview {
-      flex-direction: row;
+      flex-direction: column;
       align-items: center;
+      width: 100%;
 
       .image-container {
-        flex: 0 0 60px; // התמונה קטנה יותר במובייל
+        flex: 0 0 60px;
       }
 
       img {
@@ -119,13 +169,13 @@
       }
 
       .button-container {
-        flex-direction: column;
+        flex-direction: row;
         gap: 10px;
       }
     }
   }
 }
+
 .long-field {
-    font-size: 0.9em;
-  }
-  
+  font-size: 0.9em;
+}

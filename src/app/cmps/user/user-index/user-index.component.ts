@@ -13,6 +13,7 @@ export class UserIndexComponent {
   userService = inject(UserService);
   users$!: Observable<User[]>;
   destroyRef = inject(DestroyRef);
+  isChatOpen = false;
 
   ngOnInit(): void {
     this.loadUsers(); // טעינת המשתמשים הראשונית
@@ -30,6 +31,13 @@ export class UserIndexComponent {
     this.users$ = this.userService.users$.pipe(
       takeUntilDestroyed(this.destroyRef)
     );
+  }
+  openChat() {
+    this.isChatOpen = true;
+  }
+
+  closeChat() {
+    this.isChatOpen = false;
   }
 
   /**

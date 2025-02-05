@@ -9,3 +9,13 @@
 
 
 </section>
+<!-- כפתור לפתיחת הצ'אט -->
+<button class="chat-button" (click)="openChat()">Chat</button>
+
+<!-- מודל של הצ'אט -->
+<div class="chat-modal" *ngIf="isChatOpen">
+    <div class="chat-content">
+        <span class="close" (click)="closeChat()">&times;</span>
+        <app-chat></app-chat>
+    </div>
+</div>

@@ -10,9 +10,10 @@ import { UserService } from '../services/user.service';
 })
 export class ChatComponent implements OnInit, OnDestroy {
   @Input() chatType: 'group' | 'private' = 'group';
+  @Input() targetUserId: string = '';
   room: string = ''; // חדר צ'אט
   newMessage: string = ''; // הודעה קבוצתית
-  targetUserId: string = ''; // מזהה משתמש להודעות פרטיות
+  //targetUserId: string = ''; // מזהה משתמש להודעות פרטיות
   messages: { sender: string; text: string }[] = []; // הודעות קבוצתיות
   privateMessages: { sender: string; text: string }[] = []; // הודעות פרטיות
   private socketSubscription?: Subscription;
@@ -83,7 +84,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const privateMessage = { sender: 'Me', text: this.newMessage, toUserId: this.targetUserId }; // שינוי שם המשתנה
+    const privateMessage = { sender: 'Me', text: this.newMessage, toUserId: this.targetUserId };
 
     console.log(`📩 Sending private message:`, privateMessage);
     this.socketService.emit('chat-send-private-msg', privateMessage);
@@ -91,6 +92,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.newMessage = ''; // ניקוי השדה
   }
+
 
 
 

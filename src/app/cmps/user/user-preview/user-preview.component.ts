@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { User } from '../../../models/user.model.ts';
 import { Router } from '@angular/router';
+import { SocketService } from '../../../services/socket.service.js';
 
 @Component({
   selector: 'user-preview',
@@ -10,8 +11,9 @@ import { Router } from '@angular/router';
 export class UserPreviewComponent {
   @Input() user!: User; // מקבל משתמש להצגה
   @Output() remove = new EventEmitter<string>(); // אירוע מחיקה
+  isPrivateChatOpen = false; // האם הצ'אט פתוח
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private socketService: SocketService) { }
 
   /**
    * מעבר לפרטי המשתמש
@@ -20,7 +22,17 @@ export class UserPreviewComponent {
     console.log('Navigating to:', { modal: ['user', this.user._id] });
     this.router.navigate([{ outlets: { modal: ['user', this.user._id] } }]);
   }
+  openPrivateChat(): void {
+    console.log(`🟢 Opening private chat with user: ${this.user._id}`);
+    this.isPrivateChatOpen = true;
+  }
 
+  /**
+   * סגירת הצ'אט הפרטי
+   */
+  closePrivateChat(): void {
+    this.isPrivateChatOpen = false;
+  }
 
   /**
    * מחיקת משתמש

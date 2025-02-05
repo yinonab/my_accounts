@@ -8,6 +8,12 @@
             user.email.substring(0, 15)
             }}...</h1> -->
     </div>
+    <div evStop class="button-container">
+        <!-- כפתור לפתיחת צ'אט פרטי -->
+        <button class="message-button" (click)="openPrivateChat()">
+            <img src="../../../assets/images/message.png" alt="Send Private Message" />
+        </button>
+    </div>
 
     <div class="button-container">
         <!-- כפתור מחיקה -->
@@ -30,4 +36,10 @@
     </div>
 
 </article>
+<div class="chat-modal" *ngIf="isPrivateChatOpen" evStop (clickOutsideCapture)="closePrivateChat()">
+    <div class="chat-content">
+        <span class="close" (click)="closePrivateChat()">&times;</span>
+        <app-chat [chatType]="'private'" [targetUserId]="user._id"></app-chat>
+    </div>
+</div>
 <router-outlet />

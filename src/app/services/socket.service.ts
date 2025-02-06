@@ -149,17 +149,36 @@ export class SocketService {
       return;
     }
 
-    const privateMessage = {
-      toUserId: toUserId,
+    const privateMessage: ChatMessage = {
+      sender: user._id,
+      senderName: user.username,
       text: msg,
-      sender: user._id,  // חשוב להוסיף את ה-ID של השולח
-      senderName: user.username  // הוספת שם המשתמש
+      toUserId: toUserId
     };
 
-    console.log('✅ Sending private message:', privateMessage);
-    this.socket?.emit(SOCKET_EMIT_SEND_PRIVATE_MSG, privateMessage);
-  }
+    // שמירת ההודעה היוצאת בבאפר
+    this.addToBuffer({
+      ...privateMessage,
+      senderName: 'Me'  // שמירה מקומית כ-'Me'
+    });
 
+    console.log('✅ Sending private message:', privateMessage);
+    this.socket?.emit(SOCKET_EMIT_SEND_PRIVATE_MSG, {
+      toUserId: toUserId,
+      text: msg,
+      sender: user._id,
+      senderName: user.username
+    });
+  }
+  private addToBuffer(message: ChatMessage): void {
+    if (!this.privateMessagesBuffer.some(existingMsg =>
+      existingMsg.text === message.text &&
+      existingMsg.sender === message.sender &&
+      existingMsg.toUserId === message.toUserId
+    )) {
+      this.privateMessagesBuffer.push(message);
+    }
+  }
 
 
 
@@ -193,7 +212,7 @@ export class SocketService {
         existingMsg.text === msg.text && existingMsg.sender === msg.sender)) {
         this.privateMessagesBuffer.push(msg);
       }
-
+      this.addToBuffer(msg);
       callback(msg);
     });
   }
@@ -202,16 +221,15 @@ export class SocketService {
    * מחזיר את כל ההודעות השמורות
    */
   public getPrivateMessages(): ChatMessage[] {
-    // שינוי הטיפוס החזרה להיות ChatMessage
     return [...this.privateMessagesBuffer];
   }
 
   /**
    * איפוס ההודעות הפרטיות (כשהן נטענות לממשק)
    */
-  public clearPrivateMessages(): void {
-    this.privateMessagesBuffer = [];
-  }
+  // public clearPrivateMessages(): void {
+  //   this.privateMessagesBuffer = [];
+  // }
 
   // ✅ הפסקת האזנה להודעות
   // public off(eventName: string): void {

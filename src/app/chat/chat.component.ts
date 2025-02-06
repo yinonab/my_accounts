@@ -88,8 +88,17 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
   }
   openChat() {
-    this.privateMessages = this.socketService.getPrivateMessages();
-    this.socketService.clearPrivateMessages(); // מחיקת ההודעות מהסרוויס לאחר שהן נטענו
+    // טעינת ההודעות מהבאפר בלי למחוק אותן
+    const savedMessages = this.socketService.getPrivateMessages();
+
+    // מיפוי ההודעות עם השמות הנכונים
+    this.privateMessages = savedMessages.map(msg => ({
+      ...msg,
+      senderName: msg.sender === this.currentUser._id ? 'Me' : (msg.senderName || 'User ' + msg.sender)
+    }));
+
+    // לא מוחקים יותר את ההודעות מהבאפר
+    // this.socketService.clearPrivateMessages(); // הסרנו את השורה הזו
   }
 
 
@@ -128,14 +137,10 @@ export class ChatComponent implements OnInit, OnDestroy {
       toUserId: this.targetUserId
     };
 
-    // שליחה לשרת
-    this.socketService.emit('chat-send-private-msg', {
-      toUserId: this.targetUserId,
-      text: this.newMessage,
-      sender: this.currentUser._id,
-      senderName: user?.username
-    });
+    // שליחה לשרת דרך השירות (שגם ישמור בבאפר)
+    this.socketService.sendPrivateMessage(this.targetUserId, this.newMessage);
 
+    // הוספה לתצוגה מקומית
     this.privateMessages.push(localMessage);
     this.newMessage = '';
   }

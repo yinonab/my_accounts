@@ -2,6 +2,7 @@ import { inject, Injectable, Injector } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { UserService } from './user.service';
 import { ChatMessage } from '../models/ChatMessage';
+import { ErrorLoggerService } from './Error-logger.service';
 
 const BASE_URL = getBaseUrl();
 
@@ -27,7 +28,8 @@ export class SocketService {
   public privateMessagesBuffer: ChatMessage[] = []; // עדכון הטיפוס
 
 
-  constructor(injector: Injector) {
+
+  constructor(injector: Injector, private errorLogger: ErrorLoggerService) {
     this.injector = injector;
   }
 
@@ -39,21 +41,53 @@ export class SocketService {
    * אתחול חיבור ה-Socket
    */
   public setup(): void {
+    this.errorLogger.log('SocketService setup() called');
+    if (this.socket) {
+      this.errorLogger.log('Socket already initialized');
+      return;
+    }
     console.log('SocketService setup() called');
     if (this.socket) {
       console.log('Socket already initialized');
       return;
     }
 
-    this.socket = io(BASE_URL);
-    console.log(`Connecting to Socket at: ${BASE_URL}`);
+    const url = getBaseUrl();
+    const options = {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
+    };
+    this.errorLogger.log('Attempting socket connection', { url, options });
+    try {
+      this.socket = io(url, options);
+      console.log(`Connecting to Socket at: ${url}`);
 
-    this.socket.on('connect', () => {
-      console.log('🔌 Socket connected:', this.socket?.id);
+      this.socket.on('connect', () => {
+        this.errorLogger.log('Socket connected successfully', { socketId: this.socket?.id });
+        console.log('🔌 Socket connected:', this.socket?.id);
+        this.initializeSocketConnection();
+      });
 
-      // קריאה לפונקציה לאתחול המשתמש המחובר
-      this.initializeSocketConnection();
-    });
+      // הוספת ניטור שגיאות
+      this.socket.on('connect_error', (error) => {
+        this.errorLogger.log('Socket connection error', { error: error.message });
+        console.error('Socket connection error:', error);
+      });
+
+      this.socket.on('connect_timeout', () => {
+        this.errorLogger.log('Socket connection timeout');
+        console.error('Socket connection timeout');
+      });
+
+      this.socket.on('disconnect', (reason) => {
+        this.errorLogger.log('Socket disconnected', { reason });
+        console.log('Socket disconnected:', reason);
+      });
+    } catch (error) {
+      this.errorLogger.log('Error in setup', { error });
+    }
   }
 
   /**
@@ -144,6 +178,8 @@ export class SocketService {
     if (!this.socket) this.setup();
 
     const user = this.userService?.getLoggedInUser();
+    this.errorLogger.log('user:', user);
+
     if (!user || !toUserId || !msg.trim()) {
       console.warn('⚠️ Missing required data for private message:', { user, toUserId, msg });
       return;
@@ -202,9 +238,12 @@ export class SocketService {
 
   // ✅ האזנה להודעות פרטיות
   public onPrivateMessage(callback: (msg: ChatMessage) => void): void {
-    if (!this.socket) this.setup();
-
+    if (!this.socket) {
+      this.errorLogger.log('Setting up socket for private messages');
+      this.setup();
+    }
     this.socket?.on(SOCKET_EVENT_ADD_PRIVATE_MSG, (msg: ChatMessage) => {
+      this.errorLogger.log('Private message received', msg);
       console.log('📩 Private message received:', msg);
 
       // בדיקה אם ההודעה כבר קיימת
@@ -221,6 +260,7 @@ export class SocketService {
    * מחזיר את כל ההודעות השמורות
    */
   public getPrivateMessages(): ChatMessage[] {
+    this.errorLogger.log('Getting private messages', { count: this.privateMessagesBuffer.length });
     return [...this.privateMessagesBuffer];
   }
 
@@ -257,8 +297,12 @@ export class SocketService {
 /** פונקציה לקביעת ה-URL של ה-Socket לפי סביבת ההרצה */
 function getBaseUrl(): string {
   const environment = (window as any).env?.NODE_ENV || 'development';
+  const developmentHosts = ['localhost', '192.168.1.63', '10.0.2.2', '10.100.102.9'];
+  const isProduction = !developmentHosts.includes(window.location.hostname);
+
   console.log(`Socket environment: ${environment}`);
-  return environment === 'production'
+
+  return isProduction
     ? 'https://backend-my-accounts.onrender.com'
-    : 'http://localhost:3030';
+    : `http://${window.location.hostname}:3030`;  // ישתמש באותו hostname כמו הפרונט
 }

@@ -3,6 +3,8 @@ import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs';
 import { UserService } from '../services/user.service';
 import { ChatMessage } from '../models/ChatMessage';
+import { ErrorLoggerService } from '../services/Error-logger.service';
+import { DeviceService } from '../services/device.service';
 
 @Component({
   selector: 'app-chat',
@@ -10,6 +12,7 @@ import { ChatMessage } from '../models/ChatMessage';
   styleUrls: ['./chat.component.scss']
 })
 export class ChatComponent implements OnInit, OnDestroy {
+  isDevelopment = true;
   @Input() chatType: 'group' | 'private' = 'group';
   @Input() targetUserId: string = '';
 
@@ -24,11 +27,33 @@ export class ChatComponent implements OnInit, OnDestroy {
   private userCache: { [key: string]: string } = {}; // מטמון לשמות משתמשים
   isRoomJoined: boolean = false;
   currentUser: any;
+  isMobile: boolean = false;
 
 
-  constructor(private socketService: SocketService, private userService: UserService) { this.currentUser = this.userService.getLoggedInUser(); }
 
+  constructor(private socketService: SocketService, private userService: UserService,
+    private errorLogger: ErrorLoggerService,
+    private deviceService: DeviceService
+  ) {
+    this.currentUser = this.userService.getLoggedInUser(), this.isMobile = this.deviceService.isMobile();
+  }
+
+  showDebugInfo() {
+    const logs = this.errorLogger.getLogs();
+    const debugInfo = {
+      currentUser: this.currentUser,
+      chatType: this.chatType,
+      targetUserId: this.targetUserId,
+      messagesCount: this.privateMessages.length,
+      logs: logs
+    };
+    alert(JSON.stringify(debugInfo, null, 2));
+  }
   ngOnInit(): void {
+    this.errorLogger.log('Chat component initialized', {
+      chatType: this.chatType,
+      targetUserId: this.targetUserId
+    });
     this.socketSubscription = new Subscription();
 
     if (this.chatType === 'group') {
@@ -125,6 +150,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   sendPrivateMessage(): void {
+    this.errorLogger.log('Attempting to send private message', {
+      to: this.targetUserId,
+      text: this.newMessage
+    });
     if (!this.targetUserId.trim() || !this.newMessage.trim()) return;
 
     const user = this.userService.getLoggedInUser();

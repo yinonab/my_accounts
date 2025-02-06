@@ -1,6 +1,7 @@
 import { inject, Injectable, Injector } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { UserService } from './user.service';
+import { ChatMessage } from '../models/ChatMessage';
 
 const BASE_URL = getBaseUrl();
 
@@ -23,7 +24,7 @@ const SOCKET_EMIT_LOGOUT = 'unset-user-socket';
 export class SocketService {
   private socket: Socket | null = null;
   private injector: Injector;
-  public privateMessagesBuffer: { sender: string; text: string }[] = []; // שמירת הודעות פרטיות שהתקבלו
+  public privateMessagesBuffer: ChatMessage[] = []; // עדכון הטיפוס
 
 
   constructor(injector: Injector) {
@@ -149,9 +150,10 @@ export class SocketService {
     }
 
     const privateMessage = {
-      sender: user._id,  // הוספת המזהה של השולח
-      toUserId: toUserId, // מזהה הנמען
-      text: msg
+      toUserId: toUserId,
+      text: msg,
+      sender: user._id,  // חשוב להוסיף את ה-ID של השולח
+      senderName: user.username  // הוספת שם המשתמש
     };
 
     console.log('✅ Sending private message:', privateMessage);
@@ -161,10 +163,16 @@ export class SocketService {
 
 
 
+
+
   public login(userId: string): void {
     console.log('SocketService login() called with userId:', userId);
     if (!this.socket) this.setup();
-    this.socket?.emit(SOCKET_EMIT_LOGIN, userId);
+    const user = this.userService.getLoggedInUser();
+    this.socket?.emit(SOCKET_EMIT_LOGIN, {
+      userId: userId,
+      username: user?.username || 'Anonymous' // שליחת שם המשתמש
+    });
   }
 
   // ✅ האזנה להודעות כלליות
@@ -174,18 +182,18 @@ export class SocketService {
   }
 
   // ✅ האזנה להודעות פרטיות
-  public onPrivateMessage(callback: (msg: any) => void): void {
+  public onPrivateMessage(callback: (msg: ChatMessage) => void): void {
     if (!this.socket) this.setup();
 
-    this.socket?.on(SOCKET_EVENT_ADD_PRIVATE_MSG, (msg) => {
+    this.socket?.on(SOCKET_EVENT_ADD_PRIVATE_MSG, (msg: ChatMessage) => {
       console.log('📩 Private message received:', msg);
 
-      // בדיקה אם ההודעה כבר קיימת כדי למנוע כפילויות
-      if (!this.privateMessagesBuffer.some(existingMsg => existingMsg.text === msg.text && existingMsg.sender === msg.sender)) {
+      // בדיקה אם ההודעה כבר קיימת
+      if (!this.privateMessagesBuffer.some(existingMsg =>
+        existingMsg.text === msg.text && existingMsg.sender === msg.sender)) {
         this.privateMessagesBuffer.push(msg);
       }
 
-      // שליחת ההודעה למאזין (קומפוננטת הצ'אט)
       callback(msg);
     });
   }
@@ -193,8 +201,9 @@ export class SocketService {
   /**
    * מחזיר את כל ההודעות השמורות
    */
-  public getPrivateMessages(): { sender: string; text: string }[] {
-    return [...this.privateMessagesBuffer]; // החזרת עותק כדי למנוע שינוי ישיר במערך
+  public getPrivateMessages(): ChatMessage[] {
+    // שינוי הטיפוס החזרה להיות ChatMessage
+    return [...this.privateMessagesBuffer];
   }
 
   /**

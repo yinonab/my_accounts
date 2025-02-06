@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs';
 import { UserService } from '../services/user.service';
+import { ChatMessage } from '../models/ChatMessage';
 
 @Component({
   selector: 'app-chat',
@@ -11,44 +12,75 @@ import { UserService } from '../services/user.service';
 export class ChatComponent implements OnInit, OnDestroy {
   @Input() chatType: 'group' | 'private' = 'group';
   @Input() targetUserId: string = '';
+
   room: string = ''; // חדר צ'אט
   newMessage: string = ''; // הודעה קבוצתית
+
   //targetUserId: string = ''; // מזהה משתמש להודעות פרטיות
-  messages: { sender: string; text: string }[] = []; // הודעות קבוצתיות
-  privateMessages: { sender: string; text: string }[] = []; // הודעות פרטיות
+  messages: ChatMessage[] = [];
+  privateMessages: ChatMessage[] = [];
   private socketSubscription?: Subscription;
   private isPrivateMessageListenerActive = false; // דגל שמונע רישום כפול
   private userCache: { [key: string]: string } = {}; // מטמון לשמות משתמשים
   isRoomJoined: boolean = false;
+  currentUser: any;
 
 
-  constructor(private socketService: SocketService, private userService: UserService) { }
+  constructor(private socketService: SocketService, private userService: UserService) { this.currentUser = this.userService.getLoggedInUser(); }
 
   ngOnInit(): void {
     this.socketSubscription = new Subscription();
 
     if (this.chatType === 'group') {
       this.socketSubscription.add(
-        this.socketService.on('chat-add-msg', (msg: any) => {
+        this.socketService.on('chat-add-msg', (msg: ChatMessage) => {
           console.log('📩 New group message received:', msg);
+          if (msg.sender === this.currentUser._id) {
+            msg.senderName = 'Me';
+          } else if (!msg.senderName) {
+            // Try to get the username from cache or set a default
+            msg.senderName = this.userCache[msg.sender] || 'User ' + msg.sender;
+          }
           this.messages.push(msg);
         })
       );
     } else if (this.chatType === 'private') {
-      this.loadPrivateMessages(); // טעינת הודעות פרטיות ששמורות ב- SocketService
+      this.loadPrivateMessages();
     }
   }
   private loadPrivateMessages(): void {
-    this.privateMessages = this.socketService.getPrivateMessages();
+    const savedMessages = this.socketService.getPrivateMessages();
+    const user = this.userService.getLoggedInUser();
+
+    this.privateMessages = savedMessages.map(msg => {
+      const isCurrentUser = msg.sender === this.currentUser._id;
+      const messageWithName: ChatMessage = {
+        ...msg,
+        senderName: isCurrentUser ? 'Me' : (msg.senderName || 'User ' + msg.sender)
+      };
+      return messageWithName;
+    });
 
     if (!this.isPrivateMessageListenerActive) {
       this.socketSubscription?.add(
-        this.socketService.onPrivateMessage((msg: any) => {
+        this.socketService.onPrivateMessage((msg: ChatMessage) => {
           console.log('📩 New private message received:', msg);
+          const isCurrentUser = msg.sender === this.currentUser._id;
 
-          // מניעת כפילות – נוסיף את ההודעה רק אם היא לא קיימת
-          if (!this.privateMessages.some(existingMsg => existingMsg.text === msg.text && existingMsg.sender === msg.sender)) {
-            this.privateMessages.push(msg);
+          const formattedMessage: ChatMessage = {
+            ...msg,
+            senderName: isCurrentUser ? 'Me' : (msg.senderName || 'User ' + msg.sender)
+          };
+
+          // לוג לבדיקה
+          console.log('Message sender:', msg.sender);
+          console.log('Current user:', this.currentUser._id);
+          console.log('Is current user?', isCurrentUser);
+
+          if (!this.privateMessages.some(existingMsg =>
+            existingMsg.text === formattedMessage.text &&
+            existingMsg.sender === formattedMessage.sender)) {
+            this.privateMessages.push(formattedMessage);
           }
         })
       );
@@ -73,30 +105,40 @@ export class ChatComponent implements OnInit, OnDestroy {
   sendMessage(): void {
     if (!this.newMessage.trim()) return;
 
-    const message = { sender: 'Me', text: this.newMessage };
-    this.socketService.emit('chat-send-msg', message);
+    const message: ChatMessage = {
+      sender: this.currentUser._id,
+      senderName: 'Me',
+      text: this.newMessage
+    };
 
-    // אין צורך להוסיף את ההודעה כאן, ההודעה תגיע מהשרת
-    this.newMessage = ''; // ניקוי השדה
+    this.socketService.emit('chat-send-msg', message);
+    this.newMessage = '';
   }
 
   sendPrivateMessage(): void {
-    if (!this.targetUserId.trim() || !this.newMessage.trim()) {
-      console.warn(`⚠️ Missing recipient or message: { toUserId: ${this.targetUserId}, message: ${this.newMessage} }`);
-      return;
-    }
+    if (!this.targetUserId.trim() || !this.newMessage.trim()) return;
 
-    const privateMessage = { sender: 'Me', text: this.newMessage, toUserId: this.targetUserId };
+    const user = this.userService.getLoggedInUser();
 
-    console.log(`📩 Sending private message:`, privateMessage);
-    this.socketService.emit('chat-send-private-msg', privateMessage);
-    this.privateMessages.push(privateMessage);
+    // הודעה מקומית לתצוגה מיידית
+    const localMessage: ChatMessage = {
+      sender: this.currentUser._id,
+      senderName: 'Me',  // תמיד 'Me' עבור ההודעה המקומית
+      text: this.newMessage,
+      toUserId: this.targetUserId
+    };
 
-    this.newMessage = ''; // ניקוי השדה
+    // שליחה לשרת
+    this.socketService.emit('chat-send-private-msg', {
+      toUserId: this.targetUserId,
+      text: this.newMessage,
+      sender: this.currentUser._id,
+      senderName: user?.username
+    });
+
+    this.privateMessages.push(localMessage);
+    this.newMessage = '';
   }
-
-
-
 
   ngOnDestroy(): void {
     this.socketSubscription?.unsubscribe();

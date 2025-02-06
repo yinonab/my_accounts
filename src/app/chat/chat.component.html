@@ -9,8 +9,8 @@
     <div class="chat-box">
         <div class="messages">
             <div *ngFor="let msg of (chatType === 'group' ? messages : privateMessages)" class="message"
-                [ngClass]="{'my-message': msg.sender === 'Me', 'other-message': msg.sender !== 'Me'}">
-                <span class="sender">{{ msg.sender }}</span>
+                [ngClass]="{'my-message': msg.senderName === 'Me', 'other-message': msg.senderName !== 'Me'}">
+                <span class="sender">{{ msg.senderName }}</span>
                 <div class="message-content">{{ msg.text }}</div>
             </div>
         </div>

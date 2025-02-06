@@ -19,6 +19,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   private socketSubscription?: Subscription;
   private isPrivateMessageListenerActive = false; // דגל שמונע רישום כפול
   private userCache: { [key: string]: string } = {}; // מטמון לשמות משתמשים
+  isRoomJoined: boolean = false;
 
 
   constructor(private socketService: SocketService, private userService: UserService) { }
@@ -66,6 +67,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (!this.room.trim()) return;
     this.socketService.emit('chat-set-topic', this.room);
     console.log(`🔹 Joined room: ${this.room}`);
+    this.isRoomJoined = true;
   }
 
   sendMessage(): void {

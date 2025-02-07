@@ -246,13 +246,18 @@ export class SocketService {
       this.errorLogger.log('Private message received', msg);
       console.log('📩 Private message received:', msg);
 
-      // בדיקה אם ההודעה כבר קיימת
+      // הוספת toUserId להודעה אם חסר
+      const enhancedMsg = {
+        ...msg,
+        toUserId: msg.toUserId || this.userService.getLoggedInUser()?._id
+      };
+
       if (!this.privateMessagesBuffer.some(existingMsg =>
-        existingMsg.text === msg.text && existingMsg.sender === msg.sender)) {
-        this.privateMessagesBuffer.push(msg);
+        existingMsg.text === enhancedMsg.text && existingMsg.sender === enhancedMsg.sender)) {
+        this.privateMessagesBuffer.push(enhancedMsg);
       }
-      this.addToBuffer(msg);
-      callback(msg);
+      this.addToBuffer(enhancedMsg);
+      callback(enhancedMsg);
     });
   }
 

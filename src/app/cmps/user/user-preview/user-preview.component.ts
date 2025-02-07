@@ -1,9 +1,10 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { User } from '../../../models/user.model.ts';
 import { Router } from '@angular/router';
 import { SocketService } from '../../../services/socket.service.js';
 import { Observable } from 'rxjs';
 import { UserIndexComponent } from '../user-index/user-index.component.js';
+import { UserService } from '../../../services/user.service.js';
 
 @Component({
   selector: 'user-preview',
@@ -16,6 +17,7 @@ export class UserPreviewComponent {
   isPrivateChatOpen = false; // האם הצ'אט פתוח
   unreadMessagesCount = 0; // ✅ מספר ההודעות שלא נקראו
   unreadMessagesCount$!: Observable<number>;
+  userId: string = inject(UserService).getLoggedInUser()!._id;
 
 
   constructor(private router: Router, private socketService: SocketService, private userIndex: UserIndexComponent) { }
@@ -52,6 +54,7 @@ export class UserPreviewComponent {
    */
   closePrivateChat(): void {
     this.isPrivateChatOpen = false;
+    this.userIndex.resetUnreadMessages(this.user._id); // מאפס את הקאונטר בסגירת הצ'אט
   }
 
   /**

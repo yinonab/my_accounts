@@ -1,10 +1,11 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef } from '@angular/core';
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs';
 import { UserService } from '../services/user.service';
 import { ChatMessage } from '../models/ChatMessage';
 import { ErrorLoggerService } from '../services/Error-logger.service';
 import { DeviceService } from '../services/device.service';
+import { User } from '../models/user.model.ts';
 
 @Component({
   selector: 'app-chat',
@@ -15,6 +16,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   isDevelopment = true;
   @Input() chatType: 'group' | 'private' = 'group';
   @Input() targetUserId: string = '';
+  @ViewChild('roomInput') roomInput!: ElementRef;
+  @ViewChild('chatInput') chatInput!: ElementRef;
+
 
   room: string = ''; // חדר צ'אט
   newMessage: string = ''; // הודעה קבוצתית
@@ -36,6 +40,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     private deviceService: DeviceService
   ) {
     this.currentUser = this.userService.getLoggedInUser(), this.isMobile = this.deviceService.isMobile();
+  }
+  ngAfterViewInit() {
+    if (this.chatType === 'group' && !this.isRoomJoined) {
+      this.roomInput.nativeElement.focus();
+    } else {
+      this.chatInput.nativeElement.focus();
+    }
   }
 
   showDebugInfo() {
@@ -73,42 +84,48 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.loadPrivateMessages();
     }
   }
+  // In ChatComponent:
+  // בקומפוננטה ChatComponent
   private loadPrivateMessages(): void {
     const savedMessages = this.socketService.getPrivateMessages();
-    const user = this.userService.getLoggedInUser();
+    const currentUser = this.userService.getLoggedInUser() as User;
 
-    this.privateMessages = savedMessages.map(msg => {
-      const isCurrentUser = msg.sender === this.currentUser._id;
-      const messageWithName: ChatMessage = {
-        ...msg,
-        senderName: isCurrentUser ? 'Me' : (msg.senderName || 'User ' + msg.sender)
-      };
-      return messageWithName;
-    });
+    console.log('Current user:', currentUser._id);
+    console.log('Target user:', this.targetUserId);
+    console.log('All messages:', savedMessages);
 
+    this.privateMessages = savedMessages.filter(msg => {
+      const isParticipant =
+        (msg.sender === currentUser._id && msg.toUserId === this.targetUserId) ||
+        (msg.sender === this.targetUserId && msg.toUserId === currentUser._id);
+
+      console.log('Message:', msg);
+      console.log('Is participant?', isParticipant);
+      return isParticipant;
+    }).map(msg => ({
+      ...msg,
+      senderName: msg.sender === currentUser._id ? 'Me' : (msg.senderName || 'User ' + msg.sender)
+    }));
+
+    // בדיקת הרשמה לאירועים חדשים
     if (!this.isPrivateMessageListenerActive) {
-      this.socketSubscription?.add(
-        this.socketService.onPrivateMessage((msg: ChatMessage) => {
-          console.log('📩 New private message received:', msg);
-          const isCurrentUser = msg.sender === this.currentUser._id;
+      this.socketService.onPrivateMessage((msg: ChatMessage) => {
+        console.log('New message received:', msg);
 
-          const formattedMessage: ChatMessage = {
+        const isRelevant =
+          (msg.sender === currentUser._id && msg.toUserId === this.targetUserId) ||
+          (msg.sender === this.targetUserId && msg.toUserId === currentUser._id);
+
+        console.log('Is message relevant?', isRelevant);
+
+        if (isRelevant) {
+          const formattedMessage = {
             ...msg,
-            senderName: isCurrentUser ? 'Me' : (msg.senderName || 'User ' + msg.sender)
+            senderName: msg.sender === currentUser._id ? 'Me' : (msg.senderName || 'User ' + msg.sender)
           };
-
-          // לוג לבדיקה
-          console.log('Message sender:', msg.sender);
-          console.log('Current user:', this.currentUser._id);
-          console.log('Is current user?', isCurrentUser);
-
-          if (!this.privateMessages.some(existingMsg =>
-            existingMsg.text === formattedMessage.text &&
-            existingMsg.sender === formattedMessage.sender)) {
-            this.privateMessages.push(formattedMessage);
-          }
-        })
-      );
+          this.privateMessages.push(formattedMessage);
+        }
+      });
       this.isPrivateMessageListenerActive = true;
     }
   }
@@ -132,8 +149,11 @@ export class ChatComponent implements OnInit, OnDestroy {
   joinRoom(): void {
     if (!this.room.trim()) return;
     this.socketService.emit('chat-set-topic', this.room);
-    console.log(`🔹 Joined room: ${this.room}`);
     this.isRoomJoined = true;
+
+    setTimeout(() => {
+      this.chatInput.nativeElement.focus();
+    });
   }
 
   sendMessage(): void {

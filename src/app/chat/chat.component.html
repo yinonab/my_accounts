@@ -2,7 +2,7 @@
     <h2>{{ chatType === 'group' ? 'Group Chat - ' + room : 'Private Chat' }}</h2>
 
     <div class="room-selection" *ngIf="chatType === 'group' && !isRoomJoined">
-        <input [(ngModel)]="room" placeholder="Enter room name" class="room-input" />
+        <input #roomInput [(ngModel)]="room" placeholder="Enter room name" class="room-input" />
         <button (click)="joinRoom(); isRoomJoined = true" class="join-button">Join Room</button>
     </div>
 
@@ -16,7 +16,7 @@
         </div>
 
         <div class="chat-input">
-            <input [(ngModel)]="newMessage" placeholder="Type a message..." class="styled-input" />
+            <input #chatInput [(ngModel)]="newMessage" placeholder="Type a message..." class="styled-input" />
             <button *ngIf="chatType === 'group'" (click)="sendMessage()" class="styled-button">Send</button>
             <div *ngIf="chatType === 'private'">
                 <button (click)="sendPrivateMessage()" class="styled-button">Send Private</button>

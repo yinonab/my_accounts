@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -11,11 +11,11 @@ import { ContactDetailsComponent } from './pages/contact-details/contact-details
 import { ContactListComponent } from './cmps/contact/contact-list/contact-list.component';
 import { ContactPreviewComponent } from './cmps/contact/contact-preview/contact-preview.component';
 import { HeaderComponent } from './cmps/app-header/app-header.component';
-import { ChartsComponent } from './pages/charts/charts.component';
+//import { ChartsComponent } from './pages/charts/charts.component';
 import { ContactFilterComponent } from './cmps/contact/contact-filter/contact-filter.component';
 import { ContactEditComponent } from './pages/contact-edit/contact-edit.component';
 // import { NgChartsModule } from 'ng2-charts';
-import { NgChartsModule } from 'ng2-charts';
+//import { NgChartsModule } from 'ng2-charts';
 import { ModalComponent } from './shared/modal/modal.component';
 import { LoaderComponent } from './loader/loader.component';
 import { LoginSignupComponent } from './cmps/login-sign-up/login-sign-up.component';
@@ -36,6 +36,7 @@ import { UserDetailsComponent } from './cmps/user/user-details/user-details.comp
 import { UserFilterComponent } from './cmps/user/user-filter/user-filter.component';
 import { FullNameValidatorDirective } from './directives/full-name-validator.directive';
 import { ChatComponent } from './chat/chat.component';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 
 
@@ -48,7 +49,7 @@ import { ChatComponent } from './chat/chat.component';
     ContactListComponent,
     ContactPreviewComponent,
     HeaderComponent,
-    ChartsComponent,
+    // ChartsComponent,
     ContactFilterComponent,
     ContactEditComponent,
     ModalComponent,
@@ -80,8 +81,14 @@ import { ChatComponent } from './chat/chat.component';
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    NgChartsModule,
-    BrowserAnimationsModule
+    //NgChartsModule,
+    BrowserAnimationsModule,
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: true,
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    })
   ],
   providers: [],
   bootstrap: [AppComponent]

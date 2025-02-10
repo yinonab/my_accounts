@@ -302,7 +302,7 @@ export class SocketService {
 /** פונקציה לקביעת ה-URL של ה-Socket לפי סביבת ההרצה */
 function getBaseUrl(): string {
   const environment = (window as any).env?.NODE_ENV || 'development';
-  const developmentHosts = ['localhost', '192.168.1.63', '10.0.2.2', '10.100.102.9'];
+  const developmentHosts = ['localhost', '192.168.1.63', '192.168.1.88', '10.0.2.2', '10.100.102.9'];
   const isProduction = !developmentHosts.includes(window.location.hostname);
 
   console.log(`Socket environment: ${environment}`);

@@ -27,8 +27,10 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/manifest.webmanifest"
             ],
+            "serviceWorker": "ngsw-config.json",
             "styles": [
               "src/assets/scss/global.scss",
               "src/styles.scss"
@@ -85,7 +87,8 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/manifest.webmanifest"
             ],
             "styles": [
               "src/assets/scss/global.scss",

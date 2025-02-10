@@ -24,6 +24,15 @@
         </div>
     </div>
 </div>
+<div *ngIf="notificationPermission !== 'granted'" class="notification-permission">
+    <button (click)="showNotificationPrompt()" class="notification-button">
+        הפעל התראות 🔔
+    </button>
+</div>
+
+<button *ngIf="notificationPermission === 'granted'" (click)="sendTestNotification()" class="test-notification-btn">
+    בדוק נוטיפיקציה
+</button>
 <!-- הוספה בתחתית הטמפלייט -->
 <div class="debug-panel" *ngIf="isMobile">
     <button (click)="showDebugInfo()" class="debug-button">
@@ -64,5 +73,36 @@
     .debug-button:active {
         transform: scale(0.95);
         /* אפקט לחיצה */
+    }
+
+    .notification-permission {
+        position: fixed;
+        bottom: 60px;
+        /* מעל כפתור הדיבאג */
+        right: 10px;
+        z-index: 1000;
+    }
+
+    .notification-button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .notification-button:hover {
+        background: #0056b3;
+    }
+
+    .notification-button:active {
+        transform: scale(0.98);
     }
 </style>

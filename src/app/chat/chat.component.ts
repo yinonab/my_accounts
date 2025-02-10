@@ -101,32 +101,43 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
   }
   showNotificationPrompt() {
+    if (document.querySelector('.notification-prompt')) return; // מניעת כפילויות
+
     const prompt = document.createElement('div');
     prompt.className = 'notification-prompt';
     prompt.innerHTML = `
       <div class="notification-alert">
         האם תרצה לקבל התראות על הודעות חדשות?
         <div class="notification-actions">
-          <button class="allow-btn">אפשר התראות</button>
-          <button class="dismiss-btn">לא תודה</button>
+          <button id="allow-btn">אפשר התראות</button>
+          <button id="dismiss-btn">לא תודה</button>
         </div>
       </div>
     `;
 
-    const allowBtn = prompt.querySelector('.allow-btn');
-    const dismissBtn = prompt.querySelector('.dismiss-btn');
-
-    allowBtn?.addEventListener('click', () => {
-      this.requestNotificationPermission();
-      prompt.remove();
-    });
-
-    dismissBtn?.addEventListener('click', () => {
-      prompt.remove();
-    });
-
     document.body.appendChild(prompt);
+
+    document.getElementById('allow-btn')?.addEventListener('click', async () => {
+      console.log("🟢 לחיצה על 'אפשר התראות'");
+      Notification.requestPermission().then(async permission => {
+        console.log("🔔 הרשאת נוטיפיקציות התקבלה:", permission);
+        if (permission === 'granted') {
+          await this.requestNotificationPermission();
+          console.log('✅ ההרשאה אושרה והוגדרה');
+        } else {
+          console.warn('❌ המשתמש לא אישר התראות');
+        }
+      });
+      prompt.remove();
+    });
+
+    document.getElementById('dismiss-btn')?.addEventListener('click', () => {
+      console.log('🔕 המשתמש דחה את הבקשה');
+      prompt.remove();
+    });
   }
+
+
   // בתוך ChatComponent
   async sendTestNotification() {
     console.log("🚀 sendTestNotification called");
@@ -266,9 +277,9 @@ export class ChatComponent implements OnInit, OnDestroy {
                 }
               };
 
-              if (document.hidden) {
-                await this.notificationService.sendNotification(notificationData);
-              }
+              // if (document.hidden) {
+              await this.notificationService.sendNotification(notificationData);
+              // }
             } catch (err) {
               this.errorLogger.log('Error handling incoming message notification', err);
             }
@@ -368,9 +379,9 @@ export class ChatComponent implements OnInit, OnDestroy {
           }
         };
 
-        if (document.hidden) {
-          await this.notificationService.sendNotification(notificationData);
-        }
+        // if (document.hidden) {
+        await this.notificationService.sendNotification(notificationData);
+        // }
       } catch (err) {
         this.errorLogger.log('Error handling notification', err);
       }

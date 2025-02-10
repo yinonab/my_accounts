@@ -28,7 +28,8 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/manifest.webmanifest"
+              "src/manifest.webmanifest",
+              "src/custom-service-worker.js"
             ],
             "serviceWorker": "ngsw-config.json",
             "styles": [
@@ -88,7 +89,8 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/manifest.webmanifest"
+              "src/manifest.webmanifest",
+              "src/custom-service-worker.js"
             ],
             "styles": [
               "src/assets/scss/global.scss",

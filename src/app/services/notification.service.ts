@@ -61,6 +61,35 @@ export class NotificationService {
       });
     }
   }
+  async getLatestSubscription(): Promise<PushSubscription | null> {
+    try {
+      const response = await firstValueFrom(this.http.get<{ subscription: PushSubscription }>(
+        `${config.baseURL}/notification/get-subscription`,
+        { withCredentials: true }
+      ));
+      return response.subscription;
+    } catch (error) {
+      console.error("❌ Failed to fetch latest subscription from server", error);
+      return null;
+    }
+  }
+  async saveSubscription(subscription: PushSubscription): Promise<void> {
+    console.log('📩 Saving subscription to server:', subscription);
+
+    try {
+      await firstValueFrom(this.http.post(
+        `${config.baseURL}/notification`,
+        { subscription },
+        {
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      ));
+      console.log('✅ Subscription saved successfully.');
+    } catch (error) {
+      console.error('❌ Error saving subscription:', error);
+    }
+  }
 
 
   // עדכון הפונקציה לקבל את הטיפוס החדש
@@ -68,7 +97,8 @@ export class NotificationService {
     console.log('Attempting to send notification:', {
       title: data.title,
       body: data.body,
-      icon: data.icon,
+      icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+      badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
       data: data.data
     });
     if (!this.swPush.isEnabled) {
@@ -78,7 +108,7 @@ export class NotificationService {
 
     try {
       console.log("⏳ Checking existing subscription...");
-      let subscription = await firstValueFrom(this.swPush.subscription);
+      let subscription = await this.getLatestSubscription(); // 🔹 נשלוף מהשרת
       console.log("✅ Subscription result:", subscription);
       console.log("🚀 יקךךם'");
       if (!subscription) {
@@ -94,14 +124,16 @@ export class NotificationService {
         endpoint: subscription.endpoint ? '✅ Present' : '❌ Missing'
       });
 
-      const response = await this.http.post(
+      const response = await firstValueFrom(this.http.post(
         `${config.baseURL}/notification/send`,
         {
           payload: {
             title: data.title,
             body: data.body,
-            icon: data.icon,
-            badge: data.badge || data.icon || '/assets/images/notification-badge.png',
+
+            icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+            badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+
             vibrate: data.vibrate || [200, 100, 200],
             tag: data.tag || 'message',
             requireInteraction: data.requireInteraction ?? true
@@ -111,7 +143,7 @@ export class NotificationService {
           withCredentials: true,
           headers: { 'Content-Type': 'application/json' }
         }
-      ).toPromise();
+      ));
 
       console.log('✅ Notification sent successfully', {
         timestamp: new Date().toISOString()
@@ -129,6 +161,13 @@ export class NotificationService {
   // הקוד הקיים נשאר ללא שינוי
   async requestSubscription() {
     console.log('🔄 Loading VAPID Public Key before subscription...');
+    let subscription = await this.getLatestSubscription();
+    if (subscription) {
+      console.log('✅ Found existing subscription in the server:', subscription);
+      return subscription;
+    }
+
+    console.log('🚀 No valid subscription found. Requesting a new one...');
     await this.loadVapidPublicKey();
     if (!this.VAPID_PUBLIC_KEY) {
       console.error('❌ Failed to load VAPID Public Key. Aborting subscription.');
@@ -163,7 +202,7 @@ export class NotificationService {
       //   return null;
       // }
 
-      const subscription = await this.swPush.requestSubscription({
+      subscription = await this.swPush.requestSubscription({
         serverPublicKey: this.VAPID_PUBLIC_KEY
       });
 
@@ -179,15 +218,25 @@ export class NotificationService {
       });
 
       // שלח עם הטוקן בheaders
-      const response = await this.http.post(
+      // const response = await this.http.post(
+      //   `${config.baseURL}/notification`,
+      //   { subscription },
+      //   {
+      //     withCredentials: true, // 🔹 שולח את הקוקיז אוטומטית
+      //     headers: { 'Content-Type': 'application/json' },
+      //     observe: 'response'
+      //   }
+      // ).toPromise();
+      const response = await firstValueFrom(this.http.post(
         `${config.baseURL}/notification`,
         { subscription },
         {
-          withCredentials: true, // 🔹 שולח את הקוקיז אוטומטית
+          withCredentials: true,
           headers: { 'Content-Type': 'application/json' },
           observe: 'response'
         }
-      ).toPromise();
+      ));
+
       console.log('Subscription response:', {
         status: response?.status,
         statusText: response?.statusText
@@ -220,10 +269,33 @@ export class NotificationService {
       throw err;
     }
   }
+  async getExistingSubscription() {
+    console.log('🔄 Fetching existing subscription from server...');
+    try {
+      const response: any = await firstValueFrom(this.http.get(
+        `${config.baseURL}/notification/get-subscription`,
+        { withCredentials: true }
+      ));
+
+      if (response.subscription) {
+        console.log('✅ Existing Subscription:', response.subscription);
+        return response.subscription;
+      } else {
+        console.warn('⚠️ No subscription found in DB');
+        return null;
+      }
+    } catch (err) {
+      console.error('❌ Failed to fetch existing subscription:', err);
+      return null;
+    }
+  }
+
 
   async loadVapidPublicKey(): Promise<void> {
     try {
-      const response: any = await this.http.get(`${config.baseURL}/notification/vapid-public-key`).toPromise();
+      //const response: any = await this.http.get(`${config.baseURL}/notification/vapid-public-key`).toPromise();
+      const response: any = await firstValueFrom(this.http.get(`${config.baseURL}/notification/vapid-public-key`));
+
       this.VAPID_PUBLIC_KEY = response.vapidPublicKey;
       console.log('✅ Loaded VAPID Public Key from server:', this.VAPID_PUBLIC_KEY);
     } catch (err) {

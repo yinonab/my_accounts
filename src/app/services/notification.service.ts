@@ -4,6 +4,7 @@ import { SwPush, SwUpdate, VersionEvent, VersionReadyEvent } from '@angular/serv
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom, Observable } from 'rxjs';
 import { config } from './config.service';
+import { FirebaseService } from './firebase.service';
 
 // הוספת הממשק החדש
 export interface PushNotificationData {
@@ -38,7 +39,8 @@ export class NotificationService {
   constructor(
     private swPush: SwPush,
     private http: HttpClient,
-    private swUpdate: SwUpdate
+    private swUpdate: SwUpdate,
+    private firebaseService: FirebaseService
   ) {
     console.log('🚀 NotificationService Initialized', {
       vapidPublicKey: this.VAPID_PUBLIC_KEY ? '✅ Present' : '❌ Missing',
@@ -61,25 +63,46 @@ export class NotificationService {
       });
     }
   }
-  async getLatestSubscription(): Promise<PushSubscription | null> {
+  // async getLatestSubscription(): Promise<PushSubscription | null> {
+  //   try {
+  //     const response = await firstValueFrom(this.http.get<{ subscription: PushSubscription }>(
+  //       `${config.baseURL}/notification/get-subscription`,
+  //       { withCredentials: true }
+  //     ));
+  //     return response.subscription;
+  //   } catch (error) {
+  //     console.error("❌ Failed to fetch latest subscription from server", error);
+  //     return null;
+  //   }
+  // }
+  async getLatestSubscription(): Promise<string | null> {
     try {
-      const response = await firstValueFrom(this.http.get<{ subscription: PushSubscription }>(
+      const response = await firstValueFrom(this.http.get<{ token: string }>(
         `${config.baseURL}/notification/get-subscription`,
         { withCredentials: true }
       ));
-      return response.subscription;
+
+      if (response?.token) {
+        console.log("✅ Subscription retrieved from server:", response.token);
+        return response.token; // 🔹 מחזירים רק את ה-Token
+      } else {
+        console.warn("⚠️ No valid subscription found on server.");
+        return null;
+      }
     } catch (error) {
-      console.error("❌ Failed to fetch latest subscription from server", error);
+      console.error("❌ Error retrieving subscription from server:", error);
       return null;
     }
   }
-  async saveSubscription(subscription: PushSubscription): Promise<void> {
+
+
+  async saveSubscription(subscription: { token: string }) {
     console.log('📩 Saving subscription to server:', subscription);
 
     try {
       await firstValueFrom(this.http.post(
-        `${config.baseURL}/notification`,
-        { subscription },
+        `${config.baseURL}/notification`, // 🔹 כתובת ה-API נשארת זהה
+        { token: subscription.token }, // 🔹 שליחת `token` בלבד
         {
           withCredentials: true,
           headers: { 'Content-Type': 'application/json' }
@@ -93,182 +116,270 @@ export class NotificationService {
 
 
   // עדכון הפונקציה לקבל את הטיפוס החדש
+  // async sendNotification(data: PushNotificationData): Promise<void> {
+  //   console.log('Attempting to send notification:', {
+  //     title: data.title,
+  //     body: data.body,
+  //     icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+  //     badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+  //     data: data.data
+  //   });
+  //   if (!this.swPush.isEnabled) {
+  //     console.warn('Push notifications are not enabled');
+  //     return;
+  //   }
+
+  //   try {
+  //     console.log("⏳ Checking existing subscription...");
+  //     let subscription = await this.getLatestSubscription(); // 🔹 נשלוף מהשרת
+  //     console.log("✅ Subscription result:", subscription);
+  //     console.log("🚀 יקךךם'");
+  //     if (!subscription) {
+  //       console.warn('❌ No subscription found, requesting new one...');
+  //       subscription = await this.requestSubscription(); // ✅ מחזיר את המנוי החדש
+  //       if (!subscription) {
+  //         console.error('❌ Subscription request failed, cannot send notification.');
+  //         return;
+  //       }
+  //     }
+
+  //     console.log('📡 Sending notification to server', {
+  //       endpoint: subscription.endpoint ? '✅ Present' : '❌ Missing'
+  //     });
+
+  //     const response = await firstValueFrom(this.http.post(
+  //       `${config.baseURL}/notification/send`,
+  //       {
+  //         payload: {
+  //           title: data.title,
+  //           body: data.body,
+
+  //           icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+  //           badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+
+  //           vibrate: data.vibrate || [200, 100, 200],
+  //           tag: data.tag || 'message',
+  //           requireInteraction: data.requireInteraction ?? true
+  //         }
+  //       },
+  //       {
+  //         withCredentials: true,
+  //         headers: { 'Content-Type': 'application/json' }
+  //       }
+  //     ));
+
+  //     console.log('✅ Notification sent successfully', {
+  //       timestamp: new Date().toISOString()
+  //     });
+
+  //   } catch (error) {
+  //     console.error('❌ Error sending notification', {
+  //       error,
+  //       timestamp: new Date().toISOString()
+  //     });
+  //     throw error;
+  //   }
+  // }
+
   async sendNotification(data: PushNotificationData): Promise<void> {
-    console.log('Attempting to send notification:', {
+    console.log('🚀 Preparing to send notification:', {
       title: data.title,
-      body: data.body,
-      icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
-      badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
-      data: data.data
+      body: data.body
     });
-    if (!this.swPush.isEnabled) {
-      console.warn('Push notifications are not enabled');
-      return;
-    }
 
     try {
-      console.log("⏳ Checking existing subscription...");
-      let subscription = await this.getLatestSubscription(); // 🔹 נשלוף מהשרת
-      console.log("✅ Subscription result:", subscription);
-      console.log("🚀 יקךךם'");
-      if (!subscription) {
-        console.warn('❌ No subscription found, requesting new one...');
-        subscription = await this.requestSubscription(); // ✅ מחזיר את המנוי החדש
-        if (!subscription) {
-          console.error('❌ Subscription request failed, cannot send notification.');
-          return;
-        }
+      console.log("⏳ Checking existing FCM token...");
+      // let token = await this.getLatestSubscription();
+
+      // if (token) {
+      //   console.log("✅ Found existing FCM token:", token);
+      // } else {
+      // console.warn('❌ No FCM token found, requesting a new one...');
+      let token = await this.requestSubscription();
+      if (token) {
+        console.log("✅ Found existing FCM token:", token);
+      } else {
+        console.error('❌ FCM token request failed, cannot send notification.');
+        return;
+        // }
       }
 
-      console.log('📡 Sending notification to server', {
-        endpoint: subscription.endpoint ? '✅ Present' : '❌ Missing'
-      });
+      console.log('📡 Sending notification to server');
 
-      const response = await firstValueFrom(this.http.post(
-        `${config.baseURL}/notification/send`,
-        {
-          payload: {
+      // 🔹 שולחים רק את ה-Token לשרת
+      const response = await firstValueFrom(
+        this.http.post(
+          `${config.baseURL}/notification/send`,
+          {
             title: data.title,
             body: data.body,
-
+            token: token,
             icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
             badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
-
             vibrate: data.vibrate || [200, 100, 200],
             tag: data.tag || 'message',
             requireInteraction: data.requireInteraction ?? true
+          },
+          {
+            withCredentials: true,
+            headers: { 'Content-Type': 'application/json' }
           }
-        },
-        {
-          withCredentials: true,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      ));
+        )
+      );
 
-      console.log('✅ Notification sent successfully', {
-        timestamp: new Date().toISOString()
-      });
+      console.log('✅ Notification sent successfully', { timestamp: new Date().toISOString() });
+      console.log('✅ Notification response', { response });
 
     } catch (error) {
-      console.error('❌ Error sending notification', {
-        error,
-        timestamp: new Date().toISOString()
-      });
+      console.error('❌ Error sending notification:', error);
       throw error;
     }
   }
 
+
   // הקוד הקיים נשאר ללא שינוי
+  // async requestSubscription() {
+  //   console.log('🔄 Loading VAPID Public Key before subscription...');
+  //   let subscription = await this.getLatestSubscription();
+  //   if (subscription) {
+  //     console.log('✅ Found existing subscription in the server:', subscription);
+  //     return subscription;
+  //   }
+
+  //   console.log('🚀 No valid subscription found. Requesting a new one...');
+  //   await this.loadVapidPublicKey();
+  //   if (!this.VAPID_PUBLIC_KEY) {
+  //     console.error('❌ Failed to load VAPID Public Key. Aborting subscription.');
+  //     return null;
+  //   }
+  //   console.log('✅ Frontend VAPID Public Key Loaded:', this.VAPID_PUBLIC_KEY);
+
+  //   console.log('🔔 Attempting to request subscription', {
+  //     timestamp: new Date().toISOString()
+  //   });
+  //   try {
+  //     // בדיקות תמיכה
+  //     if (!('serviceWorker' in navigator)) {
+  //       console.warn('Service Worker not supported');
+  //       return null;
+  //     }
+
+  //     if (!this.swPush.isEnabled) {
+  //       console.warn('Push notifications are not enabled');
+  //       return null;
+  //     }
+  //     console.log('🚀 Requesting subscription with VAPID key', {
+  //       publicKey: this.VAPID_PUBLIC_KEY ? '✅ Present' : '❌ Missing'
+  //     });
+
+  //     // קבל את הטוקן מהסטורג'
+  //     // const token = localStorage.getItem('loginToken');
+
+  //     // // בדיקת תקינות הטוקן
+  //     // if (!token) {
+  //     //   console.error('No login token found. Please log in.');
+  //     //   return null;
+  //     // }
+
+  //     subscription = await this.swPush.requestSubscription({
+  //       serverPublicKey: this.VAPID_PUBLIC_KEY
+  //     });
+
+  //     console.log('📡 Subscription received', {
+  //       endpoint: subscription.endpoint,
+  //       keys: subscription.toJSON()?.keys ?
+  //         Object.keys(subscription.toJSON()!.keys!) :
+  //         'No keys found'
+  //     });
+  //     console.log('Got subscription:', {
+  //       endpoint: subscription.endpoint,
+  //       keys: subscription.toJSON()?.keys ? Object.keys(subscription.toJSON()!.keys!) : 'No keys found'
+  //     });
+
+  //     // שלח עם הטוקן בheaders
+  //     // const response = await this.http.post(
+  //     //   `${config.baseURL}/notification`,
+  //     //   { subscription },
+  //     //   {
+  //     //     withCredentials: true, // 🔹 שולח את הקוקיז אוטומטית
+  //     //     headers: { 'Content-Type': 'application/json' },
+  //     //     observe: 'response'
+  //     //   }
+  //     // ).toPromise();
+  //     const response = await firstValueFrom(this.http.post(
+  //       `${config.baseURL}/notification`,
+  //       { subscription },
+  //       {
+  //         withCredentials: true,
+  //         headers: { 'Content-Type': 'application/json' },
+  //         observe: 'response'
+  //       }
+  //     ));
+
+  //     console.log('Subscription response:', {
+  //       status: response?.status,
+  //       statusText: response?.statusText
+  //     });
+
+  //     return subscription;
+  //   } catch (err: unknown) {
+  //     // טיפול מסודר בשגיאות
+  //     if (err instanceof HttpErrorResponse) {
+  //       console.error('🚨 HTTP Error details', {
+  //         status: err.status,
+  //         message: err.message,
+  //         error: err.error
+  //       });
+
+  //       if (err.status === 401) {
+  //         localStorage.removeItem('loginToken');
+  //         // ניתן להוסיף הפניה להתחברות מחדש
+  //       }
+  //     } else if (err instanceof Error) {
+  //       console.error('General Error:', {
+  //         name: err.name,
+  //         message: err.message
+  //       });
+  //     } else {
+  //       console.error('Unknown error:', err);
+  //     }
+
+  //     // זריקת השגיאה הלאה
+  //     throw err;
+  //   }
+  // }
   async requestSubscription() {
-    console.log('🔄 Loading VAPID Public Key before subscription...');
-    let subscription = await this.getLatestSubscription();
-    if (subscription) {
-      console.log('✅ Found existing subscription in the server:', subscription);
-      return subscription;
+    console.log('🔄 Checking existing subscription...');
+    let token = await this.firebaseService.getFCMToken();
+
+    if (token) {
+      console.log('✅ Found existing token:', token);
+      return token;
     }
 
-    console.log('🚀 No valid subscription found. Requesting a new one...');
-    await this.loadVapidPublicKey();
-    if (!this.VAPID_PUBLIC_KEY) {
-      console.error('❌ Failed to load VAPID Public Key. Aborting subscription.');
-      return null;
-    }
-    console.log('✅ Frontend VAPID Public Key Loaded:', this.VAPID_PUBLIC_KEY);
-
-    console.log('🔔 Attempting to request subscription', {
-      timestamp: new Date().toISOString()
-    });
+    console.log('🚀 No valid token found. Requesting a new one...');
     try {
-      // בדיקות תמיכה
-      if (!('serviceWorker' in navigator)) {
-        console.warn('Service Worker not supported');
+      token = await this.firebaseService.getFCMToken();
+
+      if (!token) {
+        console.error('❌ Failed to retrieve FCM token. Aborting subscription.');
         return null;
       }
 
-      if (!this.swPush.isEnabled) {
-        console.warn('Push notifications are not enabled');
-        return null;
-      }
-      console.log('🚀 Requesting subscription with VAPID key', {
-        publicKey: this.VAPID_PUBLIC_KEY ? '✅ Present' : '❌ Missing'
-      });
+      console.log('📡 Token received:', token);
 
-      // קבל את הטוקן מהסטורג'
-      // const token = localStorage.getItem('loginToken');
+      // שליחת ה-Token לשרת
+      await this.saveSubscription({ token });
 
-      // // בדיקת תקינות הטוקן
-      // if (!token) {
-      //   console.error('No login token found. Please log in.');
-      //   return null;
-      // }
-
-      subscription = await this.swPush.requestSubscription({
-        serverPublicKey: this.VAPID_PUBLIC_KEY
-      });
-
-      console.log('📡 Subscription received', {
-        endpoint: subscription.endpoint,
-        keys: subscription.toJSON()?.keys ?
-          Object.keys(subscription.toJSON()!.keys!) :
-          'No keys found'
-      });
-      console.log('Got subscription:', {
-        endpoint: subscription.endpoint,
-        keys: subscription.toJSON()?.keys ? Object.keys(subscription.toJSON()!.keys!) : 'No keys found'
-      });
-
-      // שלח עם הטוקן בheaders
-      // const response = await this.http.post(
-      //   `${config.baseURL}/notification`,
-      //   { subscription },
-      //   {
-      //     withCredentials: true, // 🔹 שולח את הקוקיז אוטומטית
-      //     headers: { 'Content-Type': 'application/json' },
-      //     observe: 'response'
-      //   }
-      // ).toPromise();
-      const response = await firstValueFrom(this.http.post(
-        `${config.baseURL}/notification`,
-        { subscription },
-        {
-          withCredentials: true,
-          headers: { 'Content-Type': 'application/json' },
-          observe: 'response'
-        }
-      ));
-
-      console.log('Subscription response:', {
-        status: response?.status,
-        statusText: response?.statusText
-      });
-
-      return subscription;
-    } catch (err: unknown) {
-      // טיפול מסודר בשגיאות
-      if (err instanceof HttpErrorResponse) {
-        console.error('🚨 HTTP Error details', {
-          status: err.status,
-          message: err.message,
-          error: err.error
-        });
-
-        if (err.status === 401) {
-          localStorage.removeItem('loginToken');
-          // ניתן להוסיף הפניה להתחברות מחדש
-        }
-      } else if (err instanceof Error) {
-        console.error('General Error:', {
-          name: err.name,
-          message: err.message
-        });
-      } else {
-        console.error('Unknown error:', err);
-      }
-
-      // זריקת השגיאה הלאה
-      throw err;
+      return token;
+    } catch (error) {
+      console.error('❌ Error requesting FCM token:', error);
+      throw error;
     }
   }
+
+
+
   async getExistingSubscription() {
     console.log('🔄 Fetching existing subscription from server...');
     try {
@@ -293,9 +404,7 @@ export class NotificationService {
 
   async loadVapidPublicKey(): Promise<void> {
     try {
-      //const response: any = await this.http.get(`${config.baseURL}/notification/vapid-public-key`).toPromise();
-      const response: any = await firstValueFrom(this.http.get(`${config.baseURL}/notification/vapid-public-key`));
-
+      const response = await firstValueFrom(this.http.get<{ vapidPublicKey: string }>(`${config.baseURL}/notification/vapid-public-key`));
       this.VAPID_PUBLIC_KEY = response.vapidPublicKey;
       console.log('✅ Loaded VAPID Public Key from server:', this.VAPID_PUBLIC_KEY);
     } catch (err) {

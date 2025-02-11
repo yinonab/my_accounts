@@ -31,7 +31,8 @@
     {
       "name": "api-cache",
       "urls": [
-        "/api/**"
+        "/api/**",
+        "https://fcm.googleapis.com/fcm/send"
       ],
       "cacheConfig": {
         "strategy": "freshness",
@@ -52,5 +53,8 @@
         "timeout": "5s"
       }
     }
+  ],
+  "navigationUrls": [
+    "/**"
   ]
 }

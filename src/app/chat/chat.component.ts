@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, inject } from '@angular/core';
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs';
 import { UserService } from '../services/user.service';
@@ -9,6 +9,7 @@ import { User } from '../models/user.model.ts';
 import { NotificationService, PushNotificationData } from '../services/notification.service';
 import { config } from '../services/config.service';
 import { HttpClient } from '@angular/common/http';
+import { FirebaseService } from '../services/firebase.service';
 
 
 @Component({
@@ -40,6 +41,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   isRoomJoined: boolean = false;
   currentUser: any;
   isMobile: boolean = false;
+  private firebaseService = inject(FirebaseService);
 
 
 
@@ -79,6 +81,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.socketSubscription = new Subscription();
     this.notificationPermission = Notification.permission;
     this.initializeNotifications();
+    this.firebaseService.getFCMToken().then(token => {
+      if (token) {
+        console.log("🔑 FCM Token received:", token);
+        this.notificationService.saveSubscription({ token });
+      }
+    });
+    this.firebaseService.listenForMessages();
     if (this.notificationPermission !== 'granted') {
       this.showNotificationPrompt();
     }
@@ -361,9 +370,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.socketService.sendPrivateMessage(this.targetUserId, this.newMessage);
 
     // הוספה לתצוגה מקומית
+    console.log("Message content:", this.newMessage);
+
     this.privateMessages.push(localMessage);
-    this.newMessage = '';
+    //
     // בתוך sendPrivateMessage
+    console.log("Message content:", this.newMessage);
+
     if (this.notificationsEnabled) {
       try {
         const notificationData: PushNotificationData = {  // שים לב לטיפוס החדש
@@ -386,6 +399,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         this.errorLogger.log('Error handling notification', err);
       }
     }
+    this.newMessage = '';
   }
 
   ngOnDestroy(): void {

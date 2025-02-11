@@ -34,6 +34,7 @@ export interface PushNotificationData {
 })
 export class NotificationService {
   private VAPID_PUBLIC_KEY: string = '';
+  private isSubscriptionRequested: boolean = false;
 
 
   constructor(
@@ -348,7 +349,43 @@ export class NotificationService {
   //     throw err;
   //   }
   // }
-  async requestSubscription() {
+  // async requestSubscription() {
+  //   console.log('🔄 Checking existing subscription...');
+  //   let token = await this.firebaseService.getFCMToken();
+
+  //   if (token) {
+  //     console.log('✅ Found existing token:', token);
+  //     return token;
+  //   }
+
+  //   console.log('🚀 No valid token found. Requesting a new one...');
+  //   try {
+  //     token = await this.firebaseService.getFCMToken();
+
+  //     if (!token) {
+  //       console.error('❌ Failed to retrieve FCM token. Aborting subscription.');
+  //       return null;
+  //     }
+
+  //     console.log('📡 Token received:', token);
+
+  //     // שליחת ה-Token לשרת
+  //     await this.saveSubscription({ token });
+
+  //     return token;
+  //   } catch (error) {
+  //     console.error('❌ Error requesting FCM token:', error);
+  //     throw error;
+  //   }
+  // }
+  async requestSubscription(): Promise<string | null> {
+    if (this.isSubscriptionRequested) {
+      console.log("🔄 Subscription כבר בוצעה. לא מבצע בקשה חוזרת.");
+      return await this.firebaseService.getFCMToken();
+    }
+
+    this.isSubscriptionRequested = true;
+
     console.log('🔄 Checking existing subscription...');
     let token = await this.firebaseService.getFCMToken();
 
@@ -360,24 +397,20 @@ export class NotificationService {
     console.log('🚀 No valid token found. Requesting a new one...');
     try {
       token = await this.firebaseService.getFCMToken();
-
       if (!token) {
         console.error('❌ Failed to retrieve FCM token. Aborting subscription.');
         return null;
       }
 
       console.log('📡 Token received:', token);
-
-      // שליחת ה-Token לשרת
       await this.saveSubscription({ token });
 
       return token;
     } catch (error) {
       console.error('❌ Error requesting FCM token:', error);
-      throw error;
+      return null;
     }
   }
-
 
 
   async getExistingSubscription() {

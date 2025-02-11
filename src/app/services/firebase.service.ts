@@ -3,6 +3,7 @@ import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { BehaviorSubject } from 'rxjs';
 import { NotificationService } from './notification.service';
+import { UserService } from './user.service';
 
 // הגדרות Firebase מהקונסול
 const firebaseConfig = {
@@ -20,10 +21,12 @@ const firebaseConfig = {
 })
 export class FirebaseService {
     private messaging;
+    private fcmToken: { [userId: string]: string } = {};
     private tokenSubject = new BehaviorSubject<string | null>(null);
     readonly vapidKey = "BJ0eDoKaqa38VXNfTokyeUKpM0OA9RflAK0gMkjeA-ddZlCYvE02m5YZa7ESS8dujQL-4S_67puRZJVP5Y_CYuo"; // וודא שזה המפתח הנכון
     private injector = inject(Injector);
     private _notificationService: NotificationService | null = null;
+    private _userService: UserService | null = null;
     constructor() {
         console.log("🚀 Firebase Service Initialized");
 
@@ -41,10 +44,30 @@ export class FirebaseService {
         }
         return this._notificationService;
     }
+    private get userService(): UserService {
+        if (!this._userService) {
+            this._userService = this.injector.get(UserService);
+        }
+        return this._userService;
+    }
 
     // רישום ה-Service Worker כדי לקבל נוטיפיקציות גם כשהאפליקציה לא פתוחה
+    // private async registerServiceWorker() {
+    //     if ('serviceWorker' in navigator) {
+    //         try {
+    //             const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    //             console.log("✅ Service Worker Registered:", registration);
+    //         } catch (error) {
+    //             console.error("❌ Service Worker Registration Failed:", error);
+    //         }
+    //     }
+    // }
     private async registerServiceWorker() {
         if ('serviceWorker' in navigator) {
+            if (navigator.serviceWorker.controller) {
+                console.log("🔄 Service Worker כבר רשום. לא מבצע רישום נוסף.");
+                return;
+            }
             try {
                 const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
                 console.log("✅ Service Worker Registered:", registration);
@@ -53,6 +76,7 @@ export class FirebaseService {
             }
         }
     }
+
 
     // מחזיר Observable שניתן להאזין לו כדי לקבל את ה-token
     getTokenObservable() {
@@ -75,22 +99,47 @@ export class FirebaseService {
     }
 
     // קבלת ה-FCM Token ושליחתו לשרת
+    // async getFCMToken(): Promise<string | null> {
+    //     try {
+    //         const token = await getToken(this.messaging, { vapidKey: this.vapidKey });
+    //         console.log("✅ first:", token);
+    //         if (token) {
+    //             console.log("✅ FCM Token received:", token);
+    //             this.tokenSubject.next(token);
+    //             //await this.sendTokenToServer(token);
+    //             await this.notificationService.saveSubscription({ token });
+    //             return token; // ✅ עכשיו הפונקציה מחזירה את ה-Token
+    //         } else {
+    //             console.warn("⚠️ No FCM token received.");
+    //             return null;
+    //         }
+    //     } catch (error) {
+    //         console.error("❌ Error retrieving FCM token:", error);
+    //         return null;
+    //     }
+    // }
     async getFCMToken(): Promise<string | null> {
+        const currentUser = this.userService.getLoggedInUser()?._id; // שיטה שמחזירה את ה-ID של המשתמש המחובר כעת
+
+        if (currentUser && this.fcmToken[currentUser]) {
+            console.log(`🔄 משתמש ב-Token הקיים עבור המשתמש: ${currentUser}`, this.fcmToken[currentUser]);
+            return this.fcmToken[currentUser];
+        }
+
         try {
-            const token = await getToken(this.messaging, { vapidKey: this.vapidKey });
-            console.log("✅ first:", token);
-            if (token) {
-                console.log("✅ FCM Token received:", token);
-                this.tokenSubject.next(token);
-                //await this.sendTokenToServer(token);
-                await this.notificationService.saveSubscription({ token });
-                return token; // ✅ עכשיו הפונקציה מחזירה את ה-Token
+            const newToken = await getToken(this.messaging, { vapidKey: this.vapidKey });
+
+            if (newToken) {
+                console.log(`✅ FCM Token חדש התקבל עבור ${currentUser}:`, newToken);
+                this.fcmToken[currentUser!] = newToken; // שמור את ה-Token לפי המשתמש
+                await this.notificationService.saveSubscription({ token: newToken });
+                return newToken;
             } else {
-                console.warn("⚠️ No FCM token received.");
+                console.warn("⚠️ לא התקבל Token.");
                 return null;
             }
         } catch (error) {
-            console.error("❌ Error retrieving FCM token:", error);
+            console.error("❌ שגיאה בעת קבלת FCM Token:", error);
             return null;
         }
     }
@@ -102,7 +151,7 @@ export class FirebaseService {
             console.log("📩 Foreground notification received:", payload);
             new Notification(payload.notification?.title ?? "New Notification", {
                 body: payload.notification?.body,
-                icon: payload.notification?.icon
+                icon: payload.notification?.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
             });
         });
     }

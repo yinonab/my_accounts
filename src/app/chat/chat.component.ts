@@ -94,7 +94,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     if (this.chatType === 'group') {
       this.socketSubscription.add(
-        this.socketService.on('chat-add-msg', (msg: ChatMessage) => {
+        this.socketService.on('chat-add-msg', async (msg: ChatMessage) => {
           console.log('📩 New group message received:', msg);
           if (msg.sender === this.currentUser._id) {
             msg.senderName = 'Me';
@@ -103,6 +103,25 @@ export class ChatComponent implements OnInit, OnDestroy {
             msg.senderName = this.userCache[msg.sender] || 'User ' + msg.sender;
           }
           this.messages.push(msg);
+          if (this.notificationsEnabled && msg.sender !== this.currentUser._id) {
+            try {
+              const notificationData: PushNotificationData = {
+                title: `📢 הודעה חדשה בקבוצה`,
+                body: msg.text,
+                icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+                vibrate: [200, 100, 200],
+                requireInteraction: true,
+                data: {
+                  senderId: msg.sender,
+                  chatType: 'group'
+                }
+              };
+              await this.notificationService.sendNotification(notificationData);
+              console.log('✅ נשלחה נוטיפיקציה על הודעה קבוצתית:', msg);
+            } catch (err) {
+              console.error('❌ שגיאה בשליחת נוטיפיקציה:', err);
+            }
+          }
         })
       );
     } else if (this.chatType === 'private') {
@@ -155,7 +174,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       const notificationData: PushNotificationData = {
         title: 'נוטיפיקציית בדיקה',
         body: 'זו נוטיפיקציה בדיקתית',
-        icon: '/assets/notification-icon.png',
+        icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
         data: {
           userId: this.currentUser._id
         }
@@ -274,9 +293,9 @@ export class ChatComponent implements OnInit, OnDestroy {
           if (this.notificationsEnabled && msg.sender !== currentUser._id) {
             try {
               const notificationData: PushNotificationData = {  // שים לב לטיפוס החדש
-                title: `הודעה חדשה מ-${formattedMessage.senderName}`,
+                title: `📢 הודעה חדשה מ- ${formattedMessage.senderName}`,
                 body: msg.text,
-                icon: '/assets/chat-icon.png',
+                icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
                 vibrate: [200, 100, 200],
                 requireInteraction: true,
                 data: {
@@ -316,7 +335,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       await this.notificationService.sendNotification({
         title: 'בדיקת מערכת',
         body: 'הנוטיפיקציות עובדות!',
-        icon: '/assets/icon.png'
+        icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png"
       });
 
       this.errorLogger.log('נוטיפיקציית בדיקה נשלחה בהצלחה');
@@ -382,7 +401,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         const notificationData: PushNotificationData = {  // שים לב לטיפוס החדש
           title: 'הודעה חדשה',
           body: this.newMessage,
-          icon: '/assets/chat-icon.png',
+          icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
           vibrate: [200, 100, 200],  // נוסיף רטט
           requireInteraction: true,   // הנוטיפיקציה תישאר עד שילחצו עליה
           data: {

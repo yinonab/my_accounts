@@ -1,6 +1,6 @@
 import { Component, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import { User } from '../../../models/user.model.ts';
 import { UserService } from '../../../services/user.service';
 import { SocketService } from '../../../services/socket.service.js';
@@ -19,6 +19,8 @@ export class UserIndexComponent {
   isPrivateChatOpen = false;
   unreadPrivateMessagesCount = 0;
   unreadMessagesMap = new Map<string, BehaviorSubject<number>>();
+  unreadMessagesTimestamps = new Map<string, number>();
+
 
   ngOnInit(): void {
     this.loadUsers();
@@ -35,8 +37,26 @@ export class UserIndexComponent {
       if (unreadCount$) {
         unreadCount$.next(unreadCount$.value + 1);
       }
+      this.unreadMessagesTimestamps.set(msg.sender, Date.now());
+
+      // 🔥 מיון מחדש של המשתמשים
+      this.sortUsersByLastMessage();
+
     });
   }
+  private sortUsersByLastMessage(): void {
+    this.users$ = this.userService.users$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      map(users => {
+        return users.sort((a, b) => {
+          const lastMsgA = this.unreadMessagesTimestamps.get(a._id) || 0;
+          const lastMsgB = this.unreadMessagesTimestamps.get(b._id) || 0;
+          return lastMsgB - lastMsgA; // מסדר מהאחרון שקיבל הודעה לראשון
+        });
+      })
+    );
+  }
+
   getUnreadMessagesCount(userId: string): Observable<number> {
     if (!this.unreadMessagesMap.has(userId)) {
       this.unreadMessagesMap.set(userId, new BehaviorSubject(0));
@@ -60,6 +80,8 @@ export class UserIndexComponent {
     this.userService.loadUsers().subscribe({
       error: err => console.error('Failed to load users:', err),
     });
+    this.sortUsersByLastMessage();
+
 
     // מאזין לרשימת המשתמשים
     this.users$ = this.userService.users$.pipe(

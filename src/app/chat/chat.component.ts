@@ -293,7 +293,7 @@ export class ChatComponent implements OnInit, OnDestroy {
           if (this.notificationsEnabled && msg.sender !== currentUser._id) {
             try {
               const notificationData: PushNotificationData = {  // שים לב לטיפוס החדש
-                title: `📢 הודעה חדשה מ- ${formattedMessage.senderName}`,
+                title: `🚨 הודעה חדשה מ- ${formattedMessage.senderName}`,
                 body: msg.text,
                 icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
                 vibrate: [200, 100, 200],

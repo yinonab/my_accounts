@@ -27,6 +27,7 @@ export class FirebaseService {
     private injector = inject(Injector);
     private _notificationService: NotificationService | null = null;
     private _userService: UserService | null = null;
+    private lastNotificationTime: number | null = null;
     constructor() {
         console.log("🚀 Firebase Service Initialized");
 
@@ -144,11 +145,14 @@ export class FirebaseService {
         }
     }
 
-
+    getLastNotificationTime(): number | null {
+        return this.lastNotificationTime;
+    }
     // מאזין לנוטיפיקציות כשהאפליקציה **פתוחה**
     listenForMessages() {
         onMessage(this.messaging, (payload) => {
             console.log("📩 Foreground notification received:", payload);
+            this.lastNotificationTime = Date.now();
             new Notification(payload.notification?.title ?? "New Notification", {
                 body: payload.notification?.body,
                 icon: payload.notification?.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",

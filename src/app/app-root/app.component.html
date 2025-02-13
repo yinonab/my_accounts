@@ -1,5 +1,10 @@
 <main class="main-layout">
   <app-header></app-header>
+  <div class="app-container">
+    <button *ngIf="showInstallButton" class="install-button" (click)="installPWA()">
+      📲 התקן כאפליקציה
+    </button>
+  </div>
   <router-outlet></router-outlet>
   <router-outlet></router-outlet>
   <app-loader></app-loader>

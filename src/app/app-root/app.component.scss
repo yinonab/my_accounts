@@ -1,0 +1,38 @@
+/* קונטיינר כללי */
+.app-container {
+    text-align: center;
+    margin-top: 20px;
+    margin: 2em;
+}
+
+/* סגנון כפתור ההתקנה */
+.install-button {
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    margin-top: 15px;
+    transition: background 0.3s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* אפקט hover */
+.install-button:hover {
+    background: #1565c0;
+    transform: scale(1.05);
+}
+
+/* התאמות למובייל */
+@media (max-width: 768px) {
+    .install-button {
+        font-size: 14px;
+        padding: 0.4em 0.4em;
+    }
+}

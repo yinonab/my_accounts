@@ -24,21 +24,21 @@
         </div>
     </div>
 </div>
-<div *ngIf="notificationPermission !== 'granted'" class="notification-permission">
+<!-- <div *ngIf="notificationPermission !== 'granted'" class="notification-permission">
     <button (click)="showNotificationPrompt()" class="notification-button">
         הפעל התראות 🔔
     </button>
-</div>
+</div> -->
 
-<button *ngIf="notificationPermission === 'granted'" (click)="sendTestNotification()" class="test-notification-btn">
+<!-- <button *ngIf="notificationPermission === 'granted'" (click)="sendTestNotification()" class="test-notification-btn">
     בדוק נוטיפיקציה
-</button>
+</button> -->
 <!-- הוספה בתחתית הטמפלייט -->
-<div class="debug-panel" *ngIf="isMobile">
+<!-- <div class="debug-panel" *ngIf="isMobile">
     <button (click)="showDebugInfo()" class="debug-button">
         🐞
     </button>
-</div>
+</div> -->
 
 <style>
     .debug-panel {

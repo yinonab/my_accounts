@@ -4,6 +4,8 @@ import { User } from '../models/user.model.ts';
 import { storageService } from './async-storage.service'; // Replace with your async storage service
 import { CloudinaryService } from './cloudinary.service';
 import { SocketService } from './socket.service.js';
+import { config } from './config.service';
+
 
 
 const ENTITY_AUTH = 'auth';
@@ -11,6 +13,7 @@ const ENTITY = 'user';
 const LOGGEDIN_USER = 'loggedInUser';
 const FACEBOOK_ID = 'facebookId';
 const FACEBOOK_ACCESS_TOKEN = 'facebookAccessToken';
+const LOGIN_TOKEN = 'loginTokenBackup';
 
 
 
@@ -33,7 +36,10 @@ export class UserService {
     // if (!users || users.length === 0) {
     //   localStorage.setItem(ENTITY, JSON.stringify(this._createDemoUsers()));
     // }
+    this._restoreLoginToken(); // 🟢 שחזור טוקן אם הקוקי נמחק
     this._loadUsersFromDB();
+    this._loadLoggedInUser();
+    this.setupTokenRecoveryListener();
     const loggedInUser = JSON.parse(localStorage.getItem(LOGGEDIN_USER) || 'null');
     if (loggedInUser && loggedInUser._id) {
       this._loggedInUser$.next(loggedInUser);
@@ -51,7 +57,30 @@ export class UserService {
       )
       .subscribe();
   }
+  /** 🟢 טעינת המשתמש המחובר */
+  private _loadLoggedInUser(): void {
+    const loggedInUser = JSON.parse(localStorage.getItem(LOGGEDIN_USER) || 'null');
+    if (loggedInUser && loggedInUser._id) {
+      this._loggedInUser$.next(loggedInUser);
+      this.socketService.setup(); // חיבור ל-Socket אם יש משתמש מחובר
+    }
+  }
+  // Get logged-in user from local storage
+  public getLoggedInUser(): User | null {
+    return JSON.parse(localStorage.getItem(LOGGEDIN_USER) || 'null');
+  }
+  /** 🟢 שמירת המשתמש המחובר והטוקן */
+  public setLoggedInUser(user: User, token: string): void {
+    this._loggedInUser$.next(user);
+    localStorage.setItem(LOGGEDIN_USER, JSON.stringify(user));
+    this._saveLoginToken(token);
+    this.socketService.login(user._id);
+  }
 
+  // public setLoggedInUser(user: User): void {
+  //   this._loggedInUser$.next(user); // עדכון ה-BehaviorSubject
+  //   localStorage.setItem(LOGGEDIN_USER, JSON.stringify(user)); // עדכון ה-localStorage
+  // }
   // public login(username: string, password: string): Observable<User> {
   //   return from(storageService.query<User>(ENTITY)).pipe(
   //     map(users => {
@@ -67,18 +96,100 @@ export class UserService {
   //   );
   // }
 
+  /** 🔄 שמירת ה-`loginToken` גם בקוקי וגם בגיבוי `localStorage` */
+  private _saveLoginToken(token: string): void {
+    document.cookie = `loginToken=${token}; path=/; Secure; SameSite=Lax; max-age=${30 * 24 * 60 * 60}`;
+    localStorage.setItem(LOGIN_TOKEN, token);
+    sessionStorage.setItem(LOGIN_TOKEN, token);
+  }
+
+  /** 🔄 שחזור `loginToken` אם הקוקי נמחק */
+  private _restoreLoginToken(): void {
+    const tokenFromCookie = this.getCookie("loginToken");
+    if (!tokenFromCookie) {
+      const backupToken = localStorage.getItem(LOGIN_TOKEN);
+      if (backupToken) {
+        console.log("🔄 משחזר `loginToken` מה-LocalStorage...");
+        this._saveLoginToken(backupToken);
+      } else {
+        console.warn("❌ לא נמצא Token לשחזור");
+      }
+    }
+  }
+
+  /** 🔥 האזנה לחזרת המשתמש לאפליקציה ושחזור `loginToken` */
+  public setupTokenRecoveryListener(): void {
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        console.log("🔄 האפליקציה חזרה לפוקוס – בודק תוקף `loginToken`...");
+        this.refreshLoginTokenIfNeeded();
+      }
+    });
+  }
+  /** 🟢 שליפת `loginToken` מהקוקי */
+  getCookie(name: string): string | null {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
+  }
+
+  /** 🟢 בדיקה אם צריך לשחזר `loginToken` */
+  public refreshLoginTokenIfNeeded(): void {
+    let token = this.getCookie("loginToken") || sessionStorage.getItem(LOGIN_TOKEN) || localStorage.getItem(LOGIN_TOKEN);
+    if (!token) {
+      console.log("🔄 Token נמחק – משחזר...");
+      this._restoreLoginToken();
+    }
+    console.log("🔍 בודק האם ה-Token משוחזר בהצלחה:", this.getCookie("loginToken"));
+
+  }
+  public restoreLoginToken(token: string): void {
+    if (!token) {
+      console.warn("❌ לא התקבל Token לשחזור");
+      return;
+    }
+    console.log("🔄 משחזר את ה-Token:", token);
+    this._saveLoginToken(token);
+  }
+  public keepSessionAlive(): void {
+    fetch(`${config.baseURL}/auth/ping`, { method: 'GET', credentials: 'include' })
+      .then(response => console.log("✅ Keep-Alive Ping הצליח"))
+      .catch(error => console.warn("⚠️ Keep-Alive Ping נכשל", error));
+  }
+
+
+  // public login(username: string, password: string): Observable<User> {
+  //   const loginData = { username, password }; // Prepare login payload
+  //   return from(storageService.login<User>('auth/login', loginData)).pipe(
+  //     tap((loggedInUser: User) => {
+  //       // Update logged-in user BehaviorSubject and localStorage
+  //       this._loggedInUser$.next(loggedInUser);
+  //       localStorage.setItem(LOGGEDIN_USER, JSON.stringify(loggedInUser));
+  //       this.socketService.login(loggedInUser._id);
+  //     }),
+  //     catchError(this._handleError) // Handle errors
+  //   );
+  // }
   public login(username: string, password: string): Observable<User> {
-    const loginData = { username, password }; // Prepare login payload
-    return from(storageService.login<User>('auth/login', loginData)).pipe(
-      tap((loggedInUser: User) => {
-        // Update logged-in user BehaviorSubject and localStorage
+    const loginData = { username, password };
+
+    return from(storageService.login<{ user: User, loginToken: string }>('auth/login', loginData)).pipe(
+      tap((response) => {
+        const loggedInUser: User = response.user; // ✅ שמירת המשתמש
+        const loginToken: string = response.loginToken; // ✅ שמירת ה־Token
+
+        // ✅ שמירה על הלוגיקה המקורית שלך
         this._loggedInUser$.next(loggedInUser);
         localStorage.setItem(LOGGEDIN_USER, JSON.stringify(loggedInUser));
         this.socketService.login(loggedInUser._id);
+
+        // ✅ הוספת שמירת ה־`loginToken`
+        this._saveLoginToken(loginToken);
       }),
-      catchError(this._handleError) // Handle errors
+      map(response => response.user), // 🟢 ממיר את הפלט כך שיחזור רק `User`
+      catchError(this._handleError)
     );
   }
+
 
   public loginWithFacebook(fbUser: {
     facebookId: string;
@@ -113,13 +224,11 @@ export class UserService {
     localStorage.removeItem(LOGGEDIN_USER);
     localStorage.removeItem(FACEBOOK_ID);
     localStorage.removeItem(FACEBOOK_ACCESS_TOKEN);
+    localStorage.removeItem(LOGIN_TOKEN);
     this.socketService.logout();
   }
 
-  // Get logged-in user from local storage
-  public getLoggedInUser(): User | null {
-    return JSON.parse(localStorage.getItem(LOGGEDIN_USER) || 'null');
-  }
+
 
   // Load users from storage and apply sorting
   // public loadUsers(): Observable<User[]> {
@@ -254,10 +363,7 @@ export class UserService {
       catchError(this._handleError)
     );
   }
-  public setLoggedInUser(user: User): void {
-    this._loggedInUser$.next(user); // עדכון ה-BehaviorSubject
-    localStorage.setItem(LOGGEDIN_USER, JSON.stringify(user)); // עדכון ה-localStorage
-  }
+
 
 
   // Generate a random ID
@@ -311,7 +417,7 @@ export class UserService {
         return this.saveUser(updatedUser).pipe(
           tap((savedUser) => {
             console.log('Updated user sent to the server:', savedUser);
-            this.setLoggedInUser(savedUser); // שימוש בפונקציה החדשה
+            this.setLoggedInUser(savedUser, this.getCookie("loginToken") || '');
           })
         );
       }),

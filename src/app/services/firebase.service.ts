@@ -121,6 +121,7 @@ export class FirebaseService {
     // }
     async getFCMToken(): Promise<string | null> {
         const currentUser = this.userService.getLoggedInUser()?._id; // שיטה שמחזירה את ה-ID של המשתמש המחובר כעת
+        console.log(` currentUser - ${currentUser}:`);
 
         if (currentUser && this.fcmToken[currentUser]) {
             console.log(`🔄 משתמש ב-Token הקיים עבור המשתמש: ${currentUser}`, this.fcmToken[currentUser]);
@@ -129,6 +130,8 @@ export class FirebaseService {
 
         try {
             const newToken = await getToken(this.messaging, { vapidKey: this.vapidKey });
+            console.log(` newToken - ${newToken}:`);
+
 
             if (newToken) {
                 console.log(`✅ FCM Token חדש התקבל עבור ${currentUser}:`, newToken);

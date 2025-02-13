@@ -50,7 +50,7 @@ export class HeaderComponent implements OnInit {
 
         // עדכון ה-loggedInUser עם הערך החדש
         this.loggedInUser = savedUser;
-        this.userService.setLoggedInUser(savedUser); // עדכון ב-BehaviorSubject
+        this.userService.setLoggedInUser(savedUser, this.userService.getCookie("loginToken") || ''); // עדכון ב-BehaviorSubject
 
         this.msgService.setSuccessMsg('Profile picture updated successfully!');
         this.toggleUpload = false; // סגירת המנגנון של העלאת התמונה

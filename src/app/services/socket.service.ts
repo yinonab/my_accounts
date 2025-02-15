@@ -26,6 +26,8 @@ export class SocketService {
   private socket: Socket | null = null;
   private injector: Injector;
   public privateMessagesBuffer: ChatMessage[] = []; // עדכון הטיפוס
+  private heartbeatInterval: any = null;
+
 
 
 
@@ -68,7 +70,16 @@ export class SocketService {
         this.errorLogger.log('Socket connected successfully', { socketId: this.socket?.id });
         console.log('🔌 Socket connected:', this.socket?.id);
         this.initializeSocketConnection();
+        this.keepSocketAlive();
       });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          console.log("📱 האפליקציה חזרה לפעול, מנסה להתחבר מחדש...");
+          this.setup();
+        }
+      });
+
 
       // הוספת ניטור שגיאות
       this.socket.on('connect_error', (error) => {
@@ -84,6 +95,10 @@ export class SocketService {
       this.socket.on('disconnect', (reason) => {
         this.errorLogger.log('Socket disconnected', { reason });
         console.log('Socket disconnected:', reason);
+        setTimeout(() => {
+          console.log("🔄 מנסה להתחבר מחדש...");
+          this.setup();
+        }, 5000);
       });
     } catch (error) {
       this.errorLogger.log('Error in setup', { error });
@@ -215,6 +230,29 @@ export class SocketService {
       this.privateMessagesBuffer.push(message);
     }
   }
+
+  // private keepSocketAlive(): void {
+  //   if (!this.socket) return;
+
+  //   setInterval(() => {
+  //     console.log("🔄 שולח Keep-Alive ל-Socket...");
+  //     this.socket?.emit("ping"); // שולח אירוע "ping" כדי לשמור על החיבור
+  //   }, 4 * 60 * 1000); // שליחת ping כל 4 דקות
+  // }
+  private keepSocketAlive(): void {
+    if (!this.socket) return;
+
+    // מניעת יצירת מספר אינטרוולים במקביל
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+    }
+
+    this.heartbeatInterval = setInterval(() => {
+      console.log("🔄 שולח Keep-Alive ל-Socket...");
+      this.socket?.emit("ping");
+    }, 30 * 1000);
+  }
+
 
 
 

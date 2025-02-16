@@ -104,18 +104,37 @@ export class UserService {
   }
 
   /** 🔄 שחזור `loginToken` אם הקוקי נמחק */
+  // private _restoreLoginToken(): void {
+  //   const tokenFromCookie = this.getCookie("loginToken");
+  //   if (!tokenFromCookie) {
+  //     const backupToken = localStorage.getItem(LOGIN_TOKEN);
+  //     if (backupToken) {
+  //       console.log("🔄 משחזר `loginToken` מה-LocalStorage...");
+  //       this._saveLoginToken(backupToken);
+  //     } else {
+  //       console.warn("❌ לא נמצא Token לשחזור");
+  //     }
+  //   }
+  // }
+  /** 🔄 שחזור `loginToken` ממקור זמין */
   private _restoreLoginToken(): void {
-    const tokenFromCookie = this.getCookie("loginToken");
-    if (!tokenFromCookie) {
-      const backupToken = localStorage.getItem(LOGIN_TOKEN);
-      if (backupToken) {
-        console.log("🔄 משחזר `loginToken` מה-LocalStorage...");
-        this._saveLoginToken(backupToken);
-      } else {
-        console.warn("❌ לא נמצא Token לשחזור");
-      }
+    let token = this.getCookie("loginToken") ||
+      sessionStorage.getItem(LOGIN_TOKEN) ||
+      sessionStorage.getItem("loginTokenBackup") ||
+      localStorage.getItem(LOGIN_TOKEN) ||
+      localStorage.getItem("loginTokenBackup");
+
+    if (!token) {
+      console.warn("❌ לא נמצא Token לשחזור – יש להתחבר מחדש");
+      return;
     }
+
+    console.log("🔄 משחזר את `loginToken` ממקור זמין:", token);
+    this._saveLoginToken(token);
+    console.log("👤 משתמש מחובר כרגע:", this._loggedInUser$.value);
+
   }
+
 
   /** 🔥 האזנה לחזרת המשתמש לאפליקציה ושחזור `loginToken` */
   public setupTokenRecoveryListener(): void {
@@ -134,13 +153,24 @@ export class UserService {
 
   /** 🟢 בדיקה אם צריך לשחזר `loginToken` */
   public refreshLoginTokenIfNeeded(): void {
-    let token = this.getCookie("loginToken") || sessionStorage.getItem(LOGIN_TOKEN) || localStorage.getItem(LOGIN_TOKEN);
-    if (!token) {
-      console.log("🔄 Token נמחק – משחזר...");
-      this._restoreLoginToken();
-    }
-    console.log("🔍 בודק האם ה-Token משוחזר בהצלחה:", this.getCookie("loginToken"));
+    let token = this.getCookie("loginToken") ||
+      sessionStorage.getItem(LOGIN_TOKEN) ||
+      sessionStorage.getItem("loginTokenBackup") ||
+      localStorage.getItem(LOGIN_TOKEN) ||
+      localStorage.getItem("loginTokenBackup");
 
+    console.log("🔍 נבדקו מקורות הטוקן:");
+    console.log("🍪 קוקי:", this.getCookie("loginToken"));
+    console.log("📦 SessionStorage:", sessionStorage.getItem("loginToken"));
+    console.log("📦 SessionStorage (Backup):", sessionStorage.getItem("loginTokenBackup"));
+    console.log("💾 LocalStorage:", localStorage.getItem(LOGIN_TOKEN));
+    console.log("💾 LocalStorage (Backup):", localStorage.getItem("loginTokenBackup"));
+
+    if (!token) {
+      console.warn("❌ לא נמצא Token לשחזור – יש להתחבר מחדש");
+    } else {
+      console.log("✅ Token משוחזר בהצלחה:", token);
+    }
   }
   public restoreLoginToken(token: string): void {
     if (!token) {

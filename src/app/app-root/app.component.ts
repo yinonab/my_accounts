@@ -43,7 +43,13 @@ export class AppComponent implements OnInit, OnDestroy {
     console.log("🚀 AppComponent Initialized");
     this.userService.refreshLoginTokenIfNeeded();
     document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) {
+      if (document.hidden) {
+        console.log("🔄 הדף ברקע - מפעיל טיימר לרענון...");
+        setTimeout(() => {
+          console.log("🔄 רענון בגלל זמן ממושך ברקע...");
+          location.reload();
+        }, 60 * 1000); // רענון כל 2 דקות
+      } else {
         console.log("🔄 האפליקציה חזרה לפוקוס – בודק תוקף Token...");
         this.userService.refreshLoginTokenIfNeeded();
       }

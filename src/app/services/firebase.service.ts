@@ -155,13 +155,29 @@ export class FirebaseService {
     listenForMessages() {
         onMessage(this.messaging, (payload) => {
             console.log("📩 Foreground notification received:", payload);
+
             this.lastNotificationTime = Date.now();
-            new Notification(payload.notification?.title ?? "New Notification", {
-                body: payload.notification?.body,
-                icon: payload.notification?.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
-            });
+
+            // ✅ ניגשים לשדות עם סוגריים מרובעים כדי למנוע שגיאת TS
+            const notificationTitle = payload.data?.['title'] || "🔔 הודעה חדשה";
+            const notificationOptions = {
+                body: payload.data?.['body'] || "📩 יש לך הודעה חדשה!",
+                icon: payload.data?.['icon'] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+                badge: payload.data?.['badge'] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+                vibrate: [200, 100, 200],
+                requireInteraction: true
+            };
+
+            if (document.hidden) {
+                console.log("📲 מציג נוטיפיקציה", notificationTitle);
+                new Notification(notificationTitle, notificationOptions);
+            } else {
+                console.log("🔔 הצגת התראה בתוך האפליקציה");
+            }
         });
     }
+
+
 
     // שליחת ה-Token לשרת לשימוש עתידי
     async sendTokenToServer(token: string) {

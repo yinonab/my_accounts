@@ -48,11 +48,11 @@ export class AppComponent implements OnInit, OnDestroy {
       if (document.hidden) {
         console.log("🔄 האפליקציה עברה לרקע, שולח פינג כדי לוודא שה-Socket לא יתנתק...");
         this.socketService.emit("ping");
-        console.log("🔄 הדף ברקע - מפעיל טיימר לרענון...");
-        setTimeout(() => {
-          console.log("🔄 רענון בגלל זמן ממושך ברקע...");
-          location.reload();
-        }, 60 * 1000); // רענון כל 2 דקות
+        // console.log("🔄 הדף ברקע - מפעיל טיימר לרענון...");
+        // setTimeout(() => {
+        //   console.log("🔄 רענון בגלל זמן ממושך ברקע...");
+        //   location.reload();
+        // },10 * 60 * 1000); // רענון כל 2 דקות
       } else {
         console.log("🔄 האפליקציה חזרה לפוקוס – בודק תוקף Token...");
         this.userService.refreshLoginTokenIfNeeded();

@@ -214,6 +214,7 @@ export class NotificationService {
           {
             title: data.title,
             body: data.body,
+            wakeUpApp: "true",
             token: token,
             icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
             badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",

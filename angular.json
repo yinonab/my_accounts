@@ -29,7 +29,6 @@
               "src/favicon.ico",
               "src/assets",
               "src/manifest.webmanifest",
-              "src/custom-service-worker.js",
               "src/firebase-messaging-sw.js"
             ],
             "serviceWorker": "ngsw-config.json",
@@ -91,7 +90,6 @@
               "src/favicon.ico",
               "src/assets",
               "src/manifest.webmanifest",
-              "src/custom-service-worker.js",
               "src/firebase-messaging-sw.js"
             ],
             "styles": [

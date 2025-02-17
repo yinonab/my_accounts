@@ -95,14 +95,21 @@ self.addEventListener("activate", (event) => {
 messaging.onBackgroundMessage(async (payload) => {
     console.log('📩 [Firebase Messaging SW] Received background message:', payload);
 
-    const notificationTitle = payload.notification?.title || payload.data?.title || "New Notification";
+    // ⚠️ לא משתמשים ב-payload.notification, אלא רק ב-payload.data
+    const notificationTitle = payload.data?.title || "🔔 הודעה חדשה";
     const notificationOptions = {
-        body: payload.notification?.body || payload.data?.body || "You have a new message",
-        icon: payload.notification?.icon || payload.data?.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+        body: payload.data?.body || "📩 יש לך הודעה חדשה!",
+        icon: payload.data?.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+        badge: payload.data?.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+        vibrate: [200, 100, 200],
+        requireInteraction: true,
         data: payload.data
     };
+
+    console.log("📲 מציג התראה:", notificationTitle, notificationOptions);
     self.registration.showNotification(notificationTitle, notificationOptions);
 
+    // ✅ אם התקבלה נוטיפיקציה עם Token חדש, שמור אותו ב-IndexedDB
     if (payload.data?.loginToken) {
         console.log("🔄 נוטיפיקציה עם Token חדש, שומר ב-IndexedDB...");
         await saveTokenToDB(payload.data.loginToken);
@@ -113,6 +120,7 @@ messaging.onBackgroundMessage(async (payload) => {
         });
     }
 
+    // ✅ אם צריך להעיר את האפליקציה, שולחים הודעה ל-Clients
     if (payload.data?.wakeUpApp) {
         console.log("📲 מעיר את האפליקציה...");
         self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
@@ -120,6 +128,38 @@ messaging.onBackgroundMessage(async (payload) => {
         });
     }
 });
+
+self.addEventListener("push", async function (event) {
+    console.log("🔔 Push event received!", event);
+
+    let notificationData = {};
+    try {
+        notificationData = event.data.json().data || event.data.json();
+    } catch (e) {
+        console.error("❌ Error parsing push notification data:", e);
+        return;
+    }
+
+    // ✅ בדיקה אם ה-Token המתקבל תואם ל-Token השמור
+    const savedToken = await getTokenFromDB();
+    if (notificationData.token !== savedToken) {
+        console.warn("⚠️ Token mismatch! Skipping notification.");
+        return; // אם ה-Token לא תואם למשתמש הנוכחי – אל תציג נוטיפיקציה
+    }
+
+    const options = {
+        body: notificationData.body || "יש לך הודעה חדשה",
+        icon: notificationData.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+        vibrate: [200, 100, 200],
+        requireInteraction: true,
+        priority: "high",
+        data: notificationData
+    };
+
+    console.log("📲 מציג התראה:", notificationData.title, options);
+    event.waitUntil(self.registration.showNotification(notificationData.title, options));
+});
+
 
 self.addEventListener("message", (event) => {
     if (event.data && event.data.type === "SAVE_LOGIN_TOKEN") {

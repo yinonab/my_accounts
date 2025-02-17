@@ -75,6 +75,11 @@ export class AppComponent implements OnInit, OnDestroy {
       }
       if (event.data && event.data.type === "WAKE_UP") {
         console.log("📲 קיבלנו הודעה להעיר את האפליקציה - מבצע התחברות מחדש!");
+        if (document.hidden) {
+          console.log("🔄 האפליקציה ברקע, מנסה להעיר אותה...");
+          window.focus();
+        }
+
         if (!this.socketService.isConnected()) {
           console.log("🔌 ה-Socket נותק, מתחבר מחדש...");
           this.socketService.setup();

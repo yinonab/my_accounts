@@ -12,6 +12,7 @@ export interface PushNotificationData {
   body: string;
   icon?: string;
   badge?: string;
+  wakeUpApp?: boolean;
   vibrate?: number[];
   data?: {
     [key: string]: any;
@@ -214,7 +215,7 @@ export class NotificationService {
           {
             title: data.title,
             body: data.body,
-            wakeUpApp: "true",
+            wakeUpApp: data.wakeUpApp ? "true" : "false",
             token: token,
             icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
             badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",

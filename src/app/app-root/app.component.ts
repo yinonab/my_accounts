@@ -6,6 +6,7 @@ import { PwaService } from '../services/pwa.service';
 import { NotificationService } from '../services/notification.service';
 import { NotificationMobileService } from '../services/notification.mobile.service';
 import { UserService } from '../services/user.service';
+import { SocketService } from '../services/socket.service';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +20,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private pwaService = inject(PwaService);
   private notificationMobileService = inject(NotificationMobileService);
   private userService = inject(UserService);
+  private socketService = inject(SocketService);
   subscription!: Subscription
   private idleTimer: any;
   private idleTime = 0;
@@ -44,6 +46,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.userService.refreshLoginTokenIfNeeded();
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
+        console.log("🔄 האפליקציה עברה לרקע, שולח פינג כדי לוודא שה-Socket לא יתנתק...");
+        this.socketService.emit("ping");
         console.log("🔄 הדף ברקע - מפעיל טיימר לרענון...");
         setTimeout(() => {
           console.log("🔄 רענון בגלל זמן ממושך ברקע...");
@@ -52,6 +56,11 @@ export class AppComponent implements OnInit, OnDestroy {
       } else {
         console.log("🔄 האפליקציה חזרה לפוקוס – בודק תוקף Token...");
         this.userService.refreshLoginTokenIfNeeded();
+        console.log("📲 האפליקציה חזרה לפוקוס, בודק אם ה-Socket עדיין מחובר...");
+        if (!this.socketService.isConnected()) {
+          console.log("🔌 ה-Socket נותק, מבצע התחברות מחדש...");
+          this.socketService.setup();
+        }
       }
     });
     this.resetIdleTimer();
@@ -63,6 +72,13 @@ export class AppComponent implements OnInit, OnDestroy {
       if (event.data && event.data.type === "RESTORE_LOGIN_TOKEN") {
         console.log("🔄 קיבלנו Token משוחזר מה-Service Worker:", event.data.token);
         this.userService.restoreLoginToken(event.data.token);
+      }
+      if (event.data && event.data.type === "WAKE_UP") {
+        console.log("📲 קיבלנו הודעה להעיר את האפליקציה - מבצע התחברות מחדש!");
+        if (!this.socketService.isConnected()) {
+          console.log("🔌 ה-Socket נותק, מתחבר מחדש...");
+          this.socketService.setup();
+        }
       }
     });
     setInterval(() => {

@@ -299,6 +299,9 @@ export class SocketService {
 
 
 
+  public isConnected(): boolean {
+    return this.socket?.connected ?? false;
+  }
 
 
   public login(userId: string): void {

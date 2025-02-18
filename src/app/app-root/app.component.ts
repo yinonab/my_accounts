@@ -44,7 +44,7 @@ export class AppComponent implements OnInit, OnDestroy {
       })
     console.log("🚀 AppComponent Initialized");
     this.userService.refreshLoginTokenIfNeeded();
-    document.addEventListener("visibilitychange", () => {
+    document.addEventListener("visibilitychange", async () => {
       if (document.hidden) {
         console.log("🔄 האפליקציה עברה לרקע, שולח פינג כדי לוודא שה-Socket לא יתנתק...");
         this.socketService.emit("ping");
@@ -61,6 +61,15 @@ export class AppComponent implements OnInit, OnDestroy {
           console.log("🔌 ה-Socket נותק, מבצע התחברות מחדש...");
           this.socketService.setup();
         }
+        console.log("🔄 בודק אם ה-FCM Token מעודכן...");
+        const newToken = await this.firebaseService.getFCMToken();
+        if (newToken) {
+          console.log("✅ טוקן מעודכן:", newToken);
+        } else {
+          console.warn("⚠️ לא נמצא טוקן, מבצע בקשת הרשאה מחדש...");
+          this.firebaseService.requestNotificationPermission();
+        }
+
       }
     });
     this.resetIdleTimer();
@@ -89,7 +98,7 @@ export class AppComponent implements OnInit, OnDestroy {
     setInterval(() => {
       console.log("🔄 שולח Keep-Alive ping לשרת...");
       this.userService.keepSessionAlive();
-    }, 5 * 60 * 1000);
+    }, 3 * 60 * 1000);
 
 
     if (!this.pwaService.isRunningStandalone() && this.pwaService.isIOS()) {
@@ -101,7 +110,7 @@ export class AppComponent implements OnInit, OnDestroy {
         const lastNotificationTime = this.firebaseService.getLastNotificationTime() ?? 0; // אם null, נגדיר כ-0
 
         // בדיקה אם כבר קפצה התראה מ-FirebaseService
-        if (Date.now() - lastNotificationTime < 8000) {
+        if (Date.now() - lastNotificationTime < 4000) {
           console.log("🔕 לא מציגים התראה כי FirebaseService כבר הציג אחת לאחרונה");
           return;
         }

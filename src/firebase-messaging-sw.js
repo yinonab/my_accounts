@@ -129,6 +129,20 @@ messaging.onBackgroundMessage(async (payload) => {
     }
 });
 
+self.addEventListener("notificationclick", (event) => {
+    console.log("📲 Notification clicked:", event.notification);
+    event.notification.close();
+    event.waitUntil(
+        clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+            if (clientList.length > 0) {
+                clientList[0].focus();
+            } else {
+                clients.openWindow("/"); // 🔹 משנה ל-URL של הדף שלך
+            }
+        })
+    );
+});
+
 self.addEventListener("push", async function (event) {
     console.log("🔔 Push event received!", event);
 

@@ -174,6 +174,10 @@ export class FirebaseService {
             } else {
                 console.log("🔔 הצגת התראה בתוך האפליקציה");
             }
+            if (payload.data?.['wakeUpApp'] === "true") {
+                console.log("📲 קיבלנו הודעה להעיר את האפליקציה - מבצע התחברות מחדש!");
+                window.focus();
+            }
         });
     }
 

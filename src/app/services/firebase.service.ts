@@ -156,26 +156,46 @@ export class FirebaseService {
         onMessage(this.messaging, (payload) => {
             console.log("📩 Foreground notification received:", payload);
 
+            // 🔹 שמירת הזמן האחרון שבו התקבלה הודעה
             this.lastNotificationTime = Date.now();
 
-            // ✅ ניגשים לשדות עם סוגריים מרובעים כדי למנוע שגיאת TS
-            const notificationTitle = payload.data?.['title'] || "🔔 הודעה חדשה";
-            const notificationOptions = {
-                body: payload.data?.['body'] || "📩 יש לך הודעה חדשה!",
-                icon: payload.data?.['icon'] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
-                badge: payload.data?.['badge'] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
-                vibrate: [200, 100, 200],
-                requireInteraction: true
+            // ✅ אם Firebase כבר הציג את ההתראה, לא מציג שוב
+            if (payload.notification) {
+                console.log("🔔 Firebase הציג את ההתראה אוטומטית, לא מציג שוב.");
+                return;
+            }
+
+            // ✅ טיפוס בטוח לנתונים שמתקבלים
+            const data: Record<string, string> = payload.data ?? {};
+            const notification: Record<string, string> = payload.notification ?? {};
+
+            // ✅ קביעת כותרת והתוכן של ההתראה
+            const notificationTitle: string = notification["title"] || data["title"] || "🔔 הודעה חדשה";
+            const notificationBody: string = notification["body"] || data["body"] || "📩 יש לך הודעה חדשה!";
+            const notificationIcon: string = notification["icon"] || data["icon"] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png";
+
+            // יצירת אובייקט `NotificationOptions` עם שדות תקפים בלבד
+            const notificationOptions: NotificationOptions = {
+                body: notificationBody,
+                icon: notificationIcon
             };
 
+            // ✅ הצגת נוטיפיקציה רק אם הדף לא בפוקוס
             if (document.hidden) {
-                console.log("📲 מציג נוטיפיקציה", notificationTitle);
+                console.log("📲 מציג נוטיפיקציה:", notificationTitle);
                 new Notification(notificationTitle, notificationOptions);
             } else {
-                console.log("🔔 הצגת התראה בתוך האפליקציה");
+                console.log("🔔 הצגת הודעה בתוך האפליקציה בלבד.");
+            }
+
+            // ✅ טיפול במקרה של `wakeUpApp`
+            if (data["wakeUpApp"] === "true") {
+                console.log("📲 קיבלנו wakeUpApp, מבצע רענון או מיקוד לחלון");
+                window.focus();
             }
         });
     }
+
 
 
 

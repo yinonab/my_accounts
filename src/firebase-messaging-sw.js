@@ -95,11 +95,17 @@ self.addEventListener("activate", (event) => {
 messaging.onBackgroundMessage(async (payload) => {
     console.log('📩 [Firebase Messaging SW] Received background message:', payload);
 
+    if (payload.notification) {
+        // אם Firebase כבר הציג את ההתראה, אל תציג שוב
+        console.log("🔔 Firebase הציג את ההתראה, לא מציג שוב.");
+        return;
+    }
+
     // ⚠️ לא משתמשים ב-payload.notification, אלא רק ב-payload.data
-    const notificationTitle = payload.data?.title || "🔔 הודעה חדשה";
+    const notificationTitle = payload.notification?.title || payload.data?.title || "🔔 הודעה חדשה";
     const notificationOptions = {
-        body: payload.data?.body || "📩 יש לך הודעה חדשה!",
-        icon: payload.data?.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+        body: payload.notification?.body || payload.data?.body || "📩 יש לך הודעה חדשה!",
+        icon: payload.notification?.icon || payload.data?.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
         badge: payload.data?.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
         vibrate: [200, 100, 200],
         requireInteraction: true,
@@ -127,6 +133,19 @@ messaging.onBackgroundMessage(async (payload) => {
             clients.forEach(client => client.postMessage({ type: "WAKE_UP" }));
         });
     }
+});
+self.addEventListener("notificationclick", (event) => {
+    console.log("📲 Notification clicked:", event.notification);
+    event.notification.close();
+    event.waitUntil(
+        clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+            if (clientList.length > 0) {
+                clientList[0].focus();
+            } else {
+                clients.openWindow("/"); // 🔹 משנה ל-URL של הדף שלך
+            }
+        })
+    );
 });
 
 self.addEventListener("push", async function (event) {

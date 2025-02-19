@@ -15,7 +15,12 @@
                 <span class="sender">{{ msg.senderName }}</span>
                 <div class="message-content">
                     <div *ngIf="msg.text">{{ msg.text }}</div>
-                    <img *ngIf="msg.imageUrl" [src]="msg.imageUrl" alt="Image" class="chat-image">
+                    <img *ngIf="msg.imageUrl" [src]="msg.imageUrl" alt="Image" class="chat-image"
+                        (error)="handleImageError(msg.imageUrl)">
+                    <video *ngIf="msg.videoUrl" [src]="msg.videoUrl" class="chat-video" controls preload="metadata"
+                        (error)="handleVideoError(msg.videoUrl)">
+                        הדפדפן שלך לא תומך בניגון וידאו.
+                    </video>
                 </div>
             </div>
         </div>
@@ -27,6 +32,11 @@
                 <label for="fileInput" class="upload-icon">📎</label>
                 <input #chatInput [(ngModel)]="newMessage" placeholder="Type a message..." class="styled-input" />
                 <input type="file" id="fileInput" #fileInput (change)="onFileSelected($event)" hidden />
+            </div>
+            <!-- לואדר טעינת קובץ -->
+            <div *ngIf="isUploading" class="upload-loader">
+                <div class="spinner"></div>
+                <p>🔄 העלאה מתבצעת... {{ uploadProgress }}%</p>
             </div>
 
             <!-- כפתור שליחה עגול -->

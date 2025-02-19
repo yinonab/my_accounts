@@ -165,7 +165,7 @@ export class SocketService {
   }
 
   // ✅ שליחת הודעה בצ'אט קבוצתי
-  public sendMessage(msg: string, imageUrl?: string): void {
+  public sendMessage(msg: string, imageUrl?: string, videoUrl?: string): void {
     console.log('asdfasdasdasd');
     if (!this.socket) this.setup();
 
@@ -178,6 +178,7 @@ export class SocketService {
       senderName: user.username,
       text: msg || '', // אם אין טקסט, שולחים הודעה ריקה
       imageUrl: imageUrl || undefined, // אם יש תמונה, נוסיף אותה
+      videoUrl: videoUrl || undefined
     }; // לא שולחים sender, השרת יקבע אותו לפי ה-userId
     this.socket?.emit(SOCKET_EMIT_SEND_MSG, message);
     console.log(`user: ${user}`);
@@ -198,22 +199,23 @@ export class SocketService {
   //   this.socket?.emit(SOCKET_EMIT_SEND_PRIVATE_MSG, privateMessage);
   // }
 
-  public sendPrivateMessage(toUserId: string, msg: string, imageUrl?: string): void {
+  public sendPrivateMessage(toUserId: string, msg: string, imageUrl?: string, videoUrl?: string): void {
     if (!this.socket) this.setup();
 
     const user = this.userService?.getLoggedInUser();
     this.errorLogger.log('user:', user);
 
-    if (!user || !toUserId || (!msg.trim() && !imageUrl)) {
-      console.warn('⚠️ Missing required data for private message:', { user, toUserId, msg, imageUrl });
+    if (!user || !toUserId || (!msg.trim() && !imageUrl && !videoUrl)) {
+      console.warn('⚠️ Missing required data for private message:', { user, toUserId, msg, imageUrl, videoUrl });
       return;
     }
 
     const privateMessage: ChatMessage = {
       sender: user._id,
       senderName: user.username,
-      text: msg || '', // אם אין טקסט, נשמור מחרוזת ריקה
-      imageUrl: imageUrl || undefined, // נוסיף תמונה אם יש
+      text: msg || '',
+      imageUrl: imageUrl || undefined,
+      videoUrl: videoUrl || undefined, // ✅ שולח וידאו
       toUserId: toUserId
     };
 
@@ -230,6 +232,7 @@ export class SocketService {
       toUserId: toUserId,
       text: msg, // עדיין שולח טקסט, גם אם ריק
       imageUrl: imageUrl, // הוספת שדה תמונה
+      videoUrl: videoUrl, // ✅ שולח גם וידאו
       sender: user._id,
       senderName: user.username
     });
@@ -359,6 +362,7 @@ export class SocketService {
    * מחזיר את כל ההודעות השמורות
    */
   public getPrivateMessages(): ChatMessage[] {
+    console.log('New message received:');
     this.errorLogger.log('Getting private messages', { count: this.privateMessagesBuffer.length });
     return [...this.privateMessagesBuffer];
   }

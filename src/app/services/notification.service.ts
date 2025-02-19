@@ -14,6 +14,7 @@ export interface PushNotificationData {
   badge?: string;
   wakeUpApp?: boolean;
   vibrate?: number[];
+  sound?: string;
   data?: {
     [key: string]: any;
   };

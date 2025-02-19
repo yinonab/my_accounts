@@ -28,6 +28,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   Notification = Notification;
   notificationPermission: string = 'default';
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
+  isUploading = false;  // מציין אם יש קובץ שנמצא בהעלאה
+  uploadProgress = 0;   // מציין את אחוזי ההעלאה
+
 
 
 
@@ -99,7 +102,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.chatType === 'group') {
       this.socketSubscription.add(
         this.socketService.on('chat-add-msg', async (msg: ChatMessage) => {
-          console.log('📩 New group message received:', msg);
+          console.log('📩 התקבלה הודעה חדשה:', msg);
+          console.log('🖼️ תמונה:', msg.imageUrl);
+          console.log('🎥 וידאו:', msg.videoUrl); // ✅ נוסיף בדיקה לווידאו
           if (msg.sender === this.currentUser._id) {
             msg.senderName = 'Me';
           } else if (!msg.senderName) {
@@ -114,9 +119,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
             try {
               const notificationData: PushNotificationData = {
                 title: `📢 הודעה חדשה בקבוצה`,
-                body: msg.text,
-                icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+                body: msg.text ? msg.text : msg.imageUrl ? '📷 נשלחה תמונה פרטית' : msg.videoUrl ? '🎥 נשלח סרטון פרטי' : '📩 קיבלת הודעה פרטית',
+                icon: msg.imageUrl ? msg.imageUrl : "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
                 vibrate: [200, 100, 200],
+                sound: 'default',
                 requireInteraction: true,
                 data: {
                   senderId: msg.sender,
@@ -132,6 +138,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         })
       );
     } else if (this.chatType === 'private') {
+      //console.log('New message received:');
       this.loadPrivateMessages();
     }
   }
@@ -263,6 +270,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   // In ChatComponent:
   // בקומפוננטה ChatComponent
   private loadPrivateMessages(): void {
+    console.log('🟢 loadPrivateMessages() is being called');
+
     const savedMessages = this.socketService.getPrivateMessages();
     const currentUser = this.userService.getLoggedInUser() as User;
     this.scrollToBottom();
@@ -291,6 +300,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         console.log('Preparing notification for message:', {
           sender: msg.sender,
           text: msg.text,
+          imageUrl: msg.imageUrl,
+          videoUrl: msg.videoUrl,
           currentUserId: this.currentUser._id
         });
         const isRelevant =
@@ -300,6 +311,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         console.log('Is message relevant?', isRelevant);
 
         if (isRelevant) {
+          console.log('New message received:', msg);
           const formattedMessage = {
             ...msg,
             senderName: msg.sender === currentUser._id ? 'Me' : (msg.senderName || 'User ' + msg.sender)
@@ -314,9 +326,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
             try {
               const notificationData: PushNotificationData = {  // שים לב לטיפוס החדש
                 title: `🚨 הודעה חדשה מ- ${formattedMessage.senderName}`,
-                body: msg.text,
-                icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+                body: msg.text ? msg.text : msg.imageUrl ? '📷 נשלחה תמונה פרטית' : msg.videoUrl ? '🎥 נשלח סרטון פרטי' : '📩 קיבלת הודעה פרטית',
+                icon: msg.imageUrl ? msg.imageUrl : "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
                 vibrate: [200, 100, 200],
+                sound: 'default',
                 requireInteraction: true,
                 data: {
                   senderId: msg.sender,
@@ -380,26 +393,86 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       const file = input.files[0];
       console.log(`📂 File selected: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
 
+      this.isUploading = true;  // מציגים את הלואדר
+      this.uploadProgress = 5; // מתחילים מ-10%
+
+      // 🔹 אינטרוול יחיד שמעלה בהדרגה את האחוזים עד 100
+      const progressInterval = setInterval(() => {
+        if (this.uploadProgress < 100) {
+          this.uploadProgress += 1; // קצב ההתקדמות
+        }
+      }, 100);
       this.cloudinaryService.uploadImage(file).subscribe({
-        next: (imageUrl) => {
-          console.log(`✅ Image uploaded successfully! URL: ${imageUrl}`);
+        next: (fileUrl) => {
+          console.log(`✅ File uploaded successfully! URL: ${fileUrl}`);
+          clearInterval(progressInterval); // מסירים את האינטרוול
+
+          // מבטיחים שה-progress מגיע ל-100% לפני הסרת הלואדר
+          this.uploadProgress = 100;
+          setTimeout(() => {
+            this.isUploading = false; // ❌ מסירים את הלואדר
+          }, 10);
+
 
           if (this.chatType === 'private') {
-            console.log(`📩 Sending private image message...`);
-            this.sendPrivateImageMessage(imageUrl); // שימוש במתודה הנכונה
+            // 🔹 הודעה פרטית
+            if (file.type.startsWith('image/')) {
+              this.sendPrivateImageMessage(fileUrl);
+            } else if (file.type.startsWith('video/')) {
+              this.sendPrivateVideoMessage(fileUrl);
+            }
           } else {
-            console.log(`🌍 Sending group image message...`);
-            this.sendImageMessage(imageUrl); // שימוש במתודה הנכונה
+            // 🔹 הודעה קבוצתית
+            if (file.type.startsWith('image/')) {
+              this.sendImageMessage(fileUrl);
+            } else if (file.type.startsWith('video/')) {
+              this.sendVideoMessage(fileUrl);
+            }
           }
         },
         error: (err) => {
-          console.error(`❌ Error uploading image: ${err.message}`, err);
+          console.error(`❌ Error uploading file: ${err.message}`, err);
+          this.isUploading = false;  // ביטול טעינה במקרה של שגיאה
+
         },
       });
     } else {
       console.warn(`⚠️ No file selected or file input is empty.`);
     }
   }
+
+
+  sendVideoMessage(videoUrl: string): void {
+    console.log(`🎬 Preparing to send video message: ${videoUrl}`);
+
+    const message: ChatMessage = {
+      sender: this.currentUser._id,
+      senderName: 'Me',
+      imageUrl: '',
+      videoUrl: videoUrl,
+      text: '' // אין טקסט כי זה וידאו בלבד
+    };
+
+    console.log(`📡 Emitting video message via socket...`, message);
+    this.socketService.sendMessage('', '', videoUrl);
+
+    console.log(`💾 Adding video message to messages array...`);
+    this.messages.push(message);
+
+    console.log(`📜 Scrolling to bottom after sending video...`);
+    setTimeout(() => {
+      requestAnimationFrame(() => this.scrollToBottom());
+    }, 1250);
+  }
+
+  handleImageError(imageUrl: string) {
+    console.error('❌ שגיאה בטעינת תמונה:', imageUrl);
+  }
+
+  handleVideoError(videoUrl: string) {
+    console.error('❌ שגיאה בטעינת וידאו:', videoUrl);
+  }
+
 
 
 
@@ -425,13 +498,14 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 700);
   }
 
-  sendPrivateImageMessage(imageUrl: string): void {
+  sendPrivateImageMessage(imageUrl: string, videoUrl?: string): void {
     console.log(`📩 Preparing to send private image message to user ${this.targetUserId}: ${imageUrl}`);
 
     const privateMessage: ChatMessage = {
       sender: this.currentUser._id,
       senderName: 'Me',
       imageUrl: imageUrl,
+      //videoUrl: videoUrl,
       toUserId: this.targetUserId,
       text: '' // הודעה ריקה כי זו רק תמונה
     };
@@ -446,6 +520,27 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       requestAnimationFrame(() => this.scrollToBottom());
     }, 700);
+  }
+  sendPrivateVideoMessage(videoUrl: string): void {
+    console.log(`🎬 Sending private video message to ${this.targetUserId}: ${videoUrl}`);
+
+    const privateMessage: ChatMessage = {
+      sender: this.currentUser._id,
+      senderName: 'Me',
+      videoUrl: videoUrl,
+      toUserId: this.targetUserId,
+      text: '' // אין טקסט כי זה וידאו בלבד
+    };
+
+    console.log(`📡 Emitting private video message via socket...`, privateMessage);
+    this.socketService.sendPrivateMessage(this.targetUserId, '', '', videoUrl);
+
+    console.log(`💾 Adding private video message to privateMessages array...`);
+    this.privateMessages.push(privateMessage);
+
+    setTimeout(() => {
+      requestAnimationFrame(() => this.scrollToBottom());
+    }, 1250);
   }
 
 

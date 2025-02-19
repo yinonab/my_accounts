@@ -4,6 +4,7 @@ export interface ChatMessage {
     sender: string;
     senderName?: string;  // הוספת שדה אופציונלי לשם השולח
     text: string;
+    videoUrl?: string;
     imageUrl?: string;
     toUserId?: string;
 }

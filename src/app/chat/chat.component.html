@@ -1,111 +1,51 @@
 <div class="chat-container">
     <h2>{{ chatType === 'group' ? 'Group Chat - ' + room : 'Private Chat' }}</h2>
 
+    <!-- בחירת חדר בצ'אט קבוצתי -->
     <div class="room-selection" *ngIf="chatType === 'group' && !isRoomJoined">
         <input #roomInput [(ngModel)]="room" placeholder="Enter room name" class="room-input" />
         <button (click)="joinRoom(); isRoomJoined = true" class="join-button">Join Room</button>
     </div>
 
     <div class="chat-box">
+        <!-- אזור ההודעות -->
         <div class="messages" #messagesContainer>
             <div *ngFor="let msg of (chatType === 'group' ? messages : privateMessages)" class="message"
                 [ngClass]="{'my-message': msg.senderName === 'Me', 'other-message': msg.senderName !== 'Me'}">
                 <span class="sender">{{ msg.senderName }}</span>
-                <div class="message-content">{{ msg.text }}</div>
+                <div class="message-content">
+                    <div *ngIf="msg.text">{{ msg.text }}</div>
+                    <img *ngIf="msg.imageUrl" [src]="msg.imageUrl" alt="Image" class="chat-image">
+                </div>
             </div>
         </div>
 
+        <!-- אזור הקלט והשליחה -->
         <div class="chat-input">
-            <input #chatInput [(ngModel)]="newMessage" placeholder="Type a message..." class="styled-input" />
-            <button *ngIf="chatType === 'group'" (click)="sendMessage($event)" class="styled-button">
-                Send
-            </button>
-            <div *ngIf="chatType === 'private'">
-                <button (click)="sendPrivateMessage($event)" class="styled-button">Send Private</button>
+            <!-- שדה ההקלדה -->
+            <div class="input-wrapper">
+                <label for="fileInput" class="upload-icon">📎</label>
+                <input #chatInput [(ngModel)]="newMessage" placeholder="Type a message..." class="styled-input" />
+                <input type="file" id="fileInput" #fileInput (change)="onFileSelected($event)" hidden />
             </div>
-        </div>
 
+            <!-- כפתור שליחה עגול -->
+            <button *ngIf="chatType === 'group'" (click)="sendMessage($event)" class="send-button">🚀</button>
+            <button *ngIf="chatType === 'private'" (click)="sendPrivateMessage($event)" class="send-button">🚀</button>
+        </div>
     </div>
 </div>
-<!-- <div *ngIf="notificationPermission !== 'granted'" class="notification-permission">
-    <button (click)="showNotificationPrompt()" class="notification-button">
-        הפעל התראות 🔔
-    </button>
-</div> -->
 
-<!-- <button *ngIf="notificationPermission === 'granted'" (click)="sendTestNotification()" class="test-notification-btn">
+<!-- אזור ההתראות -->
+<!-- <div *ngIf="notificationPermission !== 'granted'" class="notification-permission">
+    <button (click)="showNotificationPrompt()" class="notification-button"> הפעל התראות 🔔 </button>
+</div>
+
+<button *ngIf="notificationPermission === 'granted'" (click)="sendTestNotification()" class="test-notification-btn">
     בדוק נוטיפיקציה
 </button> -->
-<!-- הוספה בתחתית הטמפלייט -->
+
+<!-- כפתור Debug -->
 <!-- <div class="debug-panel" *ngIf="isMobile">
-    <button (click)="showDebugInfo()" class="debug-button">
-        🐞
-    </button>
+    <button (click)="showDebugInfo()" class="debug-button"> 🐞 </button>
 </div> -->
-
-<style>
-    .debug-panel {
-        position: fixed;
-        bottom: 10px;
-        /* קרוב יותר לקצה */
-        right: 10px;
-        /* קרוב יותר לקצה */
-        z-index: 1000;
-    }
-
-    .debug-button {
-        width: 30px;
-        /* גודל קבוע וקטן */
-        height: 30px;
-        background-color: rgba(240, 240, 240, 0.8);
-        /* רקע שקוף קלות */
-        border: 1px solid #ddd;
-        border-radius: 50%;
-        /* עיגול */
-        padding: 0;
-        font-size: 16px;
-        /* גודל האימוג'י */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        opacity: 0.6;
-        /* שקיפות קלה */
-    }
-
-    .debug-button:active {
-        transform: scale(0.95);
-        /* אפקט לחיצה */
-    }
-
-    .notification-permission {
-        position: fixed;
-        bottom: 60px;
-        /* מעל כפתור הדיבאג */
-        right: 10px;
-        z-index: 1000;
-    }
-
-    .notification-button {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .notification-button:hover {
-        background: #0056b3;
-    }
-
-    .notification-button:active {
-        transform: scale(0.98);
-    }
-</style>

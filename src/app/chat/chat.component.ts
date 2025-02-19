@@ -10,6 +10,7 @@ import { NotificationService, PushNotificationData } from '../services/notificat
 import { config } from '../services/config.service';
 import { HttpClient } from '@angular/common/http';
 import { FirebaseService } from '../services/firebase.service';
+import { CloudinaryService } from '../services/cloudinary.service';
 
 
 @Component({
@@ -43,6 +44,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   currentUser: any;
   isMobile: boolean = false;
   private firebaseService = inject(FirebaseService);
+  private cloudinaryService = inject(CloudinaryService);
 
 
 
@@ -105,7 +107,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
             msg.senderName = this.userCache[msg.sender] || 'User ' + msg.sender;
           }
           this.messages.push(msg);
-          this.scrollToBottom();
+          setTimeout(() => {
+            requestAnimationFrame(() => this.scrollToBottom());
+          }, 700);
           if (this.notificationsEnabled && msg.sender !== this.currentUser._id) {
             try {
               const notificationData: PushNotificationData = {
@@ -301,7 +305,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
             senderName: msg.sender === currentUser._id ? 'Me' : (msg.senderName || 'User ' + msg.sender)
           };
           this.privateMessages.push(formattedMessage);
-          this.scrollToBottom();
+          setTimeout(() => {
+            requestAnimationFrame(() => this.scrollToBottom());
+          }, 700);
 
           // חדש: טיפול בנוטיפיקציות להודעה נכנסת
           if (this.notificationsEnabled && msg.sender !== currentUser._id) {
@@ -368,6 +374,81 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       this.chatInput.nativeElement.focus();
     });
   }
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      console.log(`📂 File selected: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
+
+      this.cloudinaryService.uploadImage(file).subscribe({
+        next: (imageUrl) => {
+          console.log(`✅ Image uploaded successfully! URL: ${imageUrl}`);
+
+          if (this.chatType === 'private') {
+            console.log(`📩 Sending private image message...`);
+            this.sendPrivateImageMessage(imageUrl); // שימוש במתודה הנכונה
+          } else {
+            console.log(`🌍 Sending group image message...`);
+            this.sendImageMessage(imageUrl); // שימוש במתודה הנכונה
+          }
+        },
+        error: (err) => {
+          console.error(`❌ Error uploading image: ${err.message}`, err);
+        },
+      });
+    } else {
+      console.warn(`⚠️ No file selected or file input is empty.`);
+    }
+  }
+
+
+
+  sendImageMessage(imageUrl: string): void {
+    console.log(`🚀 Preparing to send group image message: ${imageUrl}`);
+
+    const message: ChatMessage = {
+      sender: this.currentUser._id,
+      senderName: 'Me',
+      imageUrl: imageUrl,
+      text: '' // הודעה ריקה כי זו רק תמונה
+    };
+
+    console.log(`📡 Emitting group image message via socket...`, message);
+    this.socketService.sendMessage('', imageUrl); // שימוש נכון בפונקציה המעודכנת
+
+    console.log(`💾 Adding image message to messages array...`);
+    this.messages.push(message);
+
+    console.log(`📜 Scrolling to bottom after sending image...`);
+    setTimeout(() => {
+      requestAnimationFrame(() => this.scrollToBottom());
+    }, 700);
+  }
+
+  sendPrivateImageMessage(imageUrl: string): void {
+    console.log(`📩 Preparing to send private image message to user ${this.targetUserId}: ${imageUrl}`);
+
+    const privateMessage: ChatMessage = {
+      sender: this.currentUser._id,
+      senderName: 'Me',
+      imageUrl: imageUrl,
+      toUserId: this.targetUserId,
+      text: '' // הודעה ריקה כי זו רק תמונה
+    };
+
+    console.log(`📡 Emitting private image message via socket...`, privateMessage);
+    this.socketService.sendPrivateMessage(this.targetUserId, '', imageUrl); // שימוש נכון בפונקציה
+
+    console.log(`💾 Adding private image message to privateMessages array...`);
+    this.privateMessages.push(privateMessage);
+
+    console.log(`📜 Scrolling to bottom after sending private image...`);
+    setTimeout(() => {
+      requestAnimationFrame(() => this.scrollToBottom());
+    }, 700);
+  }
+
+
 
   sendMessage(event?: Event): void {
     if (event) {

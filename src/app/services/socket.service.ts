@@ -165,7 +165,7 @@ export class SocketService {
   }
 
   // ✅ שליחת הודעה בצ'אט קבוצתי
-  public sendMessage(msg: string): void {
+  public sendMessage(msg: string, imageUrl?: string): void {
     console.log('asdfasdasdasd');
     if (!this.socket) this.setup();
 
@@ -173,7 +173,12 @@ export class SocketService {
     console.log(`user: ${user}`);
     if (!user) return;
 
-    const message = { text: msg }; // לא שולחים sender, השרת יקבע אותו לפי ה-userId
+    const message: ChatMessage = {
+      sender: user._id,
+      senderName: user.username,
+      text: msg || '', // אם אין טקסט, שולחים הודעה ריקה
+      imageUrl: imageUrl || undefined, // אם יש תמונה, נוסיף אותה
+    }; // לא שולחים sender, השרת יקבע אותו לפי ה-userId
     this.socket?.emit(SOCKET_EMIT_SEND_MSG, message);
     console.log(`user: ${user}`);
     console.log(`message: ${message}`);
@@ -193,21 +198,22 @@ export class SocketService {
   //   this.socket?.emit(SOCKET_EMIT_SEND_PRIVATE_MSG, privateMessage);
   // }
 
-  public sendPrivateMessage(toUserId: string, msg: string): void {
+  public sendPrivateMessage(toUserId: string, msg: string, imageUrl?: string): void {
     if (!this.socket) this.setup();
 
     const user = this.userService?.getLoggedInUser();
     this.errorLogger.log('user:', user);
 
-    if (!user || !toUserId || !msg.trim()) {
-      console.warn('⚠️ Missing required data for private message:', { user, toUserId, msg });
+    if (!user || !toUserId || (!msg.trim() && !imageUrl)) {
+      console.warn('⚠️ Missing required data for private message:', { user, toUserId, msg, imageUrl });
       return;
     }
 
     const privateMessage: ChatMessage = {
       sender: user._id,
       senderName: user.username,
-      text: msg,
+      text: msg || '', // אם אין טקסט, נשמור מחרוזת ריקה
+      imageUrl: imageUrl || undefined, // נוסיף תמונה אם יש
       toUserId: toUserId
     };
 
@@ -218,13 +224,17 @@ export class SocketService {
     });
 
     console.log('✅ Sending private message:', privateMessage);
+
+    // ✅ שמירה על הלוגיקה הקיימת ושליחת הודעה עם תמונה אם קיימת
     this.socket?.emit(SOCKET_EMIT_SEND_PRIVATE_MSG, {
       toUserId: toUserId,
-      text: msg,
+      text: msg, // עדיין שולח טקסט, גם אם ריק
+      imageUrl: imageUrl, // הוספת שדה תמונה
       sender: user._id,
       senderName: user.username
     });
   }
+
   private addToBuffer(message: ChatMessage): void {
     if (!this.privateMessagesBuffer.some(existingMsg =>
       existingMsg.text === message.text &&

@@ -122,8 +122,8 @@ export class NotificationService {
   //   console.log('Attempting to send notification:', {
   //     title: data.title,
   //     body: data.body,
-  //     icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
-  //     badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+  //     icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+  //     badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
   //     data: data.data
   //   });
   //   if (!this.swPush.isEnabled) {
@@ -156,8 +156,8 @@ export class NotificationService {
   //           title: data.title,
   //           body: data.body,
 
-  //           icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
-  //           badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+  //           icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+  //           badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
 
   //           vibrate: data.vibrate || [200, 100, 200],
   //           tag: data.tag || 'message',
@@ -217,8 +217,8 @@ export class NotificationService {
             body: data.body,
             wakeUpApp: true,
             token: token,
-            icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
-            badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+            icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+            badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
             vibrate: data.vibrate || [200, 100, 200],
             tag: data.tag || 'message',
             requireInteraction: data.requireInteraction ?? true

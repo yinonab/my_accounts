@@ -16,8 +16,8 @@ self.addEventListener("push", function (event) {
         const title = notificationData.title || "New Notification";
         const options = {
             body: notificationData.body || "You have a new message",
-            icon: notificationData.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
-            badge: notificationData.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+            icon: notificationData.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+            badge: notificationData.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
             vibrate: notificationData.vibrate || [200, 100, 200],
             tag: notificationData.tag || "push-msg",
             requireInteraction: notificationData.requireInteraction || false,

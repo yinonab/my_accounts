@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, inject, AfterViewInit } from '@angular/core';
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs';
 import { UserService } from '../services/user.service';
@@ -17,7 +17,7 @@ import { FirebaseService } from '../services/firebase.service';
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss']
 })
-export class ChatComponent implements OnInit, OnDestroy {
+export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   isDevelopment = true;
   @Input() chatType: 'group' | 'private' = 'group';
   @Input() targetUserId: string = '';
@@ -26,6 +26,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   notificationsEnabled = false;
   Notification = Notification;
   notificationPermission: string = 'default';
+  @ViewChild('messagesContainer') messagesContainer!: ElementRef;
 
 
 
@@ -60,6 +61,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     } else {
       this.chatInput.nativeElement.focus();
     }
+    this.scrollToBottom();
   }
 
   showDebugInfo() {
@@ -103,12 +105,13 @@ export class ChatComponent implements OnInit, OnDestroy {
             msg.senderName = this.userCache[msg.sender] || 'User ' + msg.sender;
           }
           this.messages.push(msg);
+          this.scrollToBottom();
           if (this.notificationsEnabled && msg.sender !== this.currentUser._id) {
             try {
               const notificationData: PushNotificationData = {
                 title: `📢 הודעה חדשה בקבוצה`,
                 body: msg.text,
-                icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+                icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
                 vibrate: [200, 100, 200],
                 requireInteraction: true,
                 data: {
@@ -164,6 +167,15 @@ export class ChatComponent implements OnInit, OnDestroy {
       prompt.remove();
     });
   }
+  private scrollToBottom(): void {
+    setTimeout(() => {
+      if (this.messagesContainer?.nativeElement) { // בדיקה למניעת שגיאה
+        this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
+      }
+    }, 100);
+  }
+
+
 
 
   // בתוך ChatComponent
@@ -174,7 +186,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       const notificationData: PushNotificationData = {
         title: 'נוטיפיקציית בדיקה',
         body: 'זו נוטיפיקציה בדיקתית',
-        icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+        icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
         data: {
           userId: this.currentUser._id
         }
@@ -249,6 +261,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   private loadPrivateMessages(): void {
     const savedMessages = this.socketService.getPrivateMessages();
     const currentUser = this.userService.getLoggedInUser() as User;
+    this.scrollToBottom();
 
     console.log('Current user:', currentUser._id);
     console.log('Target user:', this.targetUserId);
@@ -288,6 +301,7 @@ export class ChatComponent implements OnInit, OnDestroy {
             senderName: msg.sender === currentUser._id ? 'Me' : (msg.senderName || 'User ' + msg.sender)
           };
           this.privateMessages.push(formattedMessage);
+          this.scrollToBottom();
 
           // חדש: טיפול בנוטיפיקציות להודעה נכנסת
           if (this.notificationsEnabled && msg.sender !== currentUser._id) {
@@ -295,7 +309,7 @@ export class ChatComponent implements OnInit, OnDestroy {
               const notificationData: PushNotificationData = {  // שים לב לטיפוס החדש
                 title: `🚨 הודעה חדשה מ- ${formattedMessage.senderName}`,
                 body: msg.text,
-                icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+                icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
                 vibrate: [200, 100, 200],
                 requireInteraction: true,
                 data: {
@@ -335,7 +349,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       await this.notificationService.sendNotification({
         title: 'בדיקת מערכת',
         body: 'הנוטיפיקציות עובדות!',
-        icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png"
+        icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png"
       });
 
       this.errorLogger.log('נוטיפיקציית בדיקה נשלחה בהצלחה');
@@ -355,7 +369,11 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
   }
 
-  sendMessage(): void {
+  sendMessage(event?: Event): void {
+    if (event) {
+      event.preventDefault(); // מונע איבוד פוקוס בלחיצה על הכפתור
+    }
+
     if (!this.newMessage.trim()) return;
 
     const message: ChatMessage = {
@@ -365,45 +383,62 @@ export class ChatComponent implements OnInit, OnDestroy {
     };
 
     this.socketService.emit('chat-send-msg', message);
-    this.newMessage = '';
+    this.messages.push(message);
+    this.scrollToBottom();
+
+    // שמירת פוקוס בלי לאפס מידית את השדה
+    const inputElement = this.chatInput?.nativeElement;
+    inputElement.blur(); // מוריד פוקוס
+    this.newMessage = ''; // איפוס ההודעה
+    setTimeout(() => {
+      inputElement.focus(); // החזרת פוקוס אחרי 100ms
+    }, 10);
   }
 
-  async sendPrivateMessage(): Promise<void> {
+
+
+  async sendPrivateMessage(event?: Event): Promise<void> {
+    if (event) {
+      event.preventDefault(); // מונע איבוד פוקוס בלחיצה על הכפתור
+    }
+
     this.errorLogger.log('Attempting to send private message', {
       to: this.targetUserId,
       text: this.newMessage
     });
+
     if (!this.targetUserId.trim() || !this.newMessage.trim()) return;
 
-    const user = this.userService.getLoggedInUser();
-
-    // הודעה מקומית לתצוגה מיידית
     const localMessage: ChatMessage = {
       sender: this.currentUser._id,
-      senderName: 'Me',  // תמיד 'Me' עבור ההודעה המקומית
+      senderName: 'Me',
       text: this.newMessage,
       toUserId: this.targetUserId
     };
 
-    // שליחה לשרת דרך השירות (שגם ישמור בבאפר)
+    // שליחת ההודעה לשרת
     this.socketService.sendPrivateMessage(this.targetUserId, this.newMessage);
-
-    // הוספה לתצוגה מקומית
-    console.log("Message content:", this.newMessage);
-
     this.privateMessages.push(localMessage);
-    //
-    // בתוך sendPrivateMessage
+    this.scrollToBottom();
+
+    // איפוס ומיקוד מחדש לשמירת המקלדת פתוחה
+    // שמירת פוקוס בלי לאפס מידית את השדה
+    const inputElement = this.chatInput?.nativeElement;
+    inputElement.blur(); // מוריד פוקוס
+    this.newMessage = ''; // איפוס ההודעה
+    setTimeout(() => {
+      inputElement.focus(); // החזרת פוקוס אחרי 100ms
+    }, 10);
     console.log("Message content:", this.newMessage);
 
     if (this.notificationsEnabled) {
       try {
-        const notificationData: PushNotificationData = {  // שים לב לטיפוס החדש
+        const notificationData: PushNotificationData = {
           title: 'הודעה חדשה',
-          body: this.newMessage,
-          icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
-          vibrate: [200, 100, 200],  // נוסיף רטט
-          requireInteraction: true,   // הנוטיפיקציה תישאר עד שילחצו עליה
+          body: localMessage.text, // שימוש בהודעה שנשלחה במקום this.newMessage (שכבר אופסה)
+          icon: "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+          vibrate: [200, 100, 200],
+          requireInteraction: true,
           data: {
             senderId: this.currentUser._id,
             targetUserId: this.targetUserId,
@@ -411,15 +446,13 @@ export class ChatComponent implements OnInit, OnDestroy {
           }
         };
 
-        // if (document.hidden) {
         await this.notificationService.sendNotification(notificationData);
-        // }
       } catch (err) {
         this.errorLogger.log('Error handling notification', err);
       }
     }
-    this.newMessage = '';
   }
+
 
   ngOnDestroy(): void {
     this.socketSubscription?.unsubscribe();

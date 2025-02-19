@@ -162,8 +162,8 @@ export class FirebaseService {
             const notificationTitle = payload.data?.['title'] || "🔔 הודעה חדשה";
             const notificationOptions = {
                 body: payload.data?.['body'] || "📩 יש לך הודעה חדשה!",
-                icon: payload.data?.['icon'] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
-                badge: payload.data?.['badge'] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739170705/notification-badge_p0oafv.png",
+                icon: payload.data?.['icon'] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+                badge: payload.data?.['badge'] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
                 vibrate: [200, 100, 200],
                 requireInteraction: true
             };

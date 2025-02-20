@@ -25,9 +25,9 @@ export class ContactService {
         // if (!contacts || contacts.length === 0) {
         //     localStorage.setItem(ENTITY, JSON.stringify(this._createContacts()))
         // }
-        this.loadContactsFromDB();
+        this._loadContactsFromDB();
     }
-    loadContactsFromDB(): void {
+    private _loadContactsFromDB(): void {
         from(storageService.query<Contact>(ENTITY))
             .pipe(
                 tap(contacts => {

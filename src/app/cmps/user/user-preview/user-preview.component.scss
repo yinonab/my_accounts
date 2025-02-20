@@ -16,7 +16,7 @@
     background: linear-gradient(135deg, $clr9, $clr6);
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     width: 90%;
-    max-width: 320px;
+    max-width: 25em;
     border-radius: 15px;
     padding: 12px;
     gap: 8px;
@@ -28,7 +28,7 @@
     }
 
     .image-container {
-      flex: 0 0 65px;
+      flex: 0 0 20%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -43,7 +43,8 @@
     }
 
     .user-info {
-      flex: 1;
+      flex: 0 0 50%;
+      max-width: 50%;
       text-align: center;
       font-size: rem(18px);
       color: $clr8;
@@ -60,10 +61,13 @@
     }
 
     .button-container {
+      flex: 0 0 30%;
+      max-width: 30%;
       display: flex;
       flex-direction: row;
-      align-items: center;
-      gap: 6px;
+      /* חשוב מאוד: */
+      flex-wrap: wrap; 
+      gap: 6px; // או כמה שהיה אצלך
 
       .message-button-container {
         position: relative;
@@ -116,39 +120,84 @@
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
       }
+      .button-row {
+        /* גורם לכל .button-row לתפוס רוחב מלא ולהישבר לשורה חדשה */
+        flex: 0 0 100%; /* או width: 100%, אך חשוב לשלב עם flex-wrap בהורה */
+        display: flex;
+        flex-direction: row; 
+        gap: 1em;
+        justify-content: center; // או מה שבא לך
+        margin-bottom: 6px;
+      }
+    
+      .button-row:last-child {
+        margin-bottom: 0; // אם רוצים להסיר את הרווח האחרון
+      }
     }
   }
 
   @media (max-width: 600px) {
     .user-preview {
+      /* ממשיך להיות Flex בשורה */
+      display: flex;
       flex-direction: row;
       align-items: center;
-      justify-content: space-between;
+      /* אפשר לבחור איך מחלקים את הרווח הנותר – כאן לא חובה justify-content */
+      justify-content: space-between; 
       width: 100%;
+      /* אפשר להקטין padding, אם רוצים */
       padding: 8px;
-
-      .image-container {
-        flex: 0 0 50px;
-      }
-
-      img {
-        width: 50px;
-        height: 50px;
-      }
-
-      .user-info {
-        font-size: rem(16px);
-        min-width: unset;
-      }
-
-      .button-container {
+    }
+  
+    /* 20% */
+    .image-container {
+      flex: 0 0 20%;   /* "תפוס בדיוק 20%" */
+      max-width: 20%;  /* מונע התרחבות מעבר ל-20% */
+      display: flex;   /* כדי לרכז את התמונה בתוך הקובייה */
+      justify-content: center;
+      align-items: center;
+    }
+  
+    /* 50% */
+    .user-info {
+      flex: 0 0 50%;
+      max-width: 50%;
+      text-align: center; 
+      overflow: hidden;   /* אם השם ארוך מאוד, שלא ישבור עיצוב */
+      /* אפשר להקטין font-size אם צריך */
+      /* font-size: 0.9em; */
+    }
+  
+    /* 30% */
+    .button-container {
+      flex: 0 0 30%;
+      max-width: 30%;
+      /* אם הכפתורים צריכים להישאר ב-2 שורות (2 כפתורים למעלה, 2 למטה), 
+         מגדירים גם flex-wrap */
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px; 
+      justify-content: flex-end; /* להצמיד את הכפתורים לימין הרוחב של ה-30% */
+  
+      /* למקרה שעדיין רוצים שהכפתורים יופיעו ב-2 שורות (button-row) */
+      .button-row {
+        width: 100%;  /* שכל שורת כפתורים תתפוס את כל ה-30% */
+        display: flex;
         flex-direction: row;
-        gap: 5px;
+        gap: 0.5em !important;
+        justify-content: space-around; /* או flex-end / center, לבחירתך */
+        margin-bottom: 4px;
+  
+        &:last-child {
+          margin-bottom: 0;
+        }
       }
     }
   }
-}
+  
+  
 
 .long-field {
   font-size: 0.9em;
+}
 }

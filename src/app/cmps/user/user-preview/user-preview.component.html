@@ -10,23 +10,33 @@
     </div>
 
     <div class="button-container">
-        <!-- כפתור לפתיחת צ'אט פרטי -->
-        <div class="message-button-container">
-            <button class="message-button" (click)="openPrivateChat($event)">
-                <img src="../../../assets/images/chat.png" alt="Send Private Message" />
-                <ng-container *ngIf="unreadMessagesCount$ | async as unreadMessages">
-                    <span *ngIf="unreadMessages > 0 && !isPrivateChatOpen" class="badge">{{ unreadMessages }}</span>
-                </ng-container>
+
+        <!-- שורה ראשונה: שני כפתורים -->
+        <div class="button-row">
+            <div class="message-button-container">
+                <button class="message-button" (click)="openPrivateChat($event)">
+                    <img src="assets/images/chat.png" alt="Send Private Message" />
+                    <!-- וכו'... -->
+                </button>
+            </div>
+
+            <button class="social-button" (click)="openFacebookProfile($event, user)">
+                <img src="assets/images/fb2.png" alt="Facebook Profile" />
             </button>
         </div>
 
-        <!-- כפתורי רשתות חברתיות -->
-        <button class="social-button" (click)="openFacebookProfile($event, user)">
-            <img class="fb-img" src="../../../assets/images/fb2.png" alt="Facebook Profile" />
-        </button>
-        <button class="social-button" (click)="openInstagramProfile($event, user)">
-            <img class="insta-img" src="../../../assets/images/instagram.png" alt="Instagram Profile" />
-        </button>
+        <!-- שורה שנייה: שני כפתורים -->
+        <div class="button-row">
+            <button class="social-button" (click)="openInstagramProfile($event, user)">
+                <img src="assets/images/instagram.png" alt="Instagram Profile" />
+            </button>
+
+            <!-- כפתור חדש או נוסף בעתיד -->
+            <button class="social-button">S..
+                <!-- <img src="assets/images/example.png" alt="New Button" /> -->
+            </button>
+        </div>
+
     </div>
 </article>
 

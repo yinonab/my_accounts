@@ -15,8 +15,10 @@
         <div class="button-row">
             <div class="message-button-container">
                 <button class="message-button" (click)="openPrivateChat($event)">
-                    <img src="assets/images/chat.png" alt="Send Private Message" />
-                    <!-- וכו'... -->
+                    <img src="../../../assets/images/chat.png" alt="Send Private Message" />
+                    <ng-container *ngIf="unreadMessagesCount$ | async as unreadMessages">
+                        <span *ngIf="unreadMessages > 0 && !isPrivateChatOpen" class="badge">{{ unreadMessages }}</span>
+                    </ng-container>
                 </button>
             </div>
 

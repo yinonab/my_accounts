@@ -10,6 +10,7 @@
   gap: 20px;
 
   .user-preview {
+    position: relative;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -23,10 +24,10 @@
     gap: 8px;
     transition: transform 0.3s, box-shadow 0.3s;
 
-    &:hover {
-      transform: scale(1.03);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    }
+    // &:hover {
+    //   transform: scale(1.03);
+    //   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    // }
 
     .image-container {
       flex: 0 0 20%;
@@ -94,8 +95,8 @@
       .message-button,
       .social-button {
         background-color: $clr5;
-        height: 2.4em;
-        width: 2.4em;
+        height: 3em;
+        width: 3em;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -106,8 +107,8 @@
         transition: transform 0.2s ease, background-color 0.2s ease;
 
         img {
-          height: 1.4em;
-          width: 1.4em;
+          height: 2em;
+          width: 2em;
         }
 
         &:hover {
@@ -139,42 +140,102 @@
   /* 🎨 עיצוב הדרופדאון של הקונטקטים */
   .contacts-dropdown {
     position: absolute;
-    right: 0;
-    background: white;
-    border: 1px solid #ccc;
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    padding: 10px;
-    width: 220px;
-    z-index: 100;
-    animation: fadeIn 0.2s ease-in-out;
+    top: calc(100% + 10px);
+    right: 50%;
+    transform: translate(50%, -10px) scale(0.95);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 12px;
+    min-width: 250px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out forwards; /* הוספת forwards כדי לשמור על המצב הסופי */
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    
+    /* חץ קטן למעלה */
+    &::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        right: 50%;
+        transform: translateX(50%);
+        border-width: 6px;
+        border-style: solid;
+        border-color: transparent transparent rgba(255, 255, 255, 0.95) transparent;
+    }
 
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      max-height: 200px;
-      overflow-y: auto;
-      
-      li {
-        padding: 8px;
-        cursor: pointer;
-        transition: background 0.3s;
-        font-size: 14px;
+
+    .dropdown-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+        font-size: 16px;
         color: #333;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .close-dropdown {
+        background: none;
+        border: none;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #666;
+        transition: color 0.3s;
 
         &:hover {
-          background: #f5f5f5;
+            color: red;
         }
-      }
     }
-  }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0;
+        max-height: 200px;
+        overflow-y: auto;
+
+        li {
+            padding: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+            color: #444;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 8px;
+
+            &:hover {
+                background: rgba(0, 0, 0, 0.05);
+            }
+
+            /* אייקון קטן ליד כל שם */
+            &::before {
+                content: "📌";
+                font-size: 14px;
+                color: #ff5733;
+            }
+        }
+    }
+}
 
   /* 🎨 אנימציה קטנה לכניסה חלקה */
+  /* 🎨 אנימציה לכניסה חלקה */
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+    0% {
+        opacity: 0;
+        transform: translate(50%, -15px) scale(0.9); /* הזזה כלפי מעלה + הקטנה */
+    }
+    100% {
+        opacity: 1;
+        transform: translate(50%, 0) scale(1); /* החלקת כניסה טבעית */
+    }
+}
+  
 
   /* 🎯 התאמה למובייל */
   @media (max-width: 600px) {
@@ -225,12 +286,10 @@
 
     /* 🎨 עיצוב הדרופדאון למובייל */
     .contacts-dropdown {
-      width: 100%;
-      max-width: 90%;
-      right: auto;
-      left: 5%;
-      padding: 8px;
-    }
+      min-width: 17em;
+      right: 11.5em;
+      transform: none;
+  }
   }
 
   .long-field {

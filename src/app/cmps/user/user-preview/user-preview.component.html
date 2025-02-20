@@ -15,8 +15,10 @@
         <div class="button-row">
             <div class="message-button-container">
                 <button class="message-button" (click)="openPrivateChat($event)">
-                    <img src="assets/images/chat.png" alt="Send Private Message" />
-                    <!-- וכו'... -->
+                    <img src="../../../assets/images/chat.png" alt="Send Private Message" />
+                    <ng-container *ngIf="unreadMessagesCount$ | async as unreadMessages">
+                        <span *ngIf="unreadMessages > 0 && !isPrivateChatOpen" class="badge">{{ unreadMessages }}</span>
+                    </ng-container>
                 </button>
             </div>
 
@@ -32,16 +34,19 @@
             </button>
 
             <!-- כפתור חדש או נוסף בעתיד -->
-            <button class="social-button" (click)="toggleContactsDropdown()">S..
+            <button class="social-button" (click)="toggleContactsDropdown()">
+                <img src="assets/images/eye-contact.png" alt="Instagram Profile" />
                 <!-- <img src="assets/images/example.png" alt="New Button" /> -->
             </button>
             <div class="contacts-dropdown" *ngIf="showContactsDropdown">
+                <button class="close-dropdown" (click)="closeContactsDropdown()">×</button>
                 <ul>
                     <li *ngFor="let contact of contacts" (click)="navigateToContact(contact._id)">
                         {{ contact.name }}
                     </li>
                 </ul>
             </div>
+
         </div>
 
     </div>

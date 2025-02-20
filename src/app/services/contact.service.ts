@@ -13,6 +13,9 @@ export class ContactService {
     private _contacts$ = new BehaviorSubject<Contact[]>([])
     public contacts$ = this._contacts$.asObservable()
 
+    private _allContacts$ = new BehaviorSubject<Contact[]>([])
+    public allContacts$ = this._allContacts$.asObservable()
+
     private _filterBy$ = new BehaviorSubject<ContactFilter>({ name: '' });
     public filterBy$ = this._filterBy$.asObservable()
 
@@ -30,6 +33,22 @@ export class ContactService {
                 tap(contacts => {
                     // Update BehaviorSubject with contacts loaded from the DB
                     this._contacts$.next(this._sort(contacts));
+                }),
+                catchError(this._handleError)
+            )
+            .subscribe();
+    }
+
+    loadAllContactsFromDB(): void {
+        console.log("🔄 Resetting filter and fetching ALL contacts from DB...");
+
+        // ניקוי ה- filterBy כדי לוודא שאין סינון
+        this._filterBy$.next({ name: '' });
+        from(storageService.query<Contact>('contact/All'))
+            .pipe(
+                tap(aContacts => {
+                    // Update BehaviorSubject with contacts loaded from the DB
+                    this._allContacts$.next(this._sort(aContacts));
                 }),
                 catchError(this._handleError)
             )

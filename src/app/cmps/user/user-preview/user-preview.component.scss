@@ -1,6 +1,7 @@
 @import "../../../../assets/scss/setup/variables";
 @import "../../../../assets/scss/setup/functions";
 
+/* שומר על העיצוב הקיים */
 :host {
   display: flex;
   justify-content: center;
@@ -9,6 +10,7 @@
   gap: 20px;
 
   .user-preview {
+    position: relative;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -22,10 +24,10 @@
     gap: 8px;
     transition: transform 0.3s, box-shadow 0.3s;
 
-    &:hover {
-      transform: scale(1.03);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    }
+    // &:hover {
+    //   transform: scale(1.03);
+    //   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    // }
 
     .image-container {
       flex: 0 0 20%;
@@ -65,9 +67,8 @@
       max-width: 30%;
       display: flex;
       flex-direction: row;
-      /* חשוב מאוד: */
       flex-wrap: wrap; 
-      gap: 6px; // או כמה שהיה אצלך
+      gap: 6px;
 
       .message-button-container {
         position: relative;
@@ -94,8 +95,8 @@
       .message-button,
       .social-button {
         background-color: $clr5;
-        height: 2.4em;
-        width: 2.4em;
+        height: 3em;
+        width: 3em;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -106,8 +107,8 @@
         transition: transform 0.2s ease, background-color 0.2s ease;
 
         img {
-          height: 1.4em;
-          width: 1.4em;
+          height: 2em;
+          width: 2em;
         }
 
         &:hover {
@@ -120,72 +121,161 @@
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
       }
+
       .button-row {
-        /* גורם לכל .button-row לתפוס רוחב מלא ולהישבר לשורה חדשה */
-        flex: 0 0 100%; /* או width: 100%, אך חשוב לשלב עם flex-wrap בהורה */
+        flex: 0 0 100%;
         display: flex;
         flex-direction: row; 
         gap: 1em;
-        justify-content: center; // או מה שבא לך
+        justify-content: center;
         margin-bottom: 6px;
       }
     
       .button-row:last-child {
-        margin-bottom: 0; // אם רוצים להסיר את הרווח האחרון
+        margin-bottom: 0;
       }
     }
   }
 
+  /* 🎨 עיצוב הדרופדאון של הקונטקטים */
+  .contacts-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 50%;
+    transform: translate(50%, -10px) scale(0.95);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 12px;
+    min-width: 250px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out forwards; /* הוספת forwards כדי לשמור על המצב הסופי */
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    
+    /* חץ קטן למעלה */
+    &::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        right: 50%;
+        transform: translateX(50%);
+        border-width: 6px;
+        border-style: solid;
+        border-color: transparent transparent rgba(255, 255, 255, 0.95) transparent;
+    }
+
+
+    .dropdown-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+        font-size: 16px;
+        color: #333;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .close-dropdown {
+        background: none;
+        border: none;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #666;
+        transition: color 0.3s;
+
+        &:hover {
+            color: red;
+        }
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0;
+        max-height: 200px;
+        overflow-y: auto;
+
+        li {
+            padding: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+            color: #444;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 8px;
+
+            &:hover {
+                background: rgba(0, 0, 0, 0.05);
+            }
+
+            /* אייקון קטן ליד כל שם */
+            &::before {
+                content: "📌";
+                font-size: 14px;
+                color: #ff5733;
+            }
+        }
+    }
+}
+
+  /* 🎨 אנימציה קטנה לכניסה חלקה */
+  /* 🎨 אנימציה לכניסה חלקה */
+  @keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translate(50%, -15px) scale(0.9); /* הזזה כלפי מעלה + הקטנה */
+    }
+    100% {
+        opacity: 1;
+        transform: translate(50%, 0) scale(1); /* החלקת כניסה טבעית */
+    }
+}
+  
+
+  /* 🎯 התאמה למובייל */
   @media (max-width: 600px) {
     .user-preview {
-      /* ממשיך להיות Flex בשורה */
-      display: flex;
       flex-direction: row;
       align-items: center;
-      /* אפשר לבחור איך מחלקים את הרווח הנותר – כאן לא חובה justify-content */
-      justify-content: space-between; 
+      justify-content: space-between;
       width: 100%;
-      /* אפשר להקטין padding, אם רוצים */
       padding: 8px;
     }
   
-    /* 20% */
     .image-container {
-      flex: 0 0 20%;   /* "תפוס בדיוק 20%" */
-      max-width: 20%;  /* מונע התרחבות מעבר ל-20% */
-      display: flex;   /* כדי לרכז את התמונה בתוך הקובייה */
+      flex: 0 0 20%;  
+      max-width: 20%;
+      display: flex;
       justify-content: center;
       align-items: center;
     }
   
-    /* 50% */
     .user-info {
       flex: 0 0 50%;
       max-width: 50%;
       text-align: center; 
-      overflow: hidden;   /* אם השם ארוך מאוד, שלא ישבור עיצוב */
-      /* אפשר להקטין font-size אם צריך */
-      /* font-size: 0.9em; */
+      overflow: hidden;
     }
   
-    /* 30% */
     .button-container {
       flex: 0 0 30%;
       max-width: 30%;
-      /* אם הכפתורים צריכים להישאר ב-2 שורות (2 כפתורים למעלה, 2 למטה), 
-         מגדירים גם flex-wrap */
       display: flex;
       flex-wrap: wrap;
       gap: 4px; 
-      justify-content: flex-end; /* להצמיד את הכפתורים לימין הרוחב של ה-30% */
+      justify-content: flex-end;
   
-      /* למקרה שעדיין רוצים שהכפתורים יופיעו ב-2 שורות (button-row) */
       .button-row {
-        width: 100%;  /* שכל שורת כפתורים תתפוס את כל ה-30% */
+        width: 100%;
         display: flex;
         flex-direction: row;
         gap: 0.5em !important;
-        justify-content: space-around; /* או flex-end / center, לבחירתך */
+        justify-content: space-around;
         margin-bottom: 4px;
   
         &:last-child {
@@ -193,11 +283,16 @@
         }
       }
     }
-  }
-  
-  
 
-.long-field {
-  font-size: 0.9em;
-}
+    /* 🎨 עיצוב הדרופדאון למובייל */
+    .contacts-dropdown {
+      min-width: 17em;
+      right: 11.5em;
+      transform: none;
+  }
+  }
+
+  .long-field {
+    font-size: 0.9em;
+  }
 }

@@ -1,10 +1,12 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { User } from '../../../models/user.model.ts';
-import { Router } from '@angular/router';
+import { NavigationStart, Router } from '@angular/router';
 import { SocketService } from '../../../services/socket.service.js';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, concatMap, Observable, of, skip, switchMap, take } from 'rxjs';
 import { UserIndexComponent } from '../user-index/user-index.component.js';
 import { UserService } from '../../../services/user.service.js';
+import { ContactService } from '../../../services/contact.service.js';
+import { Contact } from '../../../models/contact.model.js';
 
 @Component({
   selector: 'user-preview',
@@ -18,10 +20,29 @@ export class UserPreviewComponent {
   unreadMessagesCount = 0; // ✅ מספר ההודעות שלא נקראו
   unreadMessagesCount$!: Observable<number>;
   userId: string = inject(UserService).getLoggedInUser()!._id;
+  contacts: Contact[] = [];
+  private allContacts: Contact[] = [];
+  showContactsDropdown = false;
+  private static openDropdownIdSubject = new BehaviorSubject<string | null>(null);
+  static openDropdownId$ = UserPreviewComponent.openDropdownIdSubject.asObservable();
 
-
-  constructor(private router: Router, private socketService: SocketService, private userIndex: UserIndexComponent) { }
+  constructor(private router: Router, private socketService: SocketService, private userIndex: UserIndexComponent, private contactService: ContactService) { }
   ngOnInit(): void {
+    console.log('🚀 UserPreviewComponent initialized');
+    UserPreviewComponent.openDropdownId$.subscribe(openDropdownId => {
+      this.showContactsDropdown = openDropdownId === this.user._id;
+    });
+    // האזנה לאירועי שינוי ראוטר – סגירת הדרופדאון בניווט לעמוד אחר
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        console.log('🔴 Navigation detected, closing dropdown...');
+        UserPreviewComponent.openDropdownIdSubject.next(null);
+      }
+    });
+
+    // האזנה לאירועי שינוי נראות (מעבר טאב) – סגירת הדרופדאון אם המשתמש יוצא מהטאב
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
+
     this.unreadMessagesCount$ = this.userIndex.getUnreadMessagesCount(this.user._id);
     // ✅ מאזין להודעות פרטיות
     this.socketService.onPrivateMessage((msg: any) => {
@@ -47,6 +68,89 @@ export class UserPreviewComponent {
     console.log(`🟢 Opening private chat with user: ${this.user._id}`);
     this.isPrivateChatOpen = true;
     this.userIndex.resetUnreadMessages(this.user._id);
+  }
+  filterContactsByOwner(ownerId: string): void {
+    this.contacts = this.allContacts.filter(contact => {
+      const owner = contact.owner as string | { _id: string };
+      return (typeof owner === 'string' ? owner : owner?._id) === ownerId;
+    });
+
+    console.log('🔍 Contacts filtered for owner:', ownerId);
+    console.log('📋 Filtered Contacts:', this.contacts);
+  }
+  ngOnDestroy(): void {
+    // ניקוי האזנה כדי למנוע זליגת זיכרון
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+  }
+
+  handleVisibilityChange = (): void => {
+    if (document.hidden) {
+      console.log('🔴 Tab switched or minimized, closing dropdown...');
+      UserPreviewComponent.openDropdownIdSubject.next(null);
+    }
+  };
+
+  toggleContactsDropdown(): void {
+    console.log('🟢 toggleContactsDropdown called for user:', this.user._id);
+
+    if (this.showContactsDropdown) {
+      console.log('🔴 Closing contacts dropdown for user:', this.user._id);
+      UserPreviewComponent.openDropdownIdSubject.next(null); // סוגר את כל הדרופדאונים
+      return;
+    }
+
+    console.log('🔄 Closing any other open dropdown...');
+    UserPreviewComponent.openDropdownIdSubject.next(this.user._id); // פותח את הדרופדאון הנוכחי
+
+    // קריאה לשרת אם אין נתונים
+    this.contactService.allContacts$.pipe(
+      take(1),
+      switchMap(contacts => {
+        if (contacts && contacts.length > 0) {
+          console.log('📥 Contacts already available:', contacts);
+          return of(contacts);
+        }
+
+        console.log('📥 No contacts found, fetching from server...');
+        this.contactService.loadAllContactsFromDB();
+        return this.contactService.allContacts$.pipe(skip(1), take(1));
+      })
+    ).subscribe(contacts => {
+      if (!contacts || contacts.length === 0) {
+        console.warn('⚠️ No contacts found after fetching.');
+        return;
+      }
+      this.setContactsAndShowDropdown(contacts);
+    });
+  }
+
+  private setContactsAndShowDropdown(contacts: Contact[]): void {
+    this.allContacts = contacts;
+    this.filterContactsByOwner(this.user._id);
+    this.showContactsDropdown = true;
+    console.log('✅ Contacts dropdown is now open with:', this.contacts);
+  }
+
+
+
+
+
+  closeContactsDropdown(): void {
+    console.log('🔴 Closing contacts dropdown');
+    this.showContactsDropdown = false;
+  }
+
+
+
+
+
+  resetContacts(): void {
+    this.contacts = [...this.allContacts]; // מחזיר את הרשימה המקורית
+  }
+  navigateToContact(contactId: string): void {
+    console.log(`🔗 Navigating to contact: ${contactId}`);
+    this.router.navigate([{ outlets: { modal: ['contact', contactId] } }]);
+    this.showContactsDropdown = false; // סגירת הדרופדאון לאחר ניווט
   }
 
   /**

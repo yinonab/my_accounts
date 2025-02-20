@@ -2,9 +2,11 @@ import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { User } from '../../../models/user.model.ts';
 import { Router } from '@angular/router';
 import { SocketService } from '../../../services/socket.service.js';
-import { Observable } from 'rxjs';
+import { Observable, take } from 'rxjs';
 import { UserIndexComponent } from '../user-index/user-index.component.js';
 import { UserService } from '../../../services/user.service.js';
+import { ContactService } from '../../../services/contact.service.js';
+import { Contact } from '../../../models/contact.model.js';
 
 @Component({
   selector: 'user-preview',
@@ -18,10 +20,19 @@ export class UserPreviewComponent {
   unreadMessagesCount = 0; // ✅ מספר ההודעות שלא נקראו
   unreadMessagesCount$!: Observable<number>;
   userId: string = inject(UserService).getLoggedInUser()!._id;
+  contacts: Contact[] = [];
+  private allContacts: Contact[] = [];
+  showContactsDropdown = false;
 
-
-  constructor(private router: Router, private socketService: SocketService, private userIndex: UserIndexComponent) { }
+  constructor(private router: Router, private socketService: SocketService, private userIndex: UserIndexComponent, private contactService: ContactService) { }
   ngOnInit(): void {
+    console.log('🚀 UserPreviewComponent initialized');
+
+    this.contactService.contacts$.pipe(take(1)).subscribe(contacts => {
+      console.log('📥 Initial LoadContacts result:', contacts);
+      this.allContacts = contacts;
+      this.contacts = [...contacts];
+    });
     this.unreadMessagesCount$ = this.userIndex.getUnreadMessagesCount(this.user._id);
     // ✅ מאזין להודעות פרטיות
     this.socketService.onPrivateMessage((msg: any) => {
@@ -47,6 +58,51 @@ export class UserPreviewComponent {
     console.log(`🟢 Opening private chat with user: ${this.user._id}`);
     this.isPrivateChatOpen = true;
     this.userIndex.resetUnreadMessages(this.user._id);
+  }
+  filterContactsByOwner(ownerId: string): void {
+    this.contacts = this.allContacts.filter(contact => {
+      const owner = contact.owner as string | { _id: string };
+      return (typeof owner === 'string' ? owner : owner?._id) === ownerId;
+    });
+
+    console.log('🔍 Contacts filtered for owner:', ownerId);
+    console.log('📋 Filtered Contacts:', this.contacts);
+  }
+
+  toggleContactsDropdown(): void {
+    console.log('🟢 toggleContactsDropdown called');
+
+    if (this.showContactsDropdown) {
+      this.showContactsDropdown = false;
+      return;
+    }
+
+    if (this.allContacts.length === 0) {
+      console.log('📡 Loading contacts from service...');
+      this.contactService.loadContacts().pipe(take(1)).subscribe(contacts => {
+        console.log('📥 Contacts loaded:', contacts);
+        this.allContacts = contacts;
+        this.contacts = [...contacts];
+        this.showContactsDropdown = true;
+        this.filterContactsByOwner(this.user._id);
+      });
+    } else {
+      console.log('📡 Using cached contacts');
+      this.showContactsDropdown = true;
+      this.filterContactsByOwner(this.user._id);
+    }
+  }
+
+
+
+
+
+  resetContacts(): void {
+    this.contacts = [...this.allContacts]; // מחזיר את הרשימה המקורית
+  }
+  navigateToContact(contactId: string): void {
+    console.log(`🔗 Navigating to contact: ${contactId}`);
+    this.router.navigate([{ outlets: { modal: ['contact', contactId] } }]);
   }
 
   /**

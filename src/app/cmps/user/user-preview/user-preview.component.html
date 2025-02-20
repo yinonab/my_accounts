@@ -1,5 +1,5 @@
-<article class="user-preview" (click)="onPreviewClick()">
-    <div class="image-container">
+<article class="user-preview">
+    <div (click)="onPreviewClick()" class="image-container">
         <img class="imgprofile" [src]="user.img ? user.img : '../../../assets/images/contact.png'" alt="user-image" />
     </div>
 

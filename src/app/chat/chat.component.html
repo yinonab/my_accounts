@@ -1,5 +1,11 @@
 <div class="chat-container">
-    <h2>{{ chatType === 'group' ? 'Group Chat - ' + room : 'Private Chat' }}</h2>
+    <h2>
+        {{
+        chatType === 'group'
+        ? 'Group Chat - ' + room
+        : 'Private Chat With - ' + targetUsername
+        }}
+    </h2>
 
     <!-- בחירת חדר בצ'אט קבוצתי -->
     <div class="room-selection" *ngIf="chatType === 'group' && !isRoomJoined">
@@ -30,8 +36,18 @@
             <!-- שדה ההקלדה -->
             <div class="input-wrapper">
                 <label for="fileInput" class="upload-icon">📎</label>
-                <input #chatInput [(ngModel)]="newMessage" placeholder="Type a message..." class="styled-input" />
+                <input #chatInput [(ngModel)]="newMessage" placeholder="Type a message..." class="styled-input"
+                    (keyup)="onTyping()" (blur)="onStopTyping()" />
                 <input type="file" id="fileInput" #fileInput (change)="onFileSelected($event)" hidden />
+                <div class="typing-indicator-inside" *ngIf="isTyping">
+                    <div class="blink-icon-wrapper">
+                        <!-- תלוי ב-typingMessage -->
+                        <span *ngIf="typingMessage === 'Typing...'">⌨️</span> <span
+                            *ngIf="typingMessage === '⌨️ Sending a message...'">⌨️</span>
+                        <span *ngIf="typingMessage === '📷 Sending an image...'">🖼️</span>
+                        <span *ngIf="typingMessage === '🎥 Sending a video...'">🎬</span>
+                    </div>
+                </div>
             </div>
             <!-- לואדר טעינת קובץ -->
             <div *ngIf="isUploading" class="upload-loader">

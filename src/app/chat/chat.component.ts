@@ -22,6 +22,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   isDevelopment = true;
   @Input() chatType: 'group' | 'private' = 'group';
   @Input() targetUserId: string = '';
+  targetUsername: string = '';
   @ViewChild('roomInput') roomInput!: ElementRef;
   @ViewChild('chatInput') chatInput!: ElementRef;
   notificationsEnabled = false;
@@ -30,6 +31,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
   isUploading = false;  // מציין אם יש קובץ שנמצא בהעלאה
   uploadProgress = 0;   // מציין את אחוזי ההעלאה
+  typingMessage: string = ''; // כאן תוצג האינדיקציה למה שהצד השני מקליד או שולח
+  isTyping = false; // דגל כדי להפעיל ולהסתיר את ההודעה
+  private typingDebounceTimer: any = null;
+
 
 
 
@@ -50,7 +55,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   private cloudinaryService = inject(CloudinaryService);
 
 
-
+  private typingTimeout: any = null;          // יעזור לנו לזהות מתי המשתמש הפסיק להקליד
+  private TYPING_DELAY = 2000;
   constructor(private socketService: SocketService, private userService: UserService,
     private errorLogger: ErrorLoggerService,
     private deviceService: DeviceService,
@@ -81,10 +87,24 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     alert(JSON.stringify(debugInfo, null, 2));
   }
   ngOnInit(): void {
-    this.errorLogger.log('Chat component initialized', {
-      chatType: this.chatType,
-      targetUserId: this.targetUserId
-    });
+    this.userService.getUserById(this.targetUserId)
+      .subscribe({
+        next: (user) => {
+          console.log('Fetched target user:', user);
+          this.targetUsername = user.username || 'Unknown';
+
+          // כאן כבר יש לך את השם, אז עכשיו אפשר להדפיס
+          this.errorLogger.log('Chat component initialized', {
+            chatType: this.chatType,
+            targetUserId: this.targetUserId,
+            targetUsername: this.targetUsername
+          });
+        },
+        error: (err) => {
+          console.error('Failed to load target user by ID', err);
+          this.targetUsername = 'Unknown';
+        }
+      });
     this.socketSubscription = new Subscription();
     this.notificationPermission = Notification.permission;
     this.initializeNotifications();
@@ -100,6 +120,15 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (this.chatType === 'group') {
+      this.socketSubscription.add(
+        this.socketService.on('user-typing', (data: { fromUserId: string; messageType: string }) => {
+          console.log(`✍️ Typing event received:`, data);
+
+          if (data.fromUserId !== this.currentUser._id) {
+            this.showTypingIndicator(data.messageType);
+          }
+        })
+      );
       this.socketSubscription.add(
         this.socketService.on('chat-add-msg', async (msg: ChatMessage) => {
           console.log('📩 התקבלה הודעה חדשה:', msg);
@@ -138,9 +167,70 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         })
       );
     } else if (this.chatType === 'private') {
-      //console.log('New message received:');
+      this.socketSubscription.add(
+        this.socketService.on('user-typing', (data: { fromUserId: string; messageType: string }) => {
+          console.log(`✍️ Typing event received:`, data);
+          if (data.fromUserId !== this.currentUser._id) {
+            this.showTypingIndicator(data.messageType);
+          }
+        })
+      );
       this.loadPrivateMessages();
     }
+
+    this.socketSubscription.add(
+      this.socketService.on('user-stop-typing', (data: { fromUserId: string }) => {
+        console.log(`🛑 stop-typing event received:`, data);
+        if (data.fromUserId !== this.currentUser?._id) {
+          this.isTyping = false;
+        }
+      })
+    );
+  }
+  showTypingIndicator(type: string): void {
+    this.isTyping = true;
+
+    if (type === 'text') {
+      this.typingMessage = 'Typing...';
+    } else if (type === 'image') {
+      this.typingMessage = '📷 Sending an image...';
+    } else if (type === 'video') {
+      this.typingMessage = '🎥 Sending a video...';
+    } else {
+      this.typingMessage = 'Typing...';
+    }
+
+    // אפשר להשאיר טיימר של 3 שניות, או להשתמש באירוע stop-typing
+    // כאן נשאיר כגיבוי (אם לא מגיע stop-typing):
+    // setTimeout(() => {
+    //   this.isTyping = false;
+    // }, 3000);
+  }
+  onTyping(): void {
+    if (!this.targetUserId) return;
+
+    clearTimeout(this.typingDebounceTimer);
+    this.typingDebounceTimer = setTimeout(() => {
+      // אחרי 300ms ללא הקשה נוספת, שולחים typing
+      this.socketService.emit('typing', {
+        toUserId: this.targetUserId,
+        messageType: 'text'
+      });
+    }, 5);
+
+
+
+    // מנגנון "אם לא הקלדת יותר מ-2 שניות, שלח stop-typing"
+    clearTimeout(this.typingTimeout);
+    this.typingTimeout = setTimeout(() => {
+      this.onStopTyping();
+    }, this.TYPING_DELAY);
+  }
+  onStopTyping(): void {
+    if (!this.targetUserId) return;
+    this.socketService.emit('stop-typing', {
+      toUserId: this.targetUserId
+    });
   }
   showNotificationPrompt() {
     if (document.querySelector('.notification-prompt')) return; // מניעת כפילויות
@@ -393,6 +483,22 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       const file = input.files[0];
       console.log(`📂 File selected: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
 
+      const isVideo = file.type.startsWith('video/');
+      const isImage = file.type.startsWith('image/');
+      if (isVideo || isImage) {
+        if (this.chatType === 'private' && this.targetUserId) {
+          this.socketService.emit('typing', {
+            toUserId: this.targetUserId,
+            messageType: isVideo ? 'video' : 'image'
+          });
+        } else if (this.chatType === 'group') {
+          // ייתכן שתצטרך להעביר גם מידע room, תלוי בהגדרות הצד שרת
+          this.socketService.emit('typing', {
+            messageType: isVideo ? 'video' : 'image'
+          });
+        }
+      }
+
       this.isUploading = true;  // מציגים את הלואדר
       this.uploadProgress = 5; // מתחילים מ-10%
 
@@ -463,6 +569,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       requestAnimationFrame(() => this.scrollToBottom());
     }, 1250);
+    this.onStopTyping();
   }
 
   handleImageError(imageUrl: string) {
@@ -496,6 +603,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       requestAnimationFrame(() => this.scrollToBottom());
     }, 700);
+    this.onStopTyping();
   }
 
   sendPrivateImageMessage(imageUrl: string, videoUrl?: string): void {
@@ -520,6 +628,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       requestAnimationFrame(() => this.scrollToBottom());
     }, 700);
+    this.onStopTyping();
   }
   sendPrivateVideoMessage(videoUrl: string): void {
     console.log(`🎬 Sending private video message to ${this.targetUserId}: ${videoUrl}`);
@@ -541,6 +650,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       requestAnimationFrame(() => this.scrollToBottom());
     }, 1250);
+    this.onStopTyping();
   }
 
 
@@ -569,6 +679,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       inputElement.focus(); // החזרת פוקוס אחרי 100ms
     }, 10);
+    this.onStopTyping();
   }
 
 
@@ -596,6 +707,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     this.socketService.sendPrivateMessage(this.targetUserId, this.newMessage);
     this.privateMessages.push(localMessage);
     this.scrollToBottom();
+    this.onStopTyping();
 
     // איפוס ומיקוד מחדש לשמירת המקלדת פתוחה
     // שמירת פוקוס בלי לאפס מידית את השדה

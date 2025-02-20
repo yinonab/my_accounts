@@ -146,6 +146,25 @@
     cursor: pointer;
     background: #000;
 }
+.typing-indicator-inside {
+    position: absolute;
+    right: 55px; /* כדי שזה יהיה משמאל לכפתור השליחה */
+    top: 50%;
+    transform: translateY(-50%);
+    animation: blink 1.2s infinite;
+  
+    .blink-icon-wrapper {
+      font-size: 20px; /* גודל האייקון */
+      display: flex;
+      align-items: center;
+    }
+  }
+  
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+  }
 
 // ✅ עיצוב וידאו במובייל
 @media (max-width: 600px) {

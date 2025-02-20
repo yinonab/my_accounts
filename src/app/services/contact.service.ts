@@ -31,7 +31,12 @@ export class ContactService {
         from(storageService.query<Contact>(ENTITY))
             .pipe(
                 tap(contacts => {
-                    // Update BehaviorSubject with contacts loaded from the DB
+                    contacts = contacts.map(contact => ({
+                        ...contact,
+                        name: contact.name || 'Unnamed Contact', // ✅ הוספת שדה קבוע name
+                        owner: contact.owner || 'Unknown',
+                        fields: contact.fields || []
+                    }));
                     this._contacts$.next(this._sort(contacts));
                 }),
                 catchError(this._handleError)
@@ -39,50 +44,33 @@ export class ContactService {
             .subscribe();
     }
 
-    loadAllContactsFromDB(): void {
-        console.log("🔄 Resetting filter and fetching ALL contacts from DB...");
-
-        // ניקוי ה- filterBy כדי לוודא שאין סינון
+    public loadAllContactsFromDB(): void {
         this._filterBy$.next({ name: '' });
         from(storageService.query<Contact>('contact/All'))
             .pipe(
                 tap(aContacts => {
-                    // Update BehaviorSubject with contacts loaded from the DB
+                    aContacts = aContacts.map(contact => ({
+                        ...contact,
+                        name: contact.name || 'Unnamed Contact', // ✅ הוספת name כברירת מחדל
+                        owner: contact.owner || 'Unknown',
+                        fields: contact.fields || []
+                    }));
                     this._allContacts$.next(this._sort(aContacts));
                 }),
                 catchError(this._handleError)
             )
             .subscribe();
     }
-
     public updateContactImage(contactId: string, imageUrl: string): Observable<Contact> {
-        // חפש את הקשר הקיים
         const existingContact = this._contacts$.value.find(contact => contact._id === contactId);
+        if (!existingContact) return throwError(() => new Error('Contact not found'));
 
-        if (!existingContact) {
-            return throwError(() => new Error('Contact not found'));
-        }
-
-        // צור אובייקט חדש עם התמונה המעודכנת
-        const updatedContact: Contact = {
+        // שינוי: עדכון תמונה בתוך `fields` במקום ישירות בתוך האובייקט
+        const updatedContact = {
             ...existingContact,
-            img: imageUrl
+            fields: [...existingContact.fields.filter(f => f.label !== 'image'), { label: 'image', type: 'file', value: imageUrl }]
         };
-
-        // שלח את האובייקט המלא לעדכון
-        return from(
-            storageService.put<Contact>('contact/edit', updatedContact)
-        ).pipe(
-            tap((contact: Contact) => {
-                // עדכן את ה-BehaviorSubject
-                const contacts = this._contacts$.value.map(c =>
-                    c._id === contact._id ? contact : c
-                );
-                this._contacts$.next(contacts);
-            }),
-            retry(1),
-            catchError((err) => this._handleError(err))
-        );
+        return this._updateContact(updatedContact);
     }
 
 
@@ -94,13 +82,13 @@ export class ContactService {
                     const filterBy = this._filterBy$.value;
                     contacts = contacts.map(contact => ({
                         ...contact,
-                        lastName: contact.lastName || '',
-                        birthday: contact.birthday || '',
+                        fields: contact.fields || []
                     }));
                     if (filterBy && filterBy.name) {
-                        contacts = this._filter(contacts, filterBy.name)
+                        contacts = contacts.filter(contact =>
+                            contact.fields.some(f => f.label === 'name' && f.value.toLowerCase().includes(filterBy.name.toLowerCase()))
+                        );
                     }
-                    contacts = contacts.filter(contact => contact.name.toLowerCase().includes(filterBy.name.toLowerCase()))
                     this._contacts$.next(this._sort(contacts))
                 }),
                 retry(1),
@@ -123,29 +111,42 @@ export class ContactService {
     }
 
     public saveContact(contact: Contact) {
-        const existingContact = this._contacts$.value.find(c => c._id === contact._id);
-        if (existingContact && !contact.img) {
-            contact.img = existingContact.img; // שמירה על התמונה הקיימת
+        if (!contact.fields) {
+            contact.fields = [];
         }
-
-        // קריאה לפונקציה המתאימה (עדכון או הוספה)
+        if (!contact.owner) {
+            contact.owner = 'Default Owner';
+        }
+        if (!contact.name) {
+            contact.name = 'Unnamed Contact'; // ✅ וידוא שהשם קיים
+        }
         return contact._id ? this._updateContact(contact) : this._addContact(contact);
     }
+
+    public getEmptyContact(): Contact {
+        return {
+            _id: '',
+            owner: '',
+            name: 'Unnamed Contact', // ✅ השדה name חובה
+            fields: [{ label: 'name', type: 'text', value: 'Unnamed Contact' }] // ✅ שדה ברירת מחדל
+        };
+    }
+
 
     public setFilterBy(filterBy: ContactFilter) {
         this._filterBy$.next(filterBy)
         this.loadContacts().pipe(take(1)).subscribe()
     }
 
-    public getEmptyContact(): Partial<Contact> {
-        return {
-            name: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            owner: '',
-        }
-    }
+    // public getEmptyContact(): Partial<Contact> {
+    //     return {
+    //         name: '',
+    //         lastName: '',
+    //         email: '',
+    //         phone: '',
+    //         owner: '',
+    //     }
+    // }
 
     public getById(contactId: string): Observable<Contact> {
         return from(storageService.get<Contact>(ENTITY, contactId))
@@ -186,23 +187,13 @@ export class ContactService {
     }
 
     private _sort(contacts: Contact[]): Contact[] {
-        return contacts.sort((a, b) => {
-            if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) {
-                return -1;
-            }
-            if (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) {
-                return 1;
-            }
-            return 0;
-        })
+        return contacts.sort((a, b) => a.name.localeCompare(b.name)); // ✅ שינוי סידור לפי name הקבוע
     }
 
     private _filter(contacts: Contact[], term: string) {
         term = term.toLocaleLowerCase()
         return contacts.filter(contact => {
-            return contact.name.toLocaleLowerCase().includes(term) ||
-                contact.phone.toLocaleLowerCase().includes(term) ||
-                contact.email.toLocaleLowerCase().includes(term)
+            return contact.fields.some(field => field.value.toLocaleLowerCase().includes(term))
         })
     }
 

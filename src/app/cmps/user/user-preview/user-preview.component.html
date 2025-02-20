@@ -41,9 +41,10 @@
             <div class="contacts-dropdown" *ngIf="showContactsDropdown">
                 <button class="close-dropdown" (click)="closeContactsDropdown()">×</button>
                 <ul>
-                    <li *ngFor="let contact of contacts" (click)="navigateToContact(contact._id)">
-                        {{ contact.name }}
+                    <li *ngFor="let contact of contacts" (click)="navigateToContact(contact._id ? contact._id : '')">
+                        {{ getFieldValue(contact, 'name') }}
                     </li>
+
                 </ul>
             </div>
 

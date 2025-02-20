@@ -82,6 +82,11 @@ export class UserPreviewComponent {
     // ניקוי האזנה כדי למנוע זליגת זיכרון
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
   }
+  getFieldValue(contact: Contact, fieldLabel: string): string {
+    if (!contact.fields || contact.fields.length === 0) return 'N/A';
+    const field = contact.fields.find(f => f.label.toLowerCase() === fieldLabel.toLowerCase());
+    return field ? field.value : 'N/A';
+  }
 
   handleVisibilityChange = (): void => {
     if (document.hidden) {

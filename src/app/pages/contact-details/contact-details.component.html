@@ -14,16 +14,19 @@
 
   <!-- תמונת איש הקשר -->
   <div class="contact-image-container">
-    <img [src]="contact.img ? contact.img : '../../../assets/images/contact.png'" alt="contact-image" />
+    <img
+      [src]="getFieldValue(contact, 'image') ? getFieldValue(contact, 'image') : '../../../assets/images/contact.png'"
+      alt="contact-image" />
   </div>
 
-  <!-- פרטי איש הקשר -->
+  <!-- פרטי איש הקשר (מציג את כל השדות הדינאמיים) -->
   <div class="contact-fields">
-    <p><strong>Name:</strong> {{ contact.name }}</p>
-    <p *ngIf="contact.lastName"><strong>Last Name:</strong> {{ contact.lastName }}</p>
-    <p><strong>Phone:</strong> {{ contact.phone }}</p>
-    <p><strong>Email:</strong> {{ contact.email }}</p>
-    <p><strong>Birthday:</strong> {{ contact.birthday | date: 'longDate' }}</p>
+    <p><strong>Name:</strong> {{ contact.name }}</p> <!-- ✅ `name` נשאר שדה קבוע -->
+    <ng-container *ngFor="let field of contact.fields">
+      <p *ngIf="field.label !== 'image'">
+        <strong>{{ field.label }}:</strong> {{ field.value }}
+      </p>
+    </ng-container>
   </div>
 
 </section>

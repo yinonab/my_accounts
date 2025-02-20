@@ -1,32 +1,40 @@
 <article class="contact-preview" (click)="onPreviewClick()">
-  <img [src]="contact.img ? contact.img : '../../../assets/images/contact.png'" alt="contact-image" />
+  <!-- תמונת איש הקשר -->
+  <img
+    [src]="getFieldValue(contact, 'img') !== 'N/A' ? getFieldValue(contact, 'img') : '../../../assets/images/contact.png'"
+    alt="contact-image" />
+
+  <!-- מידע על איש הקשר -->
   <div class="contact-info">
-    <h1 class="contact-name" [ngClass]="{ 'long-name': isLongName }">
-      {{ contact.name }}
+    <h1 class="contact-name" [ngClass]="{ 'long-name': isLongField(getFieldValue(contact, 'name'), 15) }">
+      {{ getFieldValue(contact, 'name') }}
     </h1>
-    <h1 class="contact-last-name" [ngClass]="{ 'long-name': isLongName }">
-      {{ contact.lastName }}
+    <h1 class="contact-last-name" [ngClass]="{ 'long-name': isLongField(getFieldValue(contact, 'lastName'), 15) }">
+      {{ getFieldValue(contact, 'lastName') }}
     </h1>
   </div>
 
-
-
+  <!-- כפתורי הפעולות -->
   <div class="button-container">
-    <!-- Delete Button -->
+    <!-- כפתור מחיקה -->
     <button class="delete-button" evStop (click)="onDeleteClick()">
       <img src="../../../assets/images/delete1.png" alt="delete image" />
     </button>
-    <!-- Edit Button -->
+
+    <!-- כפתור עריכה -->
     <button class="edit-button" evStop (click)="onEditClick()" [routerLink]="['/contact/edit', contact._id]">
       <img src="../../../assets/images/edit2.png" alt="edit contact" />
     </button>
+
+    <!-- כפתור התחברות לפייסבוק -->
     <button class="facebook-login-button" evStop (click)="loginWithFacebookOrRedirect(contact)">
       <img class="fb-img" src="../../../assets/images/fb2.png" alt="delete image" />
     </button>
   </div>
 </article>
 
-<!-- Reusable Modal -->
+<!-- מודל אישור מחיקה -->
 <app-modal evStop [isVisible]="showDeleteModal" [message]="'Are you sure you want to delete this contact?'"
   (confirmed)="confirmDelete()" (canceled)="cancelDelete()"></app-modal>
+
 <router-outlet />

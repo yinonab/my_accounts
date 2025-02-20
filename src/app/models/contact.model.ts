@@ -1,14 +1,11 @@
 export interface Contact {
+    _id?: string;
     name: string;
-    lastName?: string;
-    email: string;
-    img?: string;
-    phone: string;
-    _id: string;
-    birthday: string;
     owner: string;
-    facebookToken?: string; // New property
+    fields: { label: string; type: string; value: string }[];
+    facebookToken?: string;
 }
+
 
 
 export interface ContactFilter {

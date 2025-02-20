@@ -35,6 +35,18 @@ export class ContactPreviewComponent implements OnInit {
     }
     return contact.facebookToken;
   }
+  getFieldValue(contact: Contact, fieldLabel: string): string {
+    if (!contact.fields || contact.fields.length === 0) return 'N/A';
+    const field = contact.fields.find(f => f.label.toLowerCase() === fieldLabel.toLowerCase());
+    return field ? field.value : 'N/A';
+  }
+
+  // בודק האם השדה ארוך מדי
+  isLongField(value: string | null | undefined, maxLength: number): boolean {
+    return !!value && value.length > maxLength;
+  }
+
+
   public loginWithFacebookOrRedirect(contact: Contact): void {
     // Check if token exists in localStorage
     const storedToken = localStorage.getItem('facebookToken');

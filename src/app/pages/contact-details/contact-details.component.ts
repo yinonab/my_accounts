@@ -35,6 +35,10 @@ export class ContactDetailsComponent implements OnInit, OnDestroy {
   }
 
 
+  getFieldValue(contact: Contact, fieldLabel: string): string | undefined {
+    const field = contact.fields.find(f => f.label.toLowerCase() === fieldLabel.toLowerCase());
+    return field ? field.value : undefined;
+  }
 
   onBack(): void {
     this.router.navigate([{ outlets: { modal: null } }]); // Clear the 'modal' outlet

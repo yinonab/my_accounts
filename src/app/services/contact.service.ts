@@ -22,9 +22,9 @@ export class ContactService {
         // if (!contacts || contacts.length === 0) {
         //     localStorage.setItem(ENTITY, JSON.stringify(this._createContacts()))
         // }
-        this._loadContactsFromDB();
+        this.loadContactsFromDB();
     }
-    private _loadContactsFromDB(): void {
+    loadContactsFromDB(): void {
         from(storageService.query<Contact>(ENTITY))
             .pipe(
                 tap(contacts => {
@@ -69,6 +69,12 @@ export class ContactService {
 
 
     public loadContacts() {
+        if (this._contacts$.value.length > 0) {
+            console.log('⚡ Returning cached contacts (no new request)');
+            return this.contacts$; // מחזיר את הנתונים הקיימים
+        }
+
+        console.log('📡 Fetching contacts from DB...');
         return from(storageService.query<Contact>(ENTITY))
             .pipe(
                 tap(contacts => {

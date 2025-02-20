@@ -88,12 +88,6 @@ export class ContactService {
 
 
     public loadContacts() {
-        if (this._contacts$.value.length > 0) {
-            console.log('⚡ Returning cached contacts (no new request)');
-            return this.contacts$; // מחזיר את הנתונים הקיימים
-        }
-
-        console.log('📡 Fetching contacts from DB...');
         return from(storageService.query<Contact>(ENTITY))
             .pipe(
                 tap(contacts => {

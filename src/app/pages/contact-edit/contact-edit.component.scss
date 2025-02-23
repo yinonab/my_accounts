@@ -30,6 +30,14 @@
     justify-content: space-between;
     align-items: center;
 
+    h2 {
+      font-size: 1.5rem;
+      text-align: center;
+      flex-grow: 1; // ממורכז
+      margin: 0;
+      font-weight: 600;
+    }
+
     button {
       padding: 0;
       cursor: pointer;
@@ -58,40 +66,33 @@
     justify-content: center;
     position: relative;
     margin-bottom: 15px;
-
+  
     .contact-image {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: 3px solid #f1c40f;
-      object-fit: cover;
+      @extend .contact-image;
       transition: transform 0.3s ease;
-
+  
       &:hover {
         transform: scale(1.05);
       }
     }
-
-    /* סגנון עבור האות הראשונה במקרה שאין תמונה */
+  
     .default-avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background-color: #bdc3c7; // צבע רקע
+      @extend .contact-image;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 48px; // גודל הפונט עבור האות
+      background-color: #bdc3c7;
+      font-size: 48px;
       font-weight: bold;
-      color: #34495e; // צבע הטקסט
-      border: 3px solid #f1c40f;
+      color: #34495e;
       cursor: pointer;
       transition: transform 0.3s ease;
-
+  
       &:hover {
         transform: scale(1.05);
       }
     }
+    
 
     /* כפתור העלאת תמונה */
     .image-upload {
@@ -173,11 +174,45 @@
         }
       }
     }
-
+    .desc.form-input {
+      textarea {
+        width: 100%;
+        min-height: 80px;
+        padding: 8px;
+        font-size: 16px;
+        border: 1px solid #bdc3c7;
+        border-radius: 6px;
+        color: #34495e;
+        background-color: white;
+        resize: vertical; // מאפשר שינוי גובה
+        font-family: "Roboto", sans-serif;
+    
+        &::placeholder {
+          color: #bdc3c7;
+        }
+    
+        &:focus {
+          border-color: #f1c40f;
+          outline: none;
+          box-shadow: 0 0 5px rgba(241, 196, 15, 0.5);
+        }
+    
+        &.ng-valid {
+          border-color: green;
+          background-color: #f6fff6;
+        }
+    
+        &.ng-invalid {
+          border-color: red;
+          background-color: #fff6f6;
+        }
+      }
+    }
+    
     .form-actions {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       gap: 20px;
 
       .add-btn,
@@ -209,13 +244,13 @@
       align-items: center;
       justify-content: flex-start;
       gap: 10px;
-      margin-top: 10px;
+      //margin-top: 10px;
 
       .switch {
         position: relative;
         display: inline-block;
-        width: 60px;
-        height: 34px;
+        width: 3em;
+        height: 1em;
 
         input {
           opacity: 0;
@@ -241,8 +276,8 @@
           &::before {
             position: absolute;
             content: "";
-            height: 26px;
-            width: 26px;
+            height: 0.6em;
+            width: 1em;
             left: 4px;
             bottom: 4px;
             background-color: white;
@@ -356,6 +391,112 @@
           height: 14px;
         }
       }
+    }
+  }
+}
+.contact-image {
+  object-fit: cover;
+  transition: all 0.3s ease;
+
+  &.small {
+    width: 80px !important;
+    height: 80px !important;
+    min-width: 80px !important;
+    min-height: 80px !important;
+  }
+
+  &.medium {
+    width: 120px !important;
+    height: 120px !important;
+    min-width: 120px !important;
+    min-height: 120px !important;
+  }
+
+  &.large {
+    width: 160px !important;
+    height: 160px !important;
+    min-width: 160px !important;
+    min-height: 160px !important;
+  }
+
+
+
+  &.circle {
+    border-radius: 50% !important;
+  }
+
+  &.ellipse {
+    border-radius: 50% / 30% !important;
+  }
+
+  &.square {
+    border-radius: 0 !important;
+  }
+
+  &.rectangle-horizontal {
+    width: 180px !important;
+    height: 100px !important;
+    border-radius: 5px !important;
+  }
+
+  &.rectangle-vertical {
+    width: 100px !important;
+    height: 180px !important;
+    border-radius: 5px !important;
+  }
+}
+
+
+.image-settings {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  font-weight: bold;
+  color: #34495e;
+  
+  label {
+    margin-right: 5px;
+  }
+
+  select {
+    width: 130px;
+    padding: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #f1c40f;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #f39c12;
+      box-shadow: 0 0 5px rgba(243, 156, 18, 0.5);
+    }
+  }
+}
+@media (max-width: 480px) {
+  .image-settings {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    label {
+      font-size: 14px;
+    }
+
+    select {
+      width: 100%;
+      max-width: 160px;
+      font-size: 13px;
     }
   }
 }

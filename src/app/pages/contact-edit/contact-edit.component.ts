@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ContactService } from '../../services/contact.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { Subject, filter, map, takeUntil } from 'rxjs';
@@ -20,51 +20,61 @@ export class ContactEditComponent implements OnInit, OnDestroy {
   IsLastName: boolean = false
   showImageUpload = false;
   form!: FormGroup
-  showDeleteModal: boolean = false; // State for controlling modal visibility
-  constructor(private fb: FormBuilder, private datePipe: DatePipe, private msgService: MsgService,) { }
+  imageSizeOptions = [
+    { label: 'Small', value: 'small' },
+    { label: 'Medium', value: 'medium' },
+    { label: 'Large', value: 'large' }
+  ];
+
+  imageShapeOptions = [
+    { label: 'Circle', value: 'circle' },
+    { label: 'Ellipse', value: 'ellipse' },
+    { label: 'Square', value: 'square' },
+    { label: 'Horizontal Rectangle', value: 'rectangle-horizontal' },
+    { label: 'Vertical Rectangle', value: 'rectangle-vertical' }
+  ];
+
+  selectedImageSize = 'medium';
+  selectedImageShape = 'circle';
+  showDeleteModal: boolean = false;
+  destroySubject$ = new Subject<void>();
+  contactService = inject(ContactService);
+  contact = this.contactService.getEmptyContact();
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  constructor(private fb: FormBuilder, private datePipe: DatePipe, private msgService: MsgService, private cd: ChangeDetectorRef) { }
 
   formatDate(date: Date): string {
     return this.datePipe.transform(date, 'yyyy-MM-dd') || ''; // Format as '2024-12-16'
   }
-
-
-  contactService = inject(ContactService)
-  contact = this.contactService.getEmptyContact()
-  private router = inject(Router)
-  private route = inject(ActivatedRoute)
-
-
-  destroySubject$ = new Subject<void>()
 
   ngOnInit(): void {
     // Check if a contact exists and initialize form fields accordingly
     const contactExists = !!this.contact && this.contact._id;
 
     this.form = this.fb.group({
-      name: [
-        contactExists ? this.contact.name : '',
-        [Validators.required, Validators.minLength(3)]
-      ],
-      lastName: [
-        contactExists ? this.contact.lastName : '',
-        [Validators.minLength(3)]
-      ],
-      phone: [
-        contactExists ? this.contact.phone : '',
-        [Validators.required, Validators.pattern(/^\d{10,}$/)]
-      ],
-      email: [
-        contactExists ? this.contact.email : '',
-        [Validators.required, Validators.email] // Corrected here
-      ],
-      birth: [
-        contactExists && this.contact.birthday
-          ? this.formatDate(new Date(this.contact.birthday))
-          : this.formatDate(new Date()), // Default to today's date if no contact
-        [Validators.required]
-      ],
+      name: [contactExists ? this.contact.name : '', [Validators.required, Validators.minLength(3)]],
+      lastName: [contactExists ? this.contact.lastName : '', [Validators.minLength(3)]],
+      phone: [contactExists ? this.contact.phone : '', [Validators.pattern(/^\d{10,}$/)]],
+      email: [contactExists ? this.contact.email : '', [Validators.email]],
+      birth: [contactExists && this.contact.birthday ? this.formatDate(new Date(this.contact.birthday)) : this.formatDate(new Date())],
+      imageSize: [contactExists && this.contact.imageSize ? this.contact.imageSize : 'medium'],
+      imageShape: [contactExists && this.contact.imageShape ? this.contact.imageShape : 'circle'],
+
       img: [contactExists ? this.contact.img : ''],
       _id: [contactExists ? this.contact._id : null]
+    });
+
+    this.selectedImageSize = this.form.get('imageSize')?.value;
+    this.selectedImageShape = this.form.get('imageShape')?.value;
+
+    // ** מאזינים לשינויים בשדות imageSize ו- imageShape ומעדכנים את המחלקות בזמן אמת **
+    this.form.get('imageSize')?.valueChanges.pipe(takeUntil(this.destroySubject$)).subscribe(value => {
+      this.selectedImageSize = value;
+    });
+
+    this.form.get('imageShape')?.valueChanges.pipe(takeUntil(this.destroySubject$)).subscribe(value => {
+      this.selectedImageShape = value;
     });
 
 
@@ -81,7 +91,14 @@ export class ContactEditComponent implements OnInit, OnDestroy {
         const formattedDate = contact.birthday
           ? this.formatDate(new Date(contact.birthday))
           : this.formatDate(new Date());
-        this.form.patchValue({ ...contact, birth: formattedDate });
+        this.form.patchValue({
+          ...contact,
+          birth: formattedDate,
+          imageSize: contact.imageSize || 'medium',
+          imageShape: contact.imageShape || 'circle'
+        });
+        this.selectedImageSize = contact.imageSize || 'medium';
+        this.selectedImageShape = contact.imageShape || 'circle';
       });
 
     // Close modal on route change to '/contact'
@@ -97,6 +114,33 @@ export class ContactEditComponent implements OnInit, OnDestroy {
     //     }
     //   });
   }
+  onImageSizeChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    if (this.selectedImageSize !== select.value) {
+      this.selectedImageSize = select.value;
+      this.form.get('imageSize')?.setValue(select.value);
+      console.log('Selected Image Size:', this.selectedImageSize);
+    }
+  }
+
+  onImageShapeChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    if (this.selectedImageShape !== select.value) {
+      this.selectedImageShape = select.value;
+      this.form.get('imageShape')?.setValue(select.value);
+      console.log('Selected Image Shape:', this.selectedImageShape);
+    }
+  }
+
+
+  ngAfterViewChecked() {
+    // console.log('Image classes:', this.selectedImageSize, this.selectedImageShape);
+  }
+  trackByFn(index: number, item: any) {
+    return item.value;
+  }
+
+
 
 
   // Show the delete confirmation modal
@@ -152,6 +196,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
       console.log('Form is invalid, please correct the errors.');
       return;
     }
+
     const formValue = { ...this.form.value };
     // Convert 'birth' back to timestamp
     formValue.birth = new Date(formValue.birth).getTime();
@@ -160,6 +205,13 @@ export class ContactEditComponent implements OnInit, OnDestroy {
     }
     console.log('Form values before saving:', formValue); // Debug log
     console.log('Data being sent to saveContact:', formValue); // Debug log
+
+    formValue.imageSize = this.selectedImageSize;
+    formValue.imageShape = this.selectedImageShape;
+
+    console.log('Saving Contact:', formValue); // Debug log
+    console.log('Saving Contact Data:', this.form.value);
+
     this.contactService.saveContact(formValue as Contact)
       .pipe(takeUntil(this.destroySubject$))
       .subscribe({
@@ -201,6 +253,10 @@ export class ContactEditComponent implements OnInit, OnDestroy {
     }
 
     this.contact.img = imageUrl;
+    this.form.patchValue({ img: imageUrl });
+    this.showImageUpload = false;
+    this.cd.detectChanges();
+
 
     // עדכון התמונה בטופס
     if (this.form.contains('img')) {

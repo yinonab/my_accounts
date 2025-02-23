@@ -27,6 +27,8 @@ export class ContactDetailsComponent implements OnInit, OnDestroy {
             ...contact,
             lastName: contact.lastName,
             birthday: contact.birth,
+            imageSize: contact.imageSize || 'medium',  // ברירת מחדל
+            imageShape: contact.imageShape || 'circle' // ברירת מחדל
           };
         }
         return contact;

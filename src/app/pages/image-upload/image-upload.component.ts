@@ -21,21 +21,18 @@ export class ImageUploadComponent {
   onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
+      const selectedFile = input.files[0];
+      this.uploadImage(selectedFile);
     }
   }
 
   // פונקציה שנקראת בעת שליחת הטופס
-  onUpload(): void {
-    if (!this.selectedFile) return;
-
+  private uploadImage(file: File): void {
     this.isLoading = true; // התחלת טעינה
 
-    this.cloudinaryService.uploadImage(this.selectedFile).subscribe({
+    this.cloudinaryService.uploadImage(file).subscribe({
       next: (imageUrl) => {
         console.log('Uploaded image URL:', imageUrl);
-
-        // פלט ה-URL החוצה
         this.imageUploaded.emit(imageUrl);
         this.isLoading = false; // סיום טעינה
       },

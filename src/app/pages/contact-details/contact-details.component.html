@@ -14,16 +14,18 @@
 
   <!-- תמונת איש הקשר -->
   <div class="contact-image-container">
-    <img [src]="contact.img ? contact.img : '../../../assets/images/contact.png'" alt="contact-image" />
+    <img [src]="contact.img ? contact.img : '../../../assets/images/contact.png'" class="contact-image"
+      [ngClass]="[contact.imageSize || 'medium', contact.imageShape || 'circle']" alt="contact-image" />
   </div>
+
 
   <!-- פרטי איש הקשר -->
   <div class="contact-fields">
     <p><strong>Name:</strong> {{ contact.name }}</p>
-    <p *ngIf="contact.lastName"><strong>Last Name:</strong> {{ contact.lastName }}</p>
-    <p><strong>Phone:</strong> {{ contact.phone }}</p>
+    <p *ngIf="contact.lastName"><strong>Dscription:</strong> {{ contact.lastName }}</p>
+    <!-- <p><strong>Phone:</strong> {{ contact.phone }}</p>
     <p><strong>Email:</strong> {{ contact.email }}</p>
-    <p><strong>Birthday:</strong> {{ contact.birthday | date: 'longDate' }}</p>
+    <p><strong>Birthday:</strong> {{ contact.birthday | date: 'longDate' }}</p> -->
   </div>
 
 </section>

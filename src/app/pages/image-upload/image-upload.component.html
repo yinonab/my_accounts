@@ -1,8 +1,8 @@
-<form (submit)="onUpload()">
-    <label>
-        <input type="file" (change)="onFileSelect($event)" />
-    </label>
-    <button type="submit" [disabled]="isLoading || !selectedFile">
-        {{ isLoading ? 'Uploading...' : 'Upload Image' }}
-    </button>
-</form>
+<div class="image-upload">
+    <div class="contact-image-container" *ngIf="uploadedImageUrl">
+        <img [src]="uploadedImageUrl" class="contact-image" alt="Uploaded Image" />
+    </div>
+
+    <label [class.hidden]="uploadedImageUrl" for="fileInput">בחר תמונה 📷</label>
+    <input type="file" id="fileInput" (change)="onFileSelect($event)" [disabled]="isLoading" />
+</div>

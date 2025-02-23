@@ -8,6 +8,8 @@ export interface Contact {
     birthday: string;
     owner: string;
     facebookToken?: string; // New property
+    imageSize?: string;  // חדש
+    imageShape?: string; // חדש
 }
 
 

@@ -8,3 +8,55 @@ body:has(.click-outside) {
         pointer-events: none;
     }
 }
+.contact-image, .default-avatar {
+    object-fit: cover;
+    transition: all 0.3s ease;
+    border: 3px solid #f1c40f; // צבע המסגרת הגלובלי
+
+    &.small {
+      width: 80px !important;
+      height: 80px !important;
+      min-width: 80px !important;
+      min-height: 80px !important;
+    }
+  
+    &.medium {
+      width: 120px !important;
+      height: 120px !important;
+      min-width: 120px !important;
+      min-height: 120px !important;
+    }
+  
+    &.large {
+      width: 160px !important;
+      height: 160px !important;
+      min-width: 160px !important;
+      min-height: 160px !important;
+    }
+  
+    &.circle {
+      border-radius: 50% !important;
+    }
+  
+    &.ellipse {
+      border-radius: 50% / 30% !important;
+    }
+  
+    &.square {
+      border-radius: 0 !important;
+    }
+  
+    &.rectangle-horizontal {
+      width: 180px !important;
+      height: 100px !important;
+      border-radius: 5px !important;
+    }
+  
+    &.rectangle-vertical {
+      width: 100px !important;
+      height: 180px !important;
+      border-radius: 5px !important;
+    }
+}
+
+  

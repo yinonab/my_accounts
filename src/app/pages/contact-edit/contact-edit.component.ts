@@ -55,6 +55,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       name: [contactExists ? this.contact.name : '', [Validators.required, Validators.minLength(3)]],
       lastName: [contactExists ? this.contact.lastName : '', [Validators.minLength(3)]],
+      additionalInfo: [contactExists ? this.contact.additionalInfo : ''],
       phone: [contactExists ? this.contact.phone : '', [Validators.pattern(/^\d{10,}$/)]],
       email: [contactExists ? this.contact.email : '', [Validators.email]],
       birth: [contactExists && this.contact.birthday ? this.formatDate(new Date(this.contact.birthday)) : this.formatDate(new Date())],

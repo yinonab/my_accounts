@@ -90,6 +90,26 @@
           </p>
         </ng-container>
 
+        <!-- Additional Info Input -->
+        <!-- Additional Info Input -->
+        <div class="form-input desc">
+          <label for="additionalInfo">Additional Info</label>
+          <textarea class="lastName" formControlName="additionalInfo" placeholder="Enter text, links, or anything..."
+            id="additionalInfo"></textarea>
+        </div>
+
+        <!-- הצגת additionalInfo עם לינקים קליקביליים -->
+        <p *ngIf="form.controls['additionalInfo'].value" [innerHTML]="form.controls['additionalInfo'].value | linkify"
+          class="formatted-text"></p>
+
+        <ng-container *ngIf="form.controls['additionalInfo'] as additionalInfoInput">
+          <p *ngIf="additionalInfoInput.errors && additionalInfoInput.touched" class="errors">
+            <span *ngIf="additionalInfoInput.errors['minlength']">Additional Info must be at least 3 characters
+              long!</span>
+          </p>
+        </ng-container>
+
+
         <!-- Phone Input -->
         <!-- <div class="form-input">
           <label for="phone">Phone</label>

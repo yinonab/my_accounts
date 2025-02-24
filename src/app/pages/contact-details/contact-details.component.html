@@ -23,6 +23,11 @@
   <div class="contact-fields">
     <p><strong>Name:</strong> {{ contact.name }}</p>
     <p *ngIf="contact.lastName"><strong>Dscription:</strong> {{ contact.lastName }}</p>
+    <p *ngIf="contact.additionalInfo">
+      <strong>Info:</strong>
+      <span [innerHTML]="contact.additionalInfo | extractDomain"></span>
+    </p>
+
     <!-- <p><strong>Phone:</strong> {{ contact.phone }}</p>
     <p><strong>Email:</strong> {{ contact.email }}</p>
     <p><strong>Birthday:</strong> {{ contact.birthday | date: 'longDate' }}</p> -->

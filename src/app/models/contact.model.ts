@@ -9,7 +9,8 @@ export interface Contact {
     owner: string;
     facebookToken?: string; // New property
     imageSize?: string;  // חדש
-    imageShape?: string; // חדש
+    imageShape?: string;
+    additionalInfo?: string; // חדש
 }
 
 

@@ -37,6 +37,8 @@ import { UserFilterComponent } from './cmps/user/user-filter/user-filter.compone
 import { FullNameValidatorDirective } from './directives/full-name-validator.directive';
 import { ChatComponent } from './chat/chat.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
+import { LinkifyPipe } from './pipes/linkify.pipe';
+import { ExtractDomainPipe } from './pipes/extract-domain.pipe';
 
 
 
@@ -49,6 +51,8 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     ContactListComponent,
     ContactPreviewComponent,
     HeaderComponent,
+    LinkifyPipe,
+    ExtractDomainPipe,
     // ChartsComponent,
     ContactFilterComponent,
     ContactEditComponent,

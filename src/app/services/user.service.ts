@@ -101,6 +101,11 @@ export class UserService {
     document.cookie = `loginToken=${token}; path=/; Secure; SameSite=Lax; max-age=${30 * 24 * 60 * 60}`;
     localStorage.setItem(LOGIN_TOKEN, token);
     sessionStorage.setItem(LOGIN_TOKEN, token);
+
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'SAVE_LOGIN_TOKEN', token });
+      console.log("💾 נשלחה הודעה ל-Service Worker לשמירת token ב־IndexedDB");
+    }
   }
 
   /** 🔄 שחזור `loginToken` אם הקוקי נמחק */

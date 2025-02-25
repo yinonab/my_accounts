@@ -226,24 +226,50 @@ export class UserService {
   }
 
 
+  // public loginWithFacebook(fbUser: {
+  //   facebookId: string;
+  //   name: string;
+  //   email?: string;
+  //   accessToken: string;
+  // }): Observable<User> {
+  //   return from(storageService.login<User>('auth/facebook', fbUser)).pipe(
+  //     tap((loggedInUser: User) => {
+  //       // Save the user as the currently logged-in user
+  //       this._loggedInUser$.next(loggedInUser)
+  //       localStorage.setItem(LOGGEDIN_USER, JSON.stringify(loggedInUser))
+  //       localStorage.setItem(FACEBOOK_ID, fbUser.facebookId);
+  //       localStorage.setItem(FACEBOOK_ACCESS_TOKEN, fbUser.accessToken);
+  //       this.socketService.login(loggedInUser._id);
+  //     }),
+  //     catchError(this._handleError)
+  //   )
+  // }
   public loginWithFacebook(fbUser: {
     facebookId: string;
     name: string;
     email?: string;
     accessToken: string;
   }): Observable<User> {
-    return from(storageService.login<User>('auth/facebook', fbUser)).pipe(
-      tap((loggedInUser: User) => {
-        // Save the user as the currently logged-in user
-        this._loggedInUser$.next(loggedInUser)
-        localStorage.setItem(LOGGEDIN_USER, JSON.stringify(loggedInUser))
+    return from(storageService.login<{ user: User; loginToken: string }>('auth/facebook', fbUser)).pipe(
+      tap((response) => {
+        const loggedInUser: User = response.user;
+        const loginToken: string = response.loginToken;
+        // שמירת המשתמש ב־BehaviorSubject וב־localStorage
+        this._loggedInUser$.next(loggedInUser);
+        localStorage.setItem(LOGGEDIN_USER, JSON.stringify(loggedInUser));
+        // שמירת פרטי פייסבוק
         localStorage.setItem(FACEBOOK_ID, fbUser.facebookId);
         localStorage.setItem(FACEBOOK_ACCESS_TOKEN, fbUser.accessToken);
+        // התחברות דרך Socket
         this.socketService.login(loggedInUser._id);
+        // שמירת ה־loginToken (גיבוי ב-cookie, localStorage ו-sessionStorage)
+        this._saveLoginToken(loginToken);
       }),
+      map(response => response.user),
       catchError(this._handleError)
-    )
+    );
   }
+
 
 
 

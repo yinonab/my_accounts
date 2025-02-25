@@ -51,12 +51,12 @@
 
         <div class="contact-video-container">
           <!-- אם יש וידאו, נציג <video>; אחרת, נציג אייקון/אווטר וידאו בסיסי -->
-          <video *ngIf="contact.video; else videoFallback" width="220" height="140" controls
-            (click)="toggleVideoUpload()">
-            <source [src]="contact.video" type="video/mp4">
-            <!-- טקסט fallback אם הדפדפן לא תומך -->
-            Your browser does not support the video tag.
-          </video>
+          <div class="video-wrapper" (click)="toggleVideoUpload()">
+            <video *ngIf="contact.video; else videoFallback" width="220" height="140" controls>
+              <source [src]="contact.video" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
 
           <!-- אם אין וידאו -->
           <ng-template #videoFallback>

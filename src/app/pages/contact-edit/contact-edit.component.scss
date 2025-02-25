@@ -601,3 +601,19 @@
   }
 }
 
+.video-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+/* אופציונלי: שכבת overlay שקופה */
+.video-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* שקיפות מלאה */
+  background: rgba(0, 0, 0, 0);
+}

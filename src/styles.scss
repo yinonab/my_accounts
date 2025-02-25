@@ -11,8 +11,8 @@ body:has(.click-outside) {
 .contact-image, .default-avatar {
     object-fit: cover;
     transition: all 0.3s ease;
-    border: 3px solid #f1c40f; // צבע המסגרת הגלובלי
-
+    border: 3px solid #f1c40f;
+    padding: 7px;
     &.small {
       width: 80px !important;
       height: 80px !important;
@@ -47,14 +47,14 @@ body:has(.click-outside) {
     }
   
     &.rectangle-horizontal {
-      width: 180px !important;
-      height: 100px !important;
+      width: 300px !important;
+      height: 200px !important;
       border-radius: 5px !important;
     }
   
     &.rectangle-vertical {
       width: 100px !important;
-      height: 180px !important;
+      height: 200px !important;
       border-radius: 5px !important;
     }
 }

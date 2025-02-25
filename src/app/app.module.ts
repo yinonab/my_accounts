@@ -39,6 +39,7 @@ import { ChatComponent } from './chat/chat.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { LinkifyPipe } from './pipes/linkify.pipe';
 import { ExtractDomainPipe } from './pipes/extract-domain.pipe';
+import { VideoUploadComponent } from './pages/video-upload/video-upload.component';
 
 
 
@@ -75,7 +76,8 @@ import { ExtractDomainPipe } from './pipes/extract-domain.pipe';
     UserDetailsComponent,
     UserFilterComponent,
     FullNameValidatorDirective,
-    ChatComponent
+    ChatComponent,
+    VideoUploadComponent
 
 
   ],

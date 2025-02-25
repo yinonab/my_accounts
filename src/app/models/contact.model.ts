@@ -11,6 +11,7 @@ export interface Contact {
     imageSize?: string;  // חדש
     imageShape?: string;
     additionalInfo?: string; // חדש
+    video?: string
 }
 
 

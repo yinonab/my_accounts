@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import axios from 'axios';
 import { CloudinaryService } from '../../services/cloudinary.service';
+import { LoaderService } from '../../services/loaderService/loader.service';
 
 
 @Component({
@@ -15,7 +16,7 @@ export class ImageUploadComponent {
   uploadedImageUrl: string | null = null;
   isLoading = false;
 
-  constructor(private cloudinaryService: CloudinaryService) { }
+  constructor(private cloudinaryService: CloudinaryService, private loaderService: LoaderService) { }
 
   // פונקציה שנקראת כאשר המשתמש בוחר קובץ
   onFileSelect(event: Event): void {
@@ -29,17 +30,20 @@ export class ImageUploadComponent {
   // פונקציה שנקראת בעת שליחת הטופס
   private uploadImage(file: File): void {
     this.isLoading = true; // התחלת טעינה
+    this.loaderService.show();
 
     this.cloudinaryService.uploadImage(file).subscribe({
       next: (imageUrl) => {
         console.log('Uploaded image URL:', imageUrl);
         this.imageUploaded.emit(imageUrl);
         this.isLoading = false; // סיום טעינה
+        this.loaderService.hide();
       },
       error: (err) => {
         console.error('Error uploading the image:', err);
         this.uploadError.emit('Failed to upload the image'); // פלט שגיאה
         this.isLoading = false; // סיום טעינה
+        this.loaderService.hide();
       },
     });
   }

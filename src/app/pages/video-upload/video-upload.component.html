@@ -1,0 +1,8 @@
+<div class="video-upload">
+    <div class="video-container" *ngIf="uploadedVideoUrl">
+        <video width="220" height="140" controls [src]="uploadedVideoUrl"></video>
+    </div>
+
+    <label [class.hidden]="uploadedVideoUrl" for="videoFileInput">בחר וידאו 🎥</label>
+    <input type="file" id="videoFileInput" (change)="onFileSelect($event)" [disabled]="isLoading" accept="video/*" />
+</div>

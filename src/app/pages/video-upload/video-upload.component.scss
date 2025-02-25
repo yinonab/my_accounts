@@ -1,0 +1,40 @@
+.video-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  
+    .video-container {
+      width: 220px;
+      height: 140px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+  
+    label {
+      background-color: #007bff;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: bold;
+      border-radius: 20px;
+      padding: 0.2rem 0.6rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  
+      &:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+      }
+    }
+  
+    input[type="file"] {
+      display: none;
+    }
+  
+    .hidden {
+      display: none !important;
+    }
+  }
+  

@@ -16,36 +16,62 @@
     <!-- טופס העריכה -->
     <form [formGroup]="form" (ngSubmit)="onSaveContact()" class="flex column">
 
-
-      <div class="contact-image-container">
-
-
-        <!-- תמונת איש הקשר -->
-        <!-- תמונת איש הקשר -->
-        <img *ngIf="contact.img; else fallback" [src]="contact.img" class="contact-image" (click)="toggleImageUpload()"
-          [ngClass]="[selectedImageSize, selectedImageShape]" />
+      <div class="media-row">
+        <div class="contact-image-container">
 
 
-
-        <!-- תבנית חלופית אם אין תמונה -->
-        <ng-template #fallback>
-          <div *ngIf="contact.name; else defaultAvatar" class="default-avatar" (click)="toggleImageUpload()"
-            [ngClass]="[form.get('imageSize')?.value || 'medium', form.get('imageShape')?.value || 'circle']">
-            {{ getInitials(contact.name) }}
-          </div>
+          <!-- תמונת איש הקשר -->
+          <!-- תמונת איש הקשר -->
+          <img *ngIf="contact.img; else fallback" [src]="contact.img" class="contact-image"
+            (click)="toggleImageUpload()" [ngClass]="[selectedImageSize, selectedImageShape]" />
 
 
-          <ng-template #defaultAvatar>
-            <img class="contact-image" src="../../../assets/images/contact.png" alt="Default Contact Image"
-              (click)="toggleImageUpload()"
-              [ngClass]="[form.get('imageSize')?.value || 'medium', form.get('imageShape')?.value || 'circle']" />
+
+          <!-- תבנית חלופית אם אין תמונה -->
+          <ng-template #fallback>
+            <div *ngIf="contact.name; else defaultAvatar" class="default-avatar" (click)="toggleImageUpload()"
+              [ngClass]="[form.get('imageSize')?.value || 'medium', form.get('imageShape')?.value || 'circle']">
+              {{ getInitials(contact.name) }}
+            </div>
+
+
+            <ng-template #defaultAvatar>
+              <img class="contact-image" src="../../../assets/images/picture.png" alt="Default Contact Image"
+                (click)="toggleImageUpload()"
+                [ngClass]="[form.get('imageSize')?.value || 'medium', form.get('imageShape')?.value || 'circle']" />
+            </ng-template>
           </ng-template>
-        </ng-template>
 
-        <!-- אזור העלאת תמונה -->
-        <div *ngIf="showImageUpload" class="image-upload-section">
-          <image-upload (imageUploaded)="onImageUploaded($event)" (uploadError)="onUploadError($event)">
-          </image-upload>
+          <!-- אזור העלאת תמונה -->
+          <div *ngIf="showImageUpload" class="image-upload-section">
+            <image-upload (imageUploaded)="onImageUploaded($event)" (uploadError)="onUploadError($event)">
+            </image-upload>
+          </div>
+        </div>
+
+        <div class="contact-video-container">
+          <!-- אם יש וידאו, נציג <video>; אחרת, נציג אייקון/אווטר וידאו בסיסי -->
+          <video *ngIf="contact.video; else videoFallback" width="220" height="140" controls
+            (click)="toggleVideoUpload()">
+            <source [src]="contact.video" type="video/mp4">
+            <!-- טקסט fallback אם הדפדפן לא תומך -->
+            Your browser does not support the video tag.
+          </video>
+
+          <!-- אם אין וידאו -->
+          <ng-template #videoFallback>
+            <div class="default-video-avatar" (click)="toggleVideoUpload()"
+              [ngClass]="[selectedImageSize, selectedImageShape]">
+              <!-- אייקון של וידאו או רק טקסט "No Video" -->
+              <img src="../../../assets/images/video.png" alt="Default Video Placeholder" />
+            </div>
+          </ng-template>
+
+          <!-- קומפוננטת העלאת הווידאו -->
+          <div *ngIf="showVideoUpload" class="video-upload-section">
+            <video-upload (videoUploaded)="onVideoUploaded($event)" (uploadError)="onUploadVideoError($event)">
+            </video-upload>
+          </div>
         </div>
       </div>
 

@@ -19,6 +19,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
 
   IsLastName: boolean = false
   showImageUpload = false;
+  showVideoUpload = false;
   form!: FormGroup
   imageSizeOptions = [
     { label: 'Small', value: 'small' },
@@ -42,7 +43,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
   contact = this.contactService.getEmptyContact();
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  constructor(private fb: FormBuilder, private datePipe: DatePipe, private msgService: MsgService, private cd: ChangeDetectorRef) { }
+  constructor(private fb: FormBuilder, private datePipe: DatePipe, private msgService: MsgService, private cd: ChangeDetectorRef,) { }
 
   formatDate(date: Date): string {
     return this.datePipe.transform(date, 'yyyy-MM-dd') || ''; // Format as '2024-12-16'
@@ -63,6 +64,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
       imageShape: [contactExists && this.contact.imageShape ? this.contact.imageShape : 'circle'],
 
       img: [contactExists ? this.contact.img : ''],
+      video: [contactExists ? this.contact.video : ''],
       _id: [contactExists ? this.contact._id : null]
     });
 
@@ -96,7 +98,8 @@ export class ContactEditComponent implements OnInit, OnDestroy {
           ...contact,
           birth: formattedDate,
           imageSize: contact.imageSize || 'medium',
-          imageShape: contact.imageShape || 'circle'
+          imageShape: contact.imageShape || 'circle',
+          video: contact.video || ''
         });
         this.selectedImageSize = contact.imageSize || 'medium';
         this.selectedImageShape = contact.imageShape || 'circle';
@@ -298,6 +301,45 @@ export class ContactEditComponent implements OnInit, OnDestroy {
       return ''; // אם אין שם, מחזיר מחרוזת ריקה
     }
     return name.charAt(0).toUpperCase(); // האות הראשונה, באות גדולה
+  }
+  onVideoUploaded(videoUrl: string): void {
+    console.log('Video uploaded successfully, URL:', videoUrl);
+
+    if (!this.contact) {
+      console.warn('No contact object available. Initializing a new contact.');
+      this.contact = this.contactService.getEmptyContact() as Contact;
+    }
+    // עדכון הווידאו באובייקט ובטופס
+    this.contact.video = videoUrl;
+    this.form.patchValue({ video: videoUrl });
+
+    this.showVideoUpload = false;
+
+    // אם כבר יש לנו _id (מצב עריכה), לעדכן מול השרת
+    if (this.contact._id) {
+      this.contactService.updateContactVideo(this.contact._id, videoUrl).subscribe({
+        next: (updatedContact) => {
+          console.log('Contact video updated successfully:', updatedContact);
+          this.contact = updatedContact;
+          this.msgService.setSuccessMsg('Contact video updated successfully!');
+        },
+        error: (err) => {
+          console.error('Failed to update contact video:', err);
+          this.msgService.setErrorMsg('Failed to update contact video.');
+        },
+      });
+    } else {
+      console.log('Contact does not have an ID yet. Video update will be saved with the form submission.');
+    }
+  }
+
+  onUploadVideoError(errorMsg: string): void {
+    console.error('Video upload error:', errorMsg);
+    this.msgService.setErrorMsg(errorMsg);
+  }
+
+  toggleVideoUpload(): void {
+    this.showVideoUpload = !this.showVideoUpload;
   }
 
 

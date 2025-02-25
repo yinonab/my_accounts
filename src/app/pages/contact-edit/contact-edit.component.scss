@@ -15,7 +15,7 @@
 }
 
 .contact-edit {
-  width: 25em;
+  width: 30em;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
   font-family: "Roboto", sans-serif;
   padding: 20px;
@@ -376,10 +376,14 @@
       .default-avatar {
         width: 80px;
         height: 80px;
+        
+        
       }
 
       .default-avatar {
-        font-size: 28px; // גודל פונט קטן יותר
+        font-size: 28px;
+        
+        
       }
 
       .image-upload {
@@ -434,14 +438,14 @@
   }
 
   &.rectangle-horizontal {
-    width: 180px !important;
-    height: 100px !important;
+    width: 280px !important;
+    height: 120px !important;
     border-radius: 5px !important;
   }
 
   &.rectangle-vertical {
     width: 100px !important;
-    height: 180px !important;
+    height: 200px !important;
     border-radius: 5px !important;
   }
 }
@@ -501,3 +505,99 @@
     }
   }
 }
+.media-row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* או center, לפי העדפתך */
+  gap: 2rem; /* רווח אופקי בין התמונה לווידאו */
+  margin-bottom: 1rem; /* רווח תחתון כללי אם צריך */
+}
+.contact-video-container {
+  margin-top: 0; 
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+
+  video,
+  .default-video-avatar {
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    object-fit: cover;
+    width: 220px;
+    height: 140px;
+    
+    border: 1px solid;
+    background: beige;
+  }
+
+  .video-upload-section {
+    margin-top: 0.5rem;
+  }
+
+  .default-video-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #eee;
+    width: 160px !important;
+    height: 100px !important;
+    
+    border: 1px solid;
+    background: beige;
+
+    img {
+      width: 50px;
+      height: 50px;
+      opacity: 0.6;
+    }
+  }
+}
+@media screen and (max-width: 768px) {
+  .media-row {
+    flex-direction: column; // במקום לשבת זה לצד זה, הם בערימה מלמעלה למטה
+    align-items: center;    // שמירה על מיושרות למרכז
+    gap: 1rem;             // רווח אנכי
+  }
+
+  .contact-video-container {
+    margin-top: 0 !important; // אם היה צורך להוריד מרווח גם פה
+    video,
+    .default-video-avatar {
+      width: 200px !important;   // גודל וידאו קטן יותר למובייל
+      height: 120px !important;
+      
+      border: 1px solid;
+      background: beige;
+    }
+  }
+
+  // אם תרצה גם שהתמונה תקטן יותר במובייל:
+  .contact-image-container {
+    // אפשר להגדיר קלאסים אחרים או להקטין ישירות
+    img.contact-image,
+    .default-avatar {
+      width: 100px !important;
+      height: 100px !important;
+    }
+  }
+}
+.upload-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  
+  img {
+    width: 30px;
+    height: 30px;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: #333;
+  }
+}
+

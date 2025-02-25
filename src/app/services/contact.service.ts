@@ -85,6 +85,35 @@ export class ContactService {
         );
     }
 
+    public updateContactVideo(contactId: string, videoUrl: string): Observable<Contact> {
+        // מאתרים את הקונטקט הקיים
+        const existingContact = this._contacts$.value.find(contact => contact._id === contactId);
+
+        if (!existingContact) {
+            return throwError(() => new Error('Contact not found'));
+        }
+
+        // יוצרים אובייקט חדש עם הווידאו המעודכן
+        const updatedContact: Contact = {
+            ...existingContact,
+            video: videoUrl
+        };
+
+        // שליחה לעדכון
+        return from(
+            storageService.put<Contact>('contact/edit', updatedContact)
+        ).pipe(
+            tap((contact: Contact) => {
+                // עדכון ה־BehaviorSubject
+                const contacts = this._contacts$.value.map(c =>
+                    c._id === contact._id ? contact : c
+                );
+                this._contacts$.next(contacts);
+            }),
+            retry(1),
+            catchError((err) => this._handleError(err))
+        );
+    }
 
 
     public loadContacts() {

@@ -13,10 +13,20 @@
   </section>
 
   <!-- תמונת איש הקשר -->
-  <div class="contact-image-container">
-    <img [src]="contact.img ? contact.img : '../../../assets/images/contact.png'" class="contact-image"
-      [ngClass]="[contact.imageSize || 'medium', contact.imageShape || 'circle']" alt="contact-image" />
+  <div class="media-row">
+    <div *ngIf="contact.img" class="contact-image-container">
+      <img [src]="contact.img ? contact.img : '../../../assets/images/picture.png'" class="contact-image"
+        [ngClass]="[contact.imageSize || 'medium', contact.imageShape || 'circle']" alt="contact-image" />
+    </div>
+
+    <div *ngIf="contact.video" class="contact-video-container">
+      <video width="220" height="140" controls [src]="contact.video"
+        [ngClass]="[contact.imageSize || 'medium', contact.imageShape || 'circle']">
+        Your browser does not support the video tag.
+      </video>
+    </div>
   </div>
+
 
 
   <!-- פרטי איש הקשר -->

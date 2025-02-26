@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, inject, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, inject, AfterViewInit, Output, EventEmitter } from '@angular/core';
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs';
 import { UserService } from '../services/user.service';
@@ -20,6 +20,7 @@ import { CloudinaryService } from '../services/cloudinary.service';
 })
 export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   isDevelopment = true;
+  @Output() closeChat: EventEmitter<void> = new EventEmitter<void>();
   @Input() chatType: 'group' | 'private' = 'group';
   @Input() targetUserId: string = '';
   targetUsername: string = '';
@@ -546,7 +547,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       console.warn(`⚠️ No file selected or file input is empty.`);
     }
   }
-
+  triggerCloseChat(): void {
+    this.closeChat.emit();
+  }
 
   sendVideoMessage(videoUrl: string): void {
     console.log(`🎬 Preparing to send video message: ${videoUrl}`);

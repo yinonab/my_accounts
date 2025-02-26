@@ -56,7 +56,7 @@
 <div class="chat-modal" *ngIf="isPrivateChatOpen" evStop (clickOutsideCapture)="closePrivateChat()">
     <div class="chat-content">
         <span class="close" (click)="closePrivateChat()">&times;</span>
-        <app-chat [chatType]="'private'" [targetUserId]="user._id"></app-chat>
+        <app-chat [chatType]="'private'" [targetUserId]="user._id" (closeChat)="closePrivateChat()"></app-chat>
     </div>
 </div>
 

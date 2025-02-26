@@ -3,7 +3,7 @@
 
 .user-list {
     display: grid;
-    gap: 20px;
+    gap: 0.5em;
 
     // גריד לתצוגה במחשב
     grid-template-columns: repeat(4, 1fr);

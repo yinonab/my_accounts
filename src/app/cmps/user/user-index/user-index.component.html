@@ -20,14 +20,14 @@
 <div class="chat-modal" *ngIf="isGroupChatOpen" evStop (clickOutsideCapture)="closeChat('group')">
     <div class="chat-content">
         <span class="close" (click)="closeChat('group')">&times;</span>
-        <app-chat [chatType]="'group'"></app-chat>
+        <app-chat [chatType]="'group'" (closeChat)="closeChat('group')"></app-chat>
     </div>
 </div>
 
 <!-- מודל צ'אט פרטי -->
-<div class="chat-modal" *ngIf="isPrivateChatOpen">
+<!-- <div class="chat-modal" *ngIf="isPrivateChatOpen">
     <div class="chat-content">
         <span class="close" (click)="closeChat('private')">&times;</span>
         <app-chat [chatType]="'private'"></app-chat>
     </div>
-</div>
+</div> -->

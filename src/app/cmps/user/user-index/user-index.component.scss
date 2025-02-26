@@ -112,10 +112,12 @@
   .chat-button {
     padding: 8px 15px;
     font-size: 14px;
+    bottom: 62em;
+
   }
 
   .group-chat-btn {
-    right: 100px;
+    right: 1em !important;
   }
 
   .private-chat-btn {

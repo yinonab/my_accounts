@@ -1,11 +1,15 @@
 <div class="chat-container">
-    <h2>
-        {{
-        chatType === 'group'
-        ? 'Group Chat - ' + room
-        : 'Private Chat With - ' + targetUsername
-        }}
-    </h2>
+    <div class="chat-header">
+        <!-- כפתור חזרה -->
+        <button class="close-dropdown" (click)="triggerCloseChat()">
+            <img class="close-chat" src="../../../assets/images/back.png" alt="go back" />
+        </button>
+
+        <!-- שם המשתמש או שם החדר -->
+        <h2>
+            {{ chatType === 'group' ? room : targetUsername }}
+        </h2>
+    </div>
 
     <!-- בחירת חדר בצ'אט קבוצתי -->
     <div class="room-selection" *ngIf="chatType === 'group' && !isRoomJoined">

@@ -15,6 +15,8 @@ export interface PushNotificationData {
   wakeUpApp?: boolean;
   vibrate?: number[];
   sound?: string;
+  autoDismiss?: boolean;
+  type?: string;
   data?: {
     [key: string]: any;
   };
@@ -185,10 +187,7 @@ export class NotificationService {
   // }
 
   async sendNotification(data: PushNotificationData): Promise<void> {
-    console.log('🚀 Preparing to send notification:', {
-      title: data.title,
-      body: data.body
-    });
+    console.log('🚀 Preparing to send notification:', data);
 
     try {
       console.log("⏳ Checking existing FCM token...");
@@ -206,7 +205,19 @@ export class NotificationService {
         return;
         // }
       }
-
+      console.log("📡 Payload before sending to server:", JSON.stringify({
+        title: data.title,
+        body: data.body,
+        wakeUpApp: true,
+        token: token,
+        icon: data.icon || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+        badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+        vibrate: data.vibrate || [200, 100, 200],
+        tag: data.tag || 'message',
+        requireInteraction: data.requireInteraction ?? true,
+        type: data.type ?? "regular",// ✅ מוודא ש `type` מוגדר
+        silent: data.type === "keep-alive"
+      }, null, 2));
       console.log('📡 Sending notification to server');
 
       // 🔹 שולחים רק את ה-Token לשרת
@@ -222,7 +233,11 @@ export class NotificationService {
             badge: data.badge || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
             vibrate: data.vibrate || [200, 100, 200],
             tag: data.tag || 'message',
-            requireInteraction: data.requireInteraction ?? true
+            requireInteraction: data.requireInteraction ?? true,
+
+            type: data.type ?? "regular", // ✅ הוספת type
+            silent: data.type === "keep-alive" // ✅ אם זה keep-alive, הנוטיפיקציה תהיה שקטה
+            //autoDismiss: data.autoDismiss ?? false // ✅ ניהול מחיקה אוטומטית
           },
           {
             withCredentials: true,
@@ -472,6 +487,25 @@ export class NotificationService {
     });
 
     return outputArray;
+  }
+  startKeepAliveNotifications() {
+    setInterval(async () => {
+      console.log("🔄 Sending keep-alive notification...");
+      try {
+        await this.sendNotification({
+          title: "🔄 Keep Alive",
+          body: "Ensuring the app stays awake...",
+          wakeUpApp: true,
+          silent: true, // 🔇 נוטיפיקציה שקטה
+          vibrate: [],
+          autoDismiss: true, // 🟢 מסמן למחוק את ההתראה לאחר מספר שניות
+          type: "keep-alive" // ✅ הפרדה מהודעות רגילות
+        });
+        console.log("✅ Keep-alive notification sent.");
+      } catch (error) {
+        console.error("❌ Failed to send keep-alive notification", error);
+      }
+    }, 30000); // 60 שניות
   }
 
   // האזנה להודעות Push

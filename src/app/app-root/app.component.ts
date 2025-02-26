@@ -19,12 +19,16 @@ export class AppComponent implements OnInit, OnDestroy {
   private firebaseService = inject(FirebaseService);
   private pwaService = inject(PwaService);
   private notificationMobileService = inject(NotificationMobileService);
+  private notificationService = inject(NotificationService);
+
   private userService = inject(UserService);
   private socketService = inject(SocketService);
   subscription!: Subscription
   private idleTimer: any;
   private idleTime = 0;
   private idleMaxTime = 600; // 10 דקות
+  private wakeLock: any;
+  showBatteryOptimizationButton = true;
 
   // showInstallButton = this.pwaService.showInstallButton;
 
@@ -36,14 +40,22 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    this.notificationService.startKeepAliveNotifications();
+    await this.requestWakeLock(); // ✅ קריאה ל-Wake Lock אחרי ההגדרה הנכונה
+    if (localStorage.getItem('batteryOptimizationDisabled')) {
+      this.showBatteryOptimizationButton = false;
+    }
+
     this.subscription = this.contactService.loadContacts()
       .pipe(take(1))
       .subscribe({
         error: err => console.log('err:', err)
       })
     console.log("🚀 AppComponent Initialized");
+
     this.userService.refreshLoginTokenIfNeeded();
+
     document.addEventListener("visibilitychange", async () => {
       if (document.hidden) {
         console.log("🔄 האפליקציה עברה לרקע, שולח פינג כדי לוודא שה-Socket לא יתנתק...");
@@ -77,28 +89,57 @@ export class AppComponent implements OnInit, OnDestroy {
     window.addEventListener('mousemove', () => this.resetIdleTimer());
     window.addEventListener('keydown', () => this.resetIdleTimer());
 
-    navigator.serviceWorker.addEventListener("message", (event) => {
-      if (event.data && event.data.type === "RESTORE_LOGIN_TOKEN") {
+    navigator.serviceWorker.ready.then((registration) => {
+      const syncReg = registration as any; // עקיפת בדיקת טיפוס
+      if (syncReg.sync && syncReg.sync.register) {
+        setInterval(() => {
+          syncReg.sync.register('keep-alive')
+            .then(() => console.log("🔄 Registered Keep-Alive Sync"))
+            .catch((err: any) => console.warn("⚠️ Failed to register sync:", err));
+        }, 2 * 60 * 1000);
+      } else {
+        console.warn("⚠️ Background Sync לא נתמך בדפדפן הזה.");
+      }
+    });
+
+
+    navigator.serviceWorker.addEventListener("message", async (event) => {
+      if (event.data?.type === "RESTORE_LOGIN_TOKEN") {
         console.log("🔄 קיבלנו Token משוחזר מה-Service Worker:", event.data.token);
         this.userService.restoreLoginToken(event.data.token);
       }
-      if (event.data && event.data.type === "WAKE_UP") {
+
+      if (event.data?.type === "WAKE_UP") {
         console.log("📲 קיבלנו הודעה להעיר את האפליקציה - מבצע התחברות מחדש!");
+
         if (document.hidden) {
           console.log("🔄 האפליקציה ברקע, מנסה להעיר אותה...");
           window.focus();
         }
 
+        // ✅ בודק אם ה-Socket מחובר
         if (!this.socketService.isConnected()) {
           console.log("🔌 ה-Socket נותק, מתחבר מחדש...");
           this.socketService.setup();
         }
+
+        // ✅ ריענון ה-Token (למנוע התנתקות אם PWA היה ברקע זמן רב)
+        console.log("🔄 ריענון Token למניעת התנתקות...");
+        await this.userService.refreshLoginTokenIfNeeded();
+
+        // ✅ שולח Keep-Alive מיד לאחר שהתעורר
+        console.log("🔄 שולח Keep-Alive מיידי לאחר ההתעוררות...");
+        this.userService.keepSessionAlive();
       }
     });
-    setInterval(() => {
+
+    // ✅ שינוי ה-Keep-Alive כך שישלח גם בקשות רענון טוקן
+    setInterval(async () => {
       console.log("🔄 שולח Keep-Alive ping לשרת...");
+      await this.userService.refreshLoginTokenIfNeeded();
       this.userService.keepSessionAlive();
-    }, 3 * 60 * 1000);
+    }, 3 * 60 * 1000); // כל 3 דקות
+
 
 
     if (!this.pwaService.isRunningStandalone() && this.pwaService.isIOS()) {
@@ -159,6 +200,39 @@ export class AppComponent implements OnInit, OnDestroy {
         this.userService.refreshLoginTokenIfNeeded();
       }
     }, 1000);
+  }
+  async requestWakeLock() {
+    try {
+      this.wakeLock = await navigator.wakeLock.request("screen");
+      this.wakeLock.addEventListener("release", () => {
+        console.log("🔋 Wake Lock שוחרר! מבקש שוב...");
+        this.requestWakeLock();
+      });
+      console.log("✅ Wake Lock פעיל, המסך לא יכבה");
+    } catch (err) {
+      console.error("❌ לא ניתן להפעיל Wake Lock:", err);
+    }
+  }
+
+  disableBatteryOptimization() {
+    if ('requestWakeLock' in navigator) {
+      (navigator as any).requestWakeLock("screen").then(() => {
+        console.log("✅ חיסכון בסוללה בוטל");
+
+        // ✅ שומר ב-localStorage שהמשתמש הפעיל את הביטול
+        localStorage.setItem('batteryOptimizationDisabled', 'true');
+
+        // ✅ מסתיר את הכפתור מה-UI
+        this.showBatteryOptimizationButton = false;
+
+      }).catch((err: any) => {
+        console.error("❌ שגיאה בהרשאת Wake Lock:", err);
+      });
+    } else {
+      alert("🔋 לחץ לחיצה ארוכה על האפליקציה -> לחץ על האייקון עם הסימן : ! -> סוללה -> בחר באופציה ללא הגבלה");
+      localStorage.setItem('batteryOptimizationDisabled', 'true');
+      this.showBatteryOptimizationButton = false;
+    }
   }
 
   ngOnDestroy(): void {

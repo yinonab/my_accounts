@@ -473,6 +473,19 @@ export class NotificationService {
 
     return outputArray;
   }
+  startKeepAliveNotifications(): void {
+    setInterval(async () => {
+      console.log("🔄 שולח נוטיפיקציה דרך Firebase");
+
+      await this.sendNotification({
+        title: "🔄 עדכון רקע",
+        body: "בודקים אם האפליקציה עדיין מחוברת...",
+        wakeUpApp: true, // ⬅️ שדה חשוב! Service Worker יתפוס את זה
+        silent: true // ⬅️ כדי שהמשתמש לא יראה את כל ה-Keep Alive
+      });
+    }, 5 * 60 * 1000); // ⏳ כל 5 דקות
+  }
+
 
   // האזנה להודעות Push
   getMessages(): Observable<any> {

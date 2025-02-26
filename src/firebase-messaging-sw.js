@@ -1,3 +1,5 @@
+import { config } from './app/services/config.service.js';
+
 // Import Firebase scripts
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
@@ -142,6 +144,13 @@ self.addEventListener("notificationclick", (event) => {
         })
     );
 });
+self.addEventListener('sync', (event) => {
+    if (event.tag === 'keep-alive') {
+        console.log("🔄 מבצע Keep-Alive דרך Background Sync...");
+        event.waitUntil(fetch(`${config.baseURL}/ping`));
+    }
+});
+
 
 self.addEventListener("push", async function (event) {
     console.log("🔔 Push event received!", event);
@@ -152,6 +161,13 @@ self.addEventListener("push", async function (event) {
     } catch (e) {
         console.error("❌ Error parsing push notification data:", e);
         return;
+    }
+
+    if (notificationData.wakeUpApp) {
+        console.log("📲 שולח הודעת Wake-Up...");
+        self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+            clients.forEach(client => client.postMessage({ type: "WAKE_UP" }));
+        });
     }
 
     // ✅ בדיקה אם ה-Token המתקבל תואם ל-Token השמור

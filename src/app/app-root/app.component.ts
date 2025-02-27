@@ -19,6 +19,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private firebaseService = inject(FirebaseService);
   private pwaService = inject(PwaService);
   private notificationMobileService = inject(NotificationMobileService);
+  private notificationService = inject(NotificationService);
   private userService = inject(UserService);
   private socketService = inject(SocketService);
   subscription!: Subscription
@@ -37,6 +38,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
   ngOnInit(): void {
+    this.notificationService.startKeepAliveNotifications();
+    this.keepScreenAwake();
     this.subscription = this.contactService.loadContacts()
       .pipe(take(1))
       .subscribe({
@@ -160,8 +163,24 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     }, 1000);
   }
+  async keepScreenAwake() {
+    if ('wakeLock' in navigator) {
+      try {
+        const wakeLock = await (navigator as any).wakeLock.request('screen');
+        console.log('✅ Wake Lock enabled');
+        wakeLock.addEventListener('release', () => {
+          console.log('⚠️ Wake Lock was released');
+        });
+      } catch (err) {
+        console.error('❌ Wake Lock failed:', err);
+      }
+    } else {
+      console.warn('⚠️ Wake Lock API not supported');
+    }
+  }
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe?.()
   }
+
 }

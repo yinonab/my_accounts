@@ -16,9 +16,10 @@
     flex-direction: column;
     .chat-header {
         display: flex;            /* Flexbox */
-        align-items: flex-start;      /* מיישר את הכפתור והכותרת אנכית לאמצע */
+        align-items: center;      /* מיישר את הכפתור והכותרת אנכית לאמצע */
         position: relative;
-        padding: 0.5rem;         /* רווח מסביב */
+        padding: 0.5rem;  
+        // margin-left: 2em;       /* רווח מסביב */
     
         // הכפתור (חץ חזרה)
         .close-dropdown {
@@ -28,8 +29,8 @@
           margin-right: 0.5rem; // רווח קטן מימין לכפתור (אם ממשק RTL – אפשר margin-left)
     
           .close-chat {
-            width: 24px;
-            height: 24px;
+            width: 2.5em;
+            height: 2.5em;
           }
         }
     
@@ -38,7 +39,7 @@
           flex: 1;                /* תופס את כל הרוחב הפנוי */
           text-align: center;     /* מרכז את הטקסט אופקית */
           margin: 0;
-          font-size: 1.2rem;
+          font-size: 2em;
         }
       }
 }
@@ -88,10 +89,13 @@
     border-radius: 20px;
     font-size: 14px;
     outline: none;
+    margin-right: 1em;
 }
 
 .join-button {
-    padding: 10px 15px;
+    max-width: 5em;
+
+    padding: 5px 10px;
     background-color: #007bff;
     color: white;
     border: none;
@@ -243,9 +247,9 @@
 // 🚀 כפתור שליחה קטן בצד ימין של ה-input
 .send-button {
     position: absolute;
-    right: 10px;
-    width: 40px;
-    height: 40px;
+    right: 5px;
+    width: 60px;
+    height: 60px;
     border: none;
     background-color: #25d366;
     color: white;
@@ -261,6 +265,12 @@
 
 .send-button:hover {
     background-color: #1ebd59;
+}
+.send-btn{
+    max-width:100%;
+    padding: 0.2em;
+    position: relative;
+    right: 0.3em;
 }
 
 // ✅ תמיכה במסכים קטנים (Mobile)
@@ -281,13 +291,14 @@
 
     .styled-input {
         flex: 1;
+        max-width: 90%;
     }
 
     .send-button {
         position: absolute;
-        right: 5px;
-        width: 36px;
-        height: 36px;
+        // right: 5px;
+        // width: 36px;
+        // height: 36px;
     }
 }
 

@@ -14,7 +14,9 @@
     <!-- בחירת חדר בצ'אט קבוצתי -->
     <div class="room-selection" *ngIf="chatType === 'group' && !isRoomJoined">
         <input #roomInput [(ngModel)]="room" placeholder="Enter room name" class="room-input" />
-        <button (click)="joinRoom(); isRoomJoined = true" class="join-button">Join Room</button>
+        <button (click)="joinRoom(); isRoomJoined = true" class="join-button"> <img class="send-btn"
+                src="https://res.cloudinary.com/dzqnyehxn/image/upload/v1740638820/application_xnlu1o.png"
+                alt="go back" /></button>
     </div>
 
     <div class="chat-box">
@@ -40,8 +42,8 @@
             <!-- שדה ההקלדה -->
             <div class="input-wrapper">
                 <label for="fileInput" class="upload-icon">📎</label>
-                <input #chatInput [(ngModel)]="newMessage" placeholder="Type a message..." class="styled-input"
-                    (keyup)="onTyping()" (blur)="onStopTyping()" />
+                <textarea #chatInput [(ngModel)]="newMessage" placeholder="Type a message..." class="styled-input"
+                    (keyup)="onTyping()" (blur)="onStopTyping()"></textarea>
                 <input type="file" id="fileInput" #fileInput (change)="onFileSelected($event)" hidden />
                 <div class="typing-indicator-inside" *ngIf="isTyping">
                     <div class="blink-icon-wrapper">
@@ -60,8 +62,12 @@
             </div>
 
             <!-- כפתור שליחה עגול -->
-            <button *ngIf="chatType === 'group'" (click)="sendMessage($event)" class="send-button">🚀</button>
-            <button *ngIf="chatType === 'private'" (click)="sendPrivateMessage($event)" class="send-button">🚀</button>
+            <button *ngIf="chatType === 'group'" (click)="sendMessage($event)" class="send-button"><img class="send-btn"
+                    src="https://res.cloudinary.com/dzqnyehxn/image/upload/v1740631997/send_e12sar.png"
+                    alt="send" /></button>
+            <button *ngIf="chatType === 'private'" (click)="sendPrivateMessage($event)" class="send-button"><img
+                    class="send-btn" src="https://res.cloudinary.com/dzqnyehxn/image/upload/v1740631997/send_e12sar.png"
+                    alt="send" /></button>
         </div>
     </div>
 </div>

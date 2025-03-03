@@ -35,7 +35,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   typingMessage: string = ''; // כאן תוצג האינדיקציה למה שהצד השני מקליד או שולח
   isTyping = false; // דגל כדי להפעיל ולהסתיר את ההודעה
   private typingDebounceTimer: any = null;
-  selectedImageUrl: string | null = null;
+  selectedMedia: { url: string, type: 'image' | 'video' } | null = null;
 
 
 
@@ -745,14 +745,14 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
   }
-  openImageModal(url: string): void {
-    this.selectedImageUrl = url;
+  openMediaModal(url: string, type: 'image' | 'video'): void {
+    this.selectedMedia = { url, type };
   }
 
-  // מתודה לסגירת המודל
-  closeImageModal(): void {
-    this.selectedImageUrl = null;
+  closeMediaModal(): void {
+    this.selectedMedia = null;
   }
+
 
   ngOnDestroy(): void {
     this.socketSubscription?.unsubscribe();

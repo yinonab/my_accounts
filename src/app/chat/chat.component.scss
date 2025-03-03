@@ -472,6 +472,12 @@
   margin: auto;
   border-radius: 8px;
 }
+.enlarged-video {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+  }
+  
 
 .close-modal {
   position: absolute;
@@ -484,6 +490,11 @@
   cursor: pointer;
   border-radius: 5px;
 }
+.video-container {
+    position: relative;
+    display: inline-block;
+  }
+  
 
 /* עיצוב מותאם מובייל */
 @media (max-width: 600px) {

@@ -29,6 +29,7 @@
           margin-right: 0.5rem; // רווח קטן מימין לכפתור (אם ממשק RTL – אפשר margin-left)
     
           .close-chat {
+            
             width: 2.5em;
             height: 2.5em;
           }
@@ -96,7 +97,7 @@
     max-width: 5em;
 
     padding: 5px 10px;
-    background-color: #007bff;
+   // background: linear-gradient(90deg, #34495e, #2c3e50); // כחול כהה ואלגנטי
     color: white;
     border: none;
     border-radius: 20px;
@@ -385,3 +386,118 @@
         color: red;
     }
 }
+/* עוטף את התמונה עם הכפתור */
+.image-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* כפתור להגדלה – ממוקם בתחתית/ימין של התמונה */
+.enlarge-button {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #fff;
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+/* מודל להצגת תמונה במסך מלא */
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100; /* מעל שאר התוכן */
+}
+
+/* תוכן המודל – מונע סגירה במקרה של קליק פנימי */
+.modal-content {
+  position: relative;
+}
+
+/* עיצוב התמונה המוגדלת */
+.enlarged-image {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 8px;
+}
+
+/* כפתור סגירה למודל */
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #fff;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  overflow: auto; /* מוודא שהתוכן לא חורג */
+}
+
+.modal-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px; /* ריווח פנימי להבטחת מרווח מסביב */
+}
+
+.enlarged-image {
+  max-width: 50%;
+  max-height: 95%;
+  display: block;
+  margin: auto;
+  border-radius: 8px;
+}
+
+.close-modal {
+  position: absolute;
+  top: 0px;
+  right: 15em;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #fff;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+/* עיצוב מותאם מובייל */
+@media (max-width: 600px) {
+  .enlarged-image {
+    max-width: 70%;
+    max-height: 95%;
+    border-radius: 0;
+  }
+
+  .close-modal {
+    top: 0px;
+    right: 5em;
+    padding: 4px 8px;
+    font-size: 16px;
+  }
+}
+

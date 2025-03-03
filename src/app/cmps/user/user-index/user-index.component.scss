@@ -55,7 +55,7 @@
 
 .group-chat-btn {
   right: 150px;
-  background-color: #007bff;
+  background: linear-gradient(90deg, #34495e, #2c3e50); // כחול כהה ואלגנטי
 }
 .send-btn{
 max-width: 4em;
@@ -115,7 +115,7 @@ max-width: 4em;
   .chat-button {
     padding: 8px 15px;
     font-size: 14px;
-    bottom: 63em;
+    bottom: 15em;
 
   }
 

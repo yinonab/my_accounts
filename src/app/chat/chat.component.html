@@ -2,7 +2,7 @@
     <div class="chat-header">
         <!-- כפתור חזרה -->
         <button class="close-dropdown" (click)="triggerCloseChat()">
-            <img class="close-chat" src="../../../assets/images/back.png" alt="go back" />
+            <img class="close-chat" src="../../../assets/images/backB.png" alt="go back" />
         </button>
 
         <!-- שם המשתמש או שם החדר -->
@@ -27,8 +27,13 @@
                 <span class="sender">{{ msg.senderName }}</span>
                 <div class="message-content">
                     <div *ngIf="msg.text">{{ msg.text }}</div>
-                    <img *ngIf="msg.imageUrl" [src]="msg.imageUrl" alt="Image" class="chat-image"
-                        (error)="handleImageError(msg.imageUrl)">
+                    <!-- בתוך לולאת ההודעות, במיקום של תצוגת תמונה -->
+                    <div *ngIf="msg.imageUrl" class="image-container">
+                        <img [src]="msg.imageUrl" alt="Image" class="chat-image"
+                            (error)="handleImageError(msg.imageUrl)">
+                        <button class="enlarge-button" (click)="openImageModal(msg.imageUrl)">🔍</button>
+                    </div>
+
                     <video *ngIf="msg.videoUrl" [src]="msg.videoUrl" class="chat-video" controls preload="metadata"
                         (error)="handleVideoError(msg.videoUrl)">
                         הדפדפן שלך לא תומך בניגון וידאו.
@@ -71,6 +76,14 @@
         </div>
     </div>
 </div>
+<!-- מודל לתצוגת תמונה במסך מלא -->
+<div *ngIf="selectedImageUrl" class="image-modal" (click)="closeImageModal()">
+    <div evStop (click)="closeImageModal()" class="modal-content">
+        <img [src]="selectedImageUrl" alt="Enlarged Image" class="enlarged-image">
+        <!-- <button class="close-modal" (click)="closeImageModal()">X</button> -->
+    </div>
+</div>
+
 
 <!-- אזור ההתראות -->
 <!-- <div *ngIf="notificationPermission !== 'granted'" class="notification-permission">

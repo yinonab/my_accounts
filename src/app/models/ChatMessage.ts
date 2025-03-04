@@ -7,4 +7,5 @@ export interface ChatMessage {
     videoUrl?: string;
     imageUrl?: string;
     toUserId?: string;
+    tempId?: number;
 }

@@ -413,7 +413,16 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
             ...msg,
             senderName: msg.sender === currentUser._id ? 'Me' : (msg.senderName || 'User ' + msg.sender)
           };
-          this.privateMessages.push(formattedMessage);
+          const existingIndex = this.privateMessages.findIndex(m =>
+            m.tempId !== undefined && formattedMessage.tempId !== undefined && m.tempId === formattedMessage.tempId
+          );
+          if (existingIndex !== -1) {
+            // עדכון ההודעה הקיימת
+            this.privateMessages[existingIndex] = { ...this.privateMessages[existingIndex], ...formattedMessage };
+          } else {
+            // הוספת הודעה חדשה
+            this.privateMessages.push(formattedMessage);
+          }
           setTimeout(() => {
             requestAnimationFrame(() => this.scrollToBottom());
           }, 700);
@@ -642,6 +651,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log(`📩 Preparing to send private image message to user ${this.targetUserId}: ${imageUrl}`);
 
     const privateMessage: ChatMessage = {
+      tempId: Date.now(),
       sender: this.currentUser._id,
       senderName: 'Me',
       imageUrl: imageUrl,
@@ -651,7 +661,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     };
 
     console.log(`📡 Emitting private image message via socket...`, privateMessage);
-    this.socketService.sendPrivateMessage(this.targetUserId, '', imageUrl); // שימוש נכון בפונקציה
+    this.socketService.sendPrivateMessage(this.targetUserId, '', privateMessage.tempId, imageUrl, undefined); // שימוש נכון בפונקציה
 
     console.log(`💾 Adding private image message to privateMessages array...`);
     this.privateMessages.push(privateMessage);
@@ -666,6 +676,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log(`🎬 Sending private video message to ${this.targetUserId}: ${videoUrl}`);
 
     const privateMessage: ChatMessage = {
+      tempId: Date.now(),
       sender: this.currentUser._id,
       senderName: 'Me',
       videoUrl: videoUrl,
@@ -674,7 +685,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     };
 
     console.log(`📡 Emitting private video message via socket...`, privateMessage);
-    this.socketService.sendPrivateMessage(this.targetUserId, '', '', videoUrl);
+    this.socketService.sendPrivateMessage(this.targetUserId, '', privateMessage.tempId, undefined, videoUrl);
 
     console.log(`💾 Adding private video message to privateMessages array...`);
     this.privateMessages.push(privateMessage);
@@ -729,6 +740,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.targetUserId.trim() || !this.newMessage.trim()) return;
 
     const localMessage: ChatMessage = {
+      tempId: Date.now(),
       sender: this.currentUser._id,
       senderName: 'Me',
       text: this.newMessage,
@@ -736,7 +748,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     };
 
     // שליחת ההודעה לשרת
-    this.socketService.sendPrivateMessage(this.targetUserId, this.newMessage);
+    this.socketService.sendPrivateMessage(this.targetUserId, this.newMessage, localMessage.tempId, undefined, undefined,);
     this.privateMessages.push(localMessage);
     this.scrollToBottom();
     this.onStopTyping();

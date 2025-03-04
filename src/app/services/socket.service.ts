@@ -199,7 +199,7 @@ export class SocketService {
   //   this.socket?.emit(SOCKET_EMIT_SEND_PRIVATE_MSG, privateMessage);
   // }
 
-  public sendPrivateMessage(toUserId: string, msg: string, imageUrl?: string, videoUrl?: string): void {
+  public sendPrivateMessage(toUserId: string, msg: string, tempId: number | undefined, imageUrl?: string, videoUrl?: string): void {
     if (!this.socket) this.setup();
 
     const user = this.userService?.getLoggedInUser();
@@ -234,7 +234,8 @@ export class SocketService {
       imageUrl: imageUrl, // הוספת שדה תמונה
       videoUrl: videoUrl, // ✅ שולח גם וידאו
       sender: user._id,
-      senderName: user.username
+      senderName: user.username,
+      tempId: tempId
     });
   }
 
@@ -349,10 +350,18 @@ export class SocketService {
         toUserId: msg.toUserId || this.userService.getLoggedInUser()?._id
       };
 
-      if (!this.privateMessagesBuffer.some(existingMsg =>
-        existingMsg.text === enhancedMsg.text && existingMsg.sender === enhancedMsg.sender)) {
+      // בדיקה במערך ה-buffer לפי tempId (אם קיים)
+      const index = this.privateMessagesBuffer.findIndex(existingMsg =>
+        existingMsg.tempId !== undefined && enhancedMsg.tempId !== undefined && existingMsg.tempId === enhancedMsg.tempId
+      );
+      if (index !== -1) {
+        // עדכון ההודעה הקיימת עם הנתונים החדשים מהשרת
+        this.privateMessagesBuffer[index] = { ...this.privateMessagesBuffer[index], ...enhancedMsg };
+      } else {
+        // אם לא נמצא, מוסיפים את ההודעה למערך
         this.privateMessagesBuffer.push(enhancedMsg);
       }
+
       this.addToBuffer(enhancedMsg);
       callback(enhancedMsg);
     });

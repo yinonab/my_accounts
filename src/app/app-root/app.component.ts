@@ -27,7 +27,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private idleTime = 0;
   private idleMaxTime = 600; // 10 דקות
 
-  // showInstallButton = this.pwaService.showInstallButton;
+  showBatteryOptimizationButton = true;
 
   // 🟢 הפונקציה מחזירה את הערך בכל שינוי
   get showInstallButton(): boolean {
@@ -38,6 +38,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
   ngOnInit(): void {
+    const batteryOptDisabled = localStorage.getItem('batteryOptimizationDisabled');
+    if (batteryOptDisabled === 'true') {
+      this.showBatteryOptimizationButton = false;
+    }
     this.notificationService.startKeepAliveNotifications();
     this.keepScreenAwake();
     this.subscription = this.contactService.loadContacts()
@@ -176,6 +180,27 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     } else {
       console.warn('⚠️ Wake Lock API not supported');
+    }
+  }
+
+  disableBatteryOptimization() {
+    if ('requestWakeLock' in navigator) {
+      (navigator as any).requestWakeLock("screen").then(() => {
+        console.log("✅ חיסכון בסוללה בוטל");
+
+        // ✅ שומר ב-localStorage שהמשתמש הפעיל את הביטול
+        localStorage.setItem('batteryOptimizationDisabled', 'true');
+
+        // ✅ מסתיר את הכפתור מה-UI
+        this.showBatteryOptimizationButton = false;
+
+      }).catch((err: any) => {
+        console.error("❌ שגיאה בהרשאת Wake Lock:", err);
+      });
+    } else {
+      alert("לביצועים גבוהים:\nלחץ לחיצה ארוכה על האפליקציה\nלחץ על האייקון עם הסימן :!\nלחץ על האופציה חיסכון בסוללה / סוללה\nבחר באופציה ללא הגבלה");
+      localStorage.setItem('batteryOptimizationDisabled', 'true');
+      this.showBatteryOptimizationButton = false;
     }
   }
 

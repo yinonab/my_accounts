@@ -4,6 +4,9 @@
     <button *ngIf="showInstallButton" class="install-button" (click)="installPWA()">
       📲 התקן כאפליקציה
     </button>
+    <button class="install-button" *ngIf="showBatteryOptimizationButton" (click)="disableBatteryOptimization()">
+      ☢️</button>
+
   </div>
   <!-- <router-outlet></router-outlet> -->
   <router-outlet></router-outlet>

@@ -28,6 +28,10 @@ export class SocketService {
   public privateMessagesBuffer: ChatMessage[] = []; // עדכון הטיפוס
   private heartbeatInterval: any = null;
   private heartbeatWorker: Worker | null = null;
+  // מערך של callbacks שירשמו לאירוע "chat-add-msg"
+  private chatAddMsgCallbacks: Array<(msg: any) => void> = [];
+  // דגל כדי לוודא שהרישום לאירוע מתבצע פעם אחת בלבד
+  private isChatAddMsgListenerRegistered: boolean = false;
 
 
 
@@ -123,7 +127,19 @@ export class SocketService {
       console.warn('⚠️ No logged-in user found, skipping socket authentication.');
     }
   }
-
+  public subscribeToChatAddMsg(callback: (msg: any) => void): void {
+    // הוספת הקולבק לרשימה
+    this.chatAddMsgCallbacks.push(callback);
+    // אם עדיין לא נרשם מאזין לאירוע – נרשום אותו פעם אחת
+    if (!this.isChatAddMsgListenerRegistered) {
+      if (!this.socket) this.setup();
+      this.socket?.on(SOCKET_EVENT_ADD_MSG, (msg: any) => {
+        // קריאה לכל הפונקציות שנרשמו במערך
+        this.chatAddMsgCallbacks.forEach(cb => cb(msg));
+      });
+      this.isChatAddMsgListenerRegistered = true;
+    }
+  }
   /**
    * האזנה לאירועים
    */

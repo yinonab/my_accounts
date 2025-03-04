@@ -400,12 +400,14 @@
   position: absolute;
   bottom: 5px;
   right: 5px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(244, 239, 239, 0.5);
   border: none;
   color: #fff;
   padding: 5px;
   cursor: pointer;
   border-radius: 50%;
+  max-width: 2em;
+  max-height: 2em;
 }
 
 /* מודל להצגת תמונה במסך מלא */

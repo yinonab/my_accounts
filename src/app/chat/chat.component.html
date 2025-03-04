@@ -51,7 +51,9 @@
                     <div *ngIf="msg.imageUrl" class="image-container">
                         <img [src]="msg.imageUrl" alt="Image" class="chat-image"
                             (error)="handleImageError(msg.imageUrl)">
-                        <button class="enlarge-button" (click)="openMediaModal(msg.imageUrl, 'image')">🔍</button>
+                        <button class="enlarge-button" (click)="openMediaModal(msg.imageUrl, 'image')"> <img
+                                class="zoom-chat" src="../../../assets/images/arrows.png" alt="go back" />
+                        </button>
 
                     </div>
 
@@ -60,7 +62,9 @@
                             (error)="handleVideoError(msg.videoUrl)">
                             הדפדפן שלך לא תומך בניגון וידאו.
                         </video>
-                        <button class="enlarge-button" (click)="openMediaModal(msg.videoUrl, 'video')">🔍</button>
+                        <button class="enlarge-button" (click)="openMediaModal(msg.videoUrl, 'video')"> <img
+                                class="zoom-chat" src="../../../assets/images/arrows.png" alt="go back" />
+                        </button>
                     </div>
                 </div>
             </div>

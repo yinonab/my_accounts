@@ -59,6 +59,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   isMobile: boolean = false;
   private firebaseService = inject(FirebaseService);
   private cloudinaryService = inject(CloudinaryService);
+  private processedMessageIds: Set<string | number> = new Set();
+
 
 
   private typingTimeout: any = null;          // יעזור לנו לזהות מתי המשתמש הפסיק להקליד
@@ -136,43 +138,47 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         })
       );
-      this.socketSubscription.add(
-        this.socketService.on('chat-add-msg', async (msg: ChatMessage) => {
-          console.log('📩 התקבלה הודעה חדשה:', msg);
-          console.log('🖼️ תמונה:', msg.imageUrl);
-          console.log('🎥 וידאו:', msg.videoUrl); // ✅ נוסיף בדיקה לווידאו
-          if (msg.sender === this.currentUser._id) {
-            msg.senderName = 'Me';
-          } else if (!msg.senderName) {
-            // Try to get the username from cache or set a default
-            msg.senderName = this.userCache[msg.sender] || 'User ' + msg.sender;
+      this.socketService.subscribeToChatAddMsg(async (msg: ChatMessage) => {
+        const messageId = msg.id || msg.tempId;
+        if (messageId && this.processedMessageIds.has(messageId)) {
+          // הודעה זו כבר טופלה – מתעלמים ממנה
+          return;
+        }
+        if (messageId) this.processedMessageIds.add(messageId);
+        console.log('📩 התקבלה הודעה חדשה:', msg);
+        console.log('🖼️ תמונה:', msg.imageUrl);
+        console.log('🎥 וידאו:', msg.videoUrl); // ✅ נוסיף בדיקה לווידאו
+        if (msg.sender === this.currentUser._id) {
+          msg.senderName = 'Me';
+        } else if (!msg.senderName) {
+          // Try to get the username from cache or set a default
+          msg.senderName = this.userCache[msg.sender] || 'User ' + msg.sender;
+        }
+        this.messages.push(msg);
+        setTimeout(() => {
+          requestAnimationFrame(() => this.scrollToBottom());
+        }, 700);
+        if (this.notificationsEnabled && msg.sender !== this.currentUser._id) {
+          try {
+            const notificationData: PushNotificationData = {
+              title: `📢 הודעה חדשה בקבוצה`,
+              body: msg.text ? msg.text : msg.imageUrl ? '📷 נשלחה תמונה פרטית' : msg.videoUrl ? '🎥 נשלח סרטון פרטי' : '📩 קיבלת הודעה פרטית',
+              icon: msg.imageUrl ? msg.imageUrl : "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+              vibrate: [200, 100, 200],
+              sound: 'default',
+              requireInteraction: true,
+              data: {
+                senderId: msg.sender,
+                chatType: 'group'
+              }
+            };
+            await this.notificationService.sendNotification(notificationData);
+            console.log('✅ נשלחה נוטיפיקציה על הודעה קבוצתית:', msg);
+          } catch (err) {
+            console.error('❌ שגיאה בשליחת נוטיפיקציה:', err);
           }
-          this.messages.push(msg);
-          setTimeout(() => {
-            requestAnimationFrame(() => this.scrollToBottom());
-          }, 700);
-          if (this.notificationsEnabled && msg.sender !== this.currentUser._id) {
-            try {
-              const notificationData: PushNotificationData = {
-                title: `📢 הודעה חדשה בקבוצה`,
-                body: msg.text ? msg.text : msg.imageUrl ? '📷 נשלחה תמונה פרטית' : msg.videoUrl ? '🎥 נשלח סרטון פרטי' : '📩 קיבלת הודעה פרטית',
-                icon: msg.imageUrl ? msg.imageUrl : "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
-                vibrate: [200, 100, 200],
-                sound: 'default',
-                requireInteraction: true,
-                data: {
-                  senderId: msg.sender,
-                  chatType: 'group'
-                }
-              };
-              await this.notificationService.sendNotification(notificationData);
-              console.log('✅ נשלחה נוטיפיקציה על הודעה קבוצתית:', msg);
-            } catch (err) {
-              console.error('❌ שגיאה בשליחת נוטיפיקציה:', err);
-            }
-          }
-        })
-      );
+        }
+      });
     } else if (this.chatType === 'private') {
       this.socketSubscription.add(
         this.socketService.on('user-typing', (data: { fromUserId: string; messageType: string }) => {

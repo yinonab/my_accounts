@@ -15,10 +15,13 @@
     display: flex;
     flex-direction: column;
     .chat-header {
-        display: flex;            /* Flexbox */
-        align-items: center;      /* מיישר את הכפתור והכותרת אנכית לאמצע */
-        position: relative;
-        padding: 0.5rem;  
+        display: flex;              /* Flexbox */
+  align-items: center;        /* מיישר את הכפתור והכותרת אנכית לאמצע */
+  justify-content: space-between; /* מפזר את הפריטים לימין ושמאל */
+  position: relative;
+  padding: 0.5rem;
+  background-color: #fafafa;  /* לדוגמה, רקע בהיר */
+  border-bottom: 1px solid #ddd;
         // margin-left: 2em;       /* רווח מסביב */
     
         // הכפתור (חץ חזרה)
@@ -36,12 +39,12 @@
         }
     
         // הכותרת (שם המשתמש / שם החדר)
-        h2 {
-          flex: 1;                /* תופס את כל הרוחב הפנוי */
-          text-align: center;     /* מרכז את הטקסט אופקית */
-          margin: 0;
-          font-size: 2em;
-        }
+        .chat-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+            text-align: center;
+            flex: 1; /* הכותרת תתפוס את כל הרוחב הפנוי */
+          }
       }
 }
 
@@ -80,7 +83,7 @@
 .room-selection {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin: 10px;
 }
 
 .room-input {
@@ -99,7 +102,7 @@
     padding: 5px 10px;
    // background: linear-gradient(90deg, #34495e, #2c3e50); // כחול כהה ואלגנטי
     color: white;
-    border: none;
+    border: black solid 1px;
     border-radius: 20px;
     cursor: pointer;
     font-size: 14px;
@@ -511,4 +514,126 @@
     font-size: 16px;
   }
 }
-
+/* עטיפת הדרופדאון */
+.saved-groups-container {
+    margin-left: 10px;
+  width: 7em; /* אפשר לקבוע רוחב קבוע או אוטומטי */
+    //margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    overflow: hidden; /* חשוב כדי למנוע גלילה לא רצויה */
+  }
+  
+  /* כותרת המגירה */
+  .saved-groups-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #fafafa, #f0f0f0);
+  }
+  
+  .saved-groups-header:hover {
+    background: linear-gradient(135deg, #f2f2f2, #e8e8e8);
+  }
+  
+  /* טקסט בכותרת */
+  .saved-groups-header .label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+  }
+  
+  /* חץ מסתובב */
+  .saved-groups-header .arrow {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+    color: #444;
+  }
+  .saved-groups-header .arrow.open {
+    transform: rotate(180deg);
+  }
+  
+  /* הרשימה עצמה */
+  .saved-groups-dropdown {
+    max-height: 0;
+    transition: max-height 0.4s ease-in-out;
+    overflow: hidden;
+    border-top: 1px solid #ddd;
+  }
+  
+  /* כשהמגירה במצב פתוח */
+  .saved-groups-dropdown.open {
+    max-height: 300px; /* הגובה המקסימלי בעת פתיחה */
+  }
+  
+  /* פריטי הרשימה */
+  .saved-group-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+  }
+  
+  .saved-group-item:hover {
+    background-color: #f9f9f9;
+  }
+  
+  /* שם החדר */
+  .saved-group-item span {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+  }
+  
+  /* כפתור מחיקה (X) */
+  .saved-group-item button {
+    background-color: transparent;
+    border: none;
+    color: #ff4d4d;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  
+  .saved-group-item button:hover {
+    color: #ff0000;
+  }
+  
+  /* התאמות למסכים קטנים */
+  @media (max-width: 600px) {
+    .saved-groups-header {
+      padding: 8px;
+    }
+  
+    .saved-groups-header .label {
+      font-size: 13px;
+    }
+  
+    .saved-groups-header .arrow {
+      font-size: 12px;
+    }
+  
+    .saved-groups-dropdown.open {
+      max-height: 200px;
+    }
+  
+    .saved-group-item {
+      padding: 6px 8px;
+    }
+  
+    .saved-group-item span {
+      font-size: 13px;
+    }
+  
+    .saved-group-item button {
+      font-size: 1em;
+    }
+  }
+  

@@ -36,6 +36,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   isTyping = false; // דגל כדי להפעיל ולהסתיר את ההודעה
   private typingDebounceTimer: any = null;
   selectedMedia: { url: string, type: 'image' | 'video' } | null = null;
+  savedGroups: string[] = [];
+  isSavedGroupsOpen = false;
+
 
 
 
@@ -90,6 +93,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     alert(JSON.stringify(debugInfo, null, 2));
   }
   ngOnInit(): void {
+    this.loadSavedGroups();
     this.userService.getUserById(this.targetUserId)
       .subscribe({
         next: (user) => {
@@ -469,10 +473,33 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       this.errorLogger.log('שגיאה בשליחת נוטיפיקציה', error);
     }
   }
-
-
+  joinSavedGroup(group: string): void {
+    this.room = group;
+    this.joinRoom();
+    this.isSavedGroupsOpen = false;
+  }
+  toggleSavedGroups(): void {
+    this.isSavedGroupsOpen = !this.isSavedGroupsOpen;
+  }
+  // פונקציה להסרת חדר מהרשימה
+  removeGroup(group: string): void {
+    this.savedGroups = this.savedGroups.filter(g => g !== group);
+    localStorage.setItem('savedGroups', JSON.stringify(this.savedGroups));
+  }
+  loadSavedGroups(): void {
+    const saved = localStorage.getItem('savedGroups');
+    if (saved) {
+      this.savedGroups = JSON.parse(saved);
+    }
+  }
   joinRoom(): void {
     if (!this.room.trim()) return;
+
+    if (!this.savedGroups.includes(this.room)) {
+      this.savedGroups.push(this.room);
+      localStorage.setItem('savedGroups', JSON.stringify(this.savedGroups));
+    }
+
     this.socketService.emit('chat-set-topic', this.room);
     this.isRoomJoined = true;
 
@@ -568,7 +595,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     this.socketService.sendMessage('', '', videoUrl);
 
     console.log(`💾 Adding video message to messages array...`);
-    this.messages.push(message);
+    //this.messages.push(message);
 
     console.log(`📜 Scrolling to bottom after sending video...`);
     setTimeout(() => {
@@ -602,7 +629,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     this.socketService.sendMessage('', imageUrl); // שימוש נכון בפונקציה המעודכנת
 
     console.log(`💾 Adding image message to messages array...`);
-    this.messages.push(message);
+    //this.messages.push(message);
 
     console.log(`📜 Scrolling to bottom after sending image...`);
     setTimeout(() => {
@@ -674,7 +701,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     };
 
     this.socketService.emit('chat-send-msg', message);
-    this.messages.push(message);
+    //this.messages.push(message);
     this.scrollToBottom();
 
     // שמירת פוקוס בלי לאפס מידית את השדה

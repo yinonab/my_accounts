@@ -9,7 +9,27 @@
         <h2>
             {{ chatType === 'group' ? room : targetUsername }}
         </h2>
+        <!-- מגירה נפתחת (Collapsible) לחדרים שמורים -->
+        <div class="saved-groups-container" *ngIf="chatType === 'group'">
+            <!-- כותרת המגירה: לחיצה עליה תפתח/תסגור את הרשימה -->
+            <div class="saved-groups-header" (click)="toggleSavedGroups()">
+                <span class="label">חדרים שמורים</span>
+                <!-- חץ שמתהפך בפתיחה/סגירה -->
+                <span class="arrow" [class.open]="isSavedGroupsOpen">▼</span>
+            </div>
+
+            <!-- הרשימה עצמה (מופיעה רק אם יש חדרים שמורים) -->
+            <div class="saved-groups-dropdown" *ngIf="savedGroups.length > 0" [class.open]="isSavedGroupsOpen">
+                <div *ngFor="let savedGroup of savedGroups" class="saved-group-item">
+                    <span (click)="joinSavedGroup(savedGroup)">
+                        {{ savedGroup }}
+                    </span>
+                    <button (click)="removeGroup(savedGroup)">X</button>
+                </div>
+            </div>
+        </div>
     </div>
+
 
     <!-- בחירת חדר בצ'אט קבוצתי -->
     <div class="room-selection" *ngIf="chatType === 'group' && !isRoomJoined">

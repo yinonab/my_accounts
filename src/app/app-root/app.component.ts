@@ -198,7 +198,7 @@ export class AppComponent implements OnInit, OnDestroy {
         console.error("❌ שגיאה בהרשאת Wake Lock:", err);
       });
     } else {
-      alert("לביצועים גבוהים:\nלחץ לחיצה ארוכה על האפליקציה\nלחץ על האייקון עם הסימן :!\nלחץ על האופציה חיסכון בסוללה / סוללה\nבחר באופציה ללא הגבלה");
+      alert("לביצועים גבוהים :\nלחץ לחיצה ארוכה על האייקון של האפליקציה,\nלחץ על האייקון עם הסימן : (!) ,\nלחץ על האופציה חיסכון בסוללה / סוללה,\nבחר באופציה ללא הגבלה.");
       localStorage.setItem('batteryOptimizationDisabled', 'true');
       this.showBatteryOptimizationButton = false;
     }

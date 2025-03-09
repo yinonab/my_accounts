@@ -38,16 +38,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   selectedMedia: { url: string, type: 'image' | 'video' } | null = null;
   savedGroups: string[] = [];
   isSavedGroupsOpen = false;
-
-
-
-
-
-
-
   room: string = ''; // חדר צ'אט
   newMessage: string = ''; // הודעה קבוצתית
-
   //targetUserId: string = ''; // מזהה משתמש להודעות פרטיות
   messages: ChatMessage[] = [];
   privateMessages: ChatMessage[] = [];
@@ -60,6 +52,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   private firebaseService = inject(FirebaseService);
   private cloudinaryService = inject(CloudinaryService);
   private processedMessageIds: Set<string | number> = new Set();
+  pendingMediaMessage: { mediaUrl: string; mediaType: 'image' | 'video'; text: string } | null = null;
+
 
 
 
@@ -139,12 +133,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         })
       );
       this.socketService.subscribeToChatAddMsg(async (msg: ChatMessage) => {
-        const messageId = msg.id || msg.tempId;
-        if (messageId && this.processedMessageIds.has(messageId)) {
-          // הודעה זו כבר טופלה – מתעלמים ממנה
-          return;
-        }
-        if (messageId) this.processedMessageIds.add(messageId);
+        // const messageId = msg.id || msg.tempId;
+        // if (messageId && this.processedMessageIds.has(messageId)) {
+        //   // הודעה זו כבר טופלה – מתעלמים ממנה
+        //   return;
+        // }
+        // if (messageId) this.processedMessageIds.add(messageId);
         console.log('📩 התקבלה הודעה חדשה:', msg);
         console.log('🖼️ תמונה:', msg.imageUrl);
         console.log('🎥 וידאו:', msg.videoUrl); // ✅ נוסיף בדיקה לווידאו
@@ -564,22 +558,29 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
             this.isUploading = false; // ❌ מסירים את הלואדר
           }, 10);
 
+          // במקום לשלוח מיד, נשמור את הודעת המדיה במשתנה pendingMediaMessage
+          this.pendingMediaMessage = {
+            mediaUrl: fileUrl,
+            mediaType: isVideo ? 'video' : 'image',
+            text: ''  // שדה הטקסט ההתחלתי ריק
+          };
 
-          if (this.chatType === 'private') {
-            // 🔹 הודעה פרטית
-            if (file.type.startsWith('image/')) {
-              this.sendPrivateImageMessage(fileUrl);
-            } else if (file.type.startsWith('video/')) {
-              this.sendPrivateVideoMessage(fileUrl);
-            }
-          } else {
-            // 🔹 הודעה קבוצתית
-            if (file.type.startsWith('image/')) {
-              this.sendImageMessage(fileUrl);
-            } else if (file.type.startsWith('video/')) {
-              this.sendVideoMessage(fileUrl);
-            }
-          }
+
+          // if (this.chatType === 'private') {
+          //   // 🔹 הודעה פרטית
+          //   if (file.type.startsWith('image/')) {
+          //     this.sendPrivateImageMessage(fileUrl);
+          //   } else if (file.type.startsWith('video/')) {
+          //     this.sendPrivateVideoMessage(fileUrl);
+          //   }
+          // } else {
+          //   // 🔹 הודעה קבוצתית
+          //   if (file.type.startsWith('image/')) {
+          //     this.sendImageMessage(fileUrl);
+          //   } else if (file.type.startsWith('video/')) {
+          //     this.sendVideoMessage(fileUrl);
+          //   }
+          // }
         },
         error: (err) => {
           console.error(`❌ Error uploading file: ${err.message}`, err);
@@ -594,6 +595,38 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   triggerCloseChat(): void {
     this.closeChat.emit();
   }
+
+  sendPendingMediaMessage(): void {
+    if (!this.pendingMediaMessage) return;
+
+    const message: ChatMessage = {
+      tempId: Date.now(),
+      sender: this.currentUser._id,
+      senderName: 'Me',
+      text: this.pendingMediaMessage.text,
+      // בהתאם לסוג המדיה נבחר את השדה המתאים:
+      imageUrl: this.pendingMediaMessage.mediaType === 'image' ? this.pendingMediaMessage.mediaUrl : '',
+      videoUrl: this.pendingMediaMessage.mediaType === 'video' ? this.pendingMediaMessage.mediaUrl : ''
+    };
+
+    if (this.chatType === 'private') {
+      this.socketService.sendPrivateMessage(this.targetUserId, message.text, message.tempId || undefined, message.imageUrl, message.videoUrl);
+      this.privateMessages.push(message);
+    } else {
+      this.socketService.sendMessage(message.text, message.imageUrl, message.videoUrl);
+      //this.messages.push(message);
+    }
+
+    // ניקוי הודעת המדיה הממתינה
+    this.pendingMediaMessage = null;
+    this.scrollToBottom();
+    this.onStopTyping();
+  }
+
+  cancelPendingMediaMessage(): void {
+    this.pendingMediaMessage = null;
+  }
+
 
   sendVideoMessage(videoUrl: string): void {
     console.log(`🎬 Preparing to send video message: ${videoUrl}`);

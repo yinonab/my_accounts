@@ -46,7 +46,6 @@
                 [ngClass]="{'my-message': msg.senderName === 'Me', 'other-message': msg.senderName !== 'Me'}">
                 <span class="sender">{{ msg.senderName }}</span>
                 <div class="message-content">
-                    <div *ngIf="msg.text">{{ msg.text }}</div>
                     <!-- בתוך לולאת ההודעות, במיקום של תצוגת תמונה -->
                     <div *ngIf="msg.imageUrl" class="image-container">
                         <img [src]="msg.imageUrl" alt="Image" class="chat-image"
@@ -66,6 +65,7 @@
                                 class="zoom-chat" src="../../../assets/images/arrows.png" alt="go back" />
                         </button>
                     </div>
+                    <div *ngIf="msg.text">{{ msg.text }}</div>
                 </div>
             </div>
         </div>
@@ -104,6 +104,63 @@
         </div>
     </div>
 </div>
+<div *ngIf="selectedMedia" class="image-modal" (click)="closeMediaModal()">
+    <!-- עצירת הבועת הקליק כדי שלא יסגור את המודל -->
+    <div evStop (click)="$event.stopPropagation()" class="modal-content" (click)="closeMediaModal()">
+        <!-- תצוגת המדיה (תמונה או וידאו) -->
+        <img *ngIf="selectedMedia.type === 'image'" [src]="selectedMedia.url" alt="Enlarged Image"
+            class="enlarged-image" />
+        <video *ngIf="selectedMedia.type === 'video'" [src]="selectedMedia.url" controls class="enlarged-video"></video>
+
+        <!-- אזור הקלט (טקסט־אזור + כפתור שליחה) -->
+        <div class="chat-input" style="margin-top: 1em;">
+            <div class="input-wrapper">
+                <!-- textarea בעיצוב שלך -->
+                <textarea #chatInput [(ngModel)]="newMessage" placeholder="Type a message..." class="styled-input"
+                    (keyup)="onTyping()" (blur)="onStopTyping()" rows="1"></textarea>
+            </div>
+
+            <!-- כפתורי שליחה באותו עיצוב שיש בצ'אט -->
+            <button *ngIf="chatType === 'group'" (click)="sendMessage($event)" class="send-button">
+                <img class="send-btn"
+                    src="https://res.cloudinary.com/dzqnyehxn/image/upload/v1740631997/send_e12sar.png" alt="send" />
+            </button>
+
+            <button *ngIf="chatType === 'private'" (click)="sendPrivateMessage($event)" class="send-button">
+                <img class="send-btn"
+                    src="https://res.cloudinary.com/dzqnyehxn/image/upload/v1740631997/send_e12sar.png" alt="send" />
+            </button>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="pendingMediaMessage" class="pending-media-overlay">
+    <div class="pending-media-message">
+        <h3>עריכת הודעת מדיה</h3>
+        <!-- הצגת המדיה בהתאם לסוג -->
+        <ng-container [ngSwitch]="pendingMediaMessage.mediaType">
+            <img *ngSwitchCase="'image'" [src]="pendingMediaMessage.mediaUrl" alt="תצוגה מקדימה של התמונה" />
+            <video *ngSwitchCase="'video'" [src]="pendingMediaMessage.mediaUrl" controls
+                class="pending-media-video"></video>
+        </ng-container>
+        <!-- <input type="text" [(ngModel)]="pendingMediaMessage.text" placeholder="הוסיפו טקסט למדיה" /> -->
+
+        <textarea type="text" [(ngModel)]="pendingMediaMessage.text" placeholder="הוסיפו טקסט למדיה"
+            class="styled-input" (keyup)="onTyping()" (blur)="onStopTyping()"></textarea>
+
+        <div class="buttons-modal">
+            <button (click)="sendPendingMediaMessage()" class="send-button-modal"><img class="send-btn-modal"
+                    src="https://res.cloudinary.com/dzqnyehxn/image/upload/v1740631997/send_e12sar.png"
+                    alt="send" /></button>
+
+            <button (click)="cancelPendingMediaMessage()" class="cancel-button-modal">✖️</button>
+        </div>
+
+    </div>
+</div>
+
+
+
 <!-- מודל לתצוגת תמונה במסך מלא -->
 <!-- מודל להצגת מדיה במסך מלא -->
 <!-- מודל אוניברסלי (תמונה או וידאו) אך שומר על השם image-modal -->

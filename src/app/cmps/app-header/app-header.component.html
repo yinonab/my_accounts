@@ -4,43 +4,55 @@
     <img class="logo" src="../../../assets/images/acc1.png" alt="bitcoin img">
   </div>
 
-  <!-- ניווט -->
-  <div class="nav-wrapper">
-    <nav>
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <img src="../../../assets/images/home.png" alt="Home">
-      </a>
-      <a routerLink="/contact" routerLinkActive="active">
-        <img src="../../../assets/images/account.png" alt="Contacts">
-      </a>
-      <a routerLink="/users" routerLinkActive="active">
-        <img src="../../../assets/images/teamwork.png" alt="Users">
-      </a>
-    </nav>
-  </div>
-
-  <!-- כפתורים והתחברות -->
+  <!-- מכולת קישורים בהתאם למצב המשתמש -->
   <div class="auth-wrapper">
     <div class="auth-links">
-      <ng-container *ngIf="!loggedInUser; else loggedIn">
-        <a routerLink="/login">Login</a>
-        <a routerLink="/signup">Sign Up</a>
-      </ng-container>
-      <ng-template #loggedIn>
-        <div class="user-avatar" (click)="toggleUpload = !toggleUpload">
-          <ng-container *ngIf="loggedInUser?.img; else defaultAvatar">
-            <img [src]="loggedInUser?.img" alt="User Image">
-          </ng-container>
-          <ng-template #defaultAvatar>
-            {{ getUserInitial() }}
-          </ng-template>
+      <ng-container *ngIf="loggedInUser; else notLoggedIn">
+        <!-- משתמש מחובר: מוצגים כפתורים וקישורי פרופיל -->
+        <div class="profile-container">
+          <a class="profile-picture" routerLink="/contact" routerLinkActive="active">
+            <img src="../../../assets/images/content.png" alt="Contacts">
+          </a>
+          <a class="profile-picture" routerLink="/users" routerLinkActive="active">
+            <img src="../../../assets/images/teamwork.png" alt="Users">
+          </a>
+          <!-- עטיפה לתמונת הפרופיל עם אייקון המצלמה -->
+          <div class="user-profile-wrapper">
+            <a routerLink="/" class="profile-picture">
+              <ng-container *ngIf="loggedInUser?.img; else defaultAvatar">
+                <img [src]="loggedInUser.img" alt="User Profile">
+              </ng-container>
+              <ng-template #defaultAvatar>
+                <span class="default-avatar">{{ getUserInitial() }}</span>
+              </ng-template>
+            </a>
+            <!-- אייקון מצלמה על גבול תמונת הפרופיל -->
+            <div class="camera-icon" (click)="toggleUpload = !toggleUpload">
+              <img src="../../../assets/images/camera.png" alt="Upload Image">
+            </div>
+          </div>
+          <button class="profile-picture" (click)="onLogout()">
+            <img class="logimg" src="../../../assets/images/logout2.png" alt="Logout">
+          </button>
         </div>
-        <button (click)="onLogout()">Logout</button>
+      </ng-container>
+      <ng-template #notLoggedIn>
+        <!-- כאשר אין משתמש מחובר: מוצג כפתור הבית הקלאסי -->
+        <a class="profile-picture" routerLink="/" routerLinkActive="active">
+          <img class="logimg" src="../../../assets/images/house.png" alt="Home">
+        </a>
+        <a class="profile-picture" routerLink="/login" routerLinkActive="active">
+          <img class="logimg" src="../../../assets/images/login2.png" alt="Login">
+        </a>
+        <a class="profile-picture" routerLink="/signup" routerLinkActive="active">
+          <img class="logimg" src="../../../assets/images/sign-up.png" alt="Sign Up">
+        </a>
+
       </ng-template>
     </div>
   </div>
 
-  <!-- העלאת תמונה -->
+  <!-- רכיב העלאת תמונה -->
   <div *ngIf="toggleUpload">
     <image-upload (imageUploaded)="onImageUploaded($event)"></image-upload>
   </div>

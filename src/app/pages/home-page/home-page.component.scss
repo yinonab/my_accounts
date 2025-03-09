@@ -12,7 +12,7 @@ body {
 .home-page {
     max-width: 40vw;
     margin: 0 auto;
-    min-height: 50vh; // Use 80% of the viewport height
+    min-height: max-content; // Use 80% of the viewport height
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -117,7 +117,7 @@ body {
 @media (max-width: 768px) {
   .home-page {
     max-width: 90%; // הגבלת רוחב ל-90%
-    max-height: 40vh; // הגבלת גובה ל-70% מגובה המסך
+    min-height: max-content; // הגבלת גובה ל-70% מגובה המסך
     padding: 20px; // ריווח פנימי אחיד
     margin-bottom: 30px; // ריווח נוסף מלמטה
   }
@@ -140,7 +140,7 @@ body {
 @media (max-width: 480px) {
   .home-page {
     max-width: 85%; // הגבלת רוחב ל-85%
-    max-height: 40vh; // הגבלת גובה ל-65% מגובה המסך
+    min-height: max-content; // הגבלת גובה ל-65% מגובה המסך
     padding: 15px; // ריווח פנימי קטן יותר
     margin-bottom: 20px; // ריווח נוסף מלמטה
   }

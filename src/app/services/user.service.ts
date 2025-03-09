@@ -204,8 +204,8 @@ export class UserService {
   //     catchError(this._handleError) // Handle errors
   //   );
   // }
-  public login(username: string, password: string): Observable<User> {
-    const loginData = { username, password };
+  public login(email: string, password: string): Observable<User> {
+    const loginData = { email, password };
 
     return from(storageService.login<{ user: User, loginToken: string }>('auth/login', loginData)).pipe(
       tap((response) => {

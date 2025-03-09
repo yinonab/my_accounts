@@ -2,39 +2,34 @@
   <h4>{{ isSignupMode ? 'Create an Account' : 'Sign In' }}</h4>
 
   <form (ngSubmit)="onSubmit()" #form="ngForm">
-    <!-- Username Field -->
-    <label for="username">Username:</label>
-    <input id="username" type="text" name="username" [(ngModel)]="user.username" #username="ngModel" required
-      minlength="3" appFullNameValidator />
-    <div *ngIf="username.touched && username.invalid" class="error-message">
-      <span *ngIf="username.errors?.['required']">Username is required.</span>
-      <span *ngIf="username.errors?.['minlength']">
-        Username must be at least 3 characters long.
-      </span>
-      <span>Enter your full name (first name and last name).</span>
-    </div>
-    <!-- <div class="hint-message">
-      <span>Enter your full name (first name and last name).</span>
-    </div> -->
-    <br />
-
-    <!-- Password Field -->
-    <label for="password">Password:</label>
-    <input id="password" type="password" name="password" [(ngModel)]="user.password" #password="ngModel" required
-      appPasswordValidator />
-    <div *ngIf="password.touched && password.invalid" class="error-message">
-      <span *ngIf="password.errors?.['required']">Password is required.</span>
-      <span *ngIf="password.errors?.['minlength']">Password must be at least 6 characters long.</span>
-      <span *ngIf="password.errors?.['noCapitalLetter']">Password must contain at least one capital letter.</span>
-      <span *ngIf="password.errors?.['noSpecialChar']">Password must contain at least one special character.</span>
-    </div>
-    <br />
-
-    <!-- Email Field (only for signup mode) -->
-    <ng-container *ngIf="isSignupMode">
+    <!-- במצב לוגין: הצגת שדה אימייל בלבד -->
+    <ng-container *ngIf="!isSignupMode">
       <label for="email">Email:</label>
-      <input id="email" type="text" name="email" [(ngModel)]="user.email" #email="ngModel"
-        [ngModelOptions]="{ updateOn: 'change' }" required [ngModel]="user.email" appEmailValidator appEmailTaken />
+      <input id="email" type="text" name="email" [(ngModel)]="user.email" #email="ngModel" required appEmailValidator />
+      <div *ngIf="email.touched && email.invalid" class="error-message">
+        <span *ngIf="email.errors?.['required']">Email is required.</span>
+        <span *ngIf="email.errors?.['email']">Please enter a valid email address.</span>
+      </div>
+      <br />
+    </ng-container>
+
+    <!-- במצב רישום: הצגת שדה שם מלא (username) -->
+    <ng-container *ngIf="isSignupMode">
+      <label for="username">Full Name:</label>
+      <input id="username" type="text" name="username" [(ngModel)]="user.username" #username="ngModel" required
+        minlength="3" appFullNameValidator />
+      <div *ngIf="username.touched && username.invalid" class="error-message">
+        <span *ngIf="username.errors?.['required']">Full name is required.</span>
+        <span *ngIf="username.errors?.['minlength']">
+          Full name must be at least 3 characters long.
+        </span>
+      </div>
+      <br />
+
+      <!-- שדה אימייל נוסף למצב רישום -->
+      <label for="email">Email:</label>
+      <input id="email" type="text" name="email" [(ngModel)]="user.email" #email="ngModel" required appEmailValidator
+        appEmailTaken />
       <div *ngIf="email.touched && email.invalid" class="error-message">
         <span *ngIf="email.errors?.['required']">Email is required.</span>
         <span *ngIf="email.errors?.['email']">Please enter a valid email address.</span>
@@ -45,6 +40,18 @@
       </div>
       <br />
     </ng-container>
+
+    <!-- שדה סיסמה, משותף לשני המצבים -->
+    <label for="password">Password:</label>
+    <input id="password" type="password" name="password" [(ngModel)]="user.password" #password="ngModel" required
+      appPasswordValidator />
+    <div *ngIf="password.touched && password.invalid" class="error-message">
+      <span *ngIf="password.errors?.['required']">Password is required.</span>
+      <span *ngIf="password.errors?.['minlength']">Password must be at least 6 characters long.</span>
+      <span *ngIf="password.errors?.['noCapitalLetter']">Password must contain at least one capital letter.</span>
+      <span *ngIf="password.errors?.['noSpecialChar']">Password must contain at least one special character.</span>
+    </div>
+    <br />
 
     <button type="submit" [disabled]="form.invalid">
       {{ isSignupMode ? 'Sign Up' : 'Log In' }}
@@ -58,6 +65,6 @@
     <br>
   </form>
 
-  <!-- Global Error Message -->
+  <!-- הודעת שגיאה גלובלית -->
   <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
 </div>

@@ -33,7 +33,7 @@ export class LoginSignupComponent implements OnInit {
   toggleMode(): void {
     this.isSignupMode = !this.isSignupMode; // Toggle mode
     this.errorMessage = ''; // Clear any error message
-  
+
     // Navigate to the appropriate route
     const targetRoute = this.isSignupMode ? '/signup' : '/login';
     this.router.navigate([targetRoute]).then(() => {
@@ -41,15 +41,15 @@ export class LoginSignupComponent implements OnInit {
       this.isSignupMode = targetRoute === '/signup';
     });
   }
-  
+
 
   onSubmit(): void {
     this.errorMessage = '';
-    
+
     if (this.isSignupMode) {
       this.userService.saveUser(this.user).subscribe({
         next: () => {
-          this.userService.login(this.user.username, this.user.password).subscribe({
+          this.userService.login(this.user.email, this.user.password).subscribe({
             next: () => {
               this.msgService.setSuccessMsg(`Signup successful! ${this.user.username} is now logged in.`);
               this.router.navigate(['/contact']);
@@ -64,7 +64,7 @@ export class LoginSignupComponent implements OnInit {
         },
       });
     } else {
-      this.userService.login(this.user.username, this.user.password).subscribe({
+      this.userService.login(this.user.email, this.user.password).subscribe({
         next: (user) => {
           this.msgService.setSuccessMsg(`Login successful!!! ${user.username} is now logged in.`);
           this.router.navigate(['/contact']);

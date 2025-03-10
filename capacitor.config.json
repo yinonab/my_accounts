@@ -1,0 +1,5 @@
+{
+  "appId": "com.myaccount.myapp",
+  "appName": "my_accounts",
+  "webDir": "dist/my_accounts_temp/browser"
+}

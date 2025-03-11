@@ -3,6 +3,8 @@ import { io, Socket } from 'socket.io-client';
 import { UserService } from './user.service';
 import { ChatMessage } from '../models/ChatMessage';
 import { ErrorLoggerService } from './Error-logger.service';
+import { Capacitor } from '@capacitor/core';
+
 
 const BASE_URL = getBaseUrl();
 
@@ -428,9 +430,14 @@ function getBaseUrl(): string {
   const developmentHosts = ['localhost', '192.168.1.63', '192.168.1.88', '10.0.2.2', '10.100.102.9'];
   const isProduction = !developmentHosts.includes(window.location.hostname);
 
-  console.log(`Socket environment: ${environment}`);
+  const isNative = Capacitor.getPlatform() !== 'web'; // אם לא "web", אז native
+
+  // אם רץ באמולטור אנדרואיד, נחליף את localhost ב-10.0.2.2
+  if (!isProduction && isNative && window.location.hostname === 'localhost') {
+    return 'http://10.0.2.2:3030';
+  }
 
   return isProduction
     ? 'https://backend-my-accounts.onrender.com'
-    : `http://${window.location.hostname}:3030`;  // ישתמש באותו hostname כמו הפרונט
+    : `http://${window.location.hostname}:3030`;
 }

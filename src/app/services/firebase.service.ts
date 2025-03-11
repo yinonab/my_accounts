@@ -4,6 +4,10 @@ import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { BehaviorSubject } from 'rxjs';
 import { NotificationService } from './notification.service';
 import { UserService } from './user.service';
+import { config } from './config.service';
+import { Capacitor } from '@capacitor/core';
+import { PushNotifications } from '@capacitor/push-notifications';
+
 
 // הגדרות Firebase מהקונסול
 const firebaseConfig = {
@@ -85,19 +89,50 @@ export class FirebaseService {
     }
 
     // בקשת הרשאות וקבלת ה-token
-    async requestNotificationPermission() {
-        try {
+    async requestNotificationPermission(): Promise<void> {
+        if (Capacitor.getPlatform() === 'web' && typeof Notification !== 'undefined') {
+          // טיפול בסביבת web
+          try {
             const permission = await Notification.requestPermission();
+            console.log("🔔 Notification permission (web):", permission);
             if (permission === 'granted') {
-                console.log("🔔 Notification permission granted.");
-                this.getFCMToken();
+              const token = await this.getFCMToken();
+              if (!token) {
+                console.warn("No valid FCM token received; not sending to server.");
+              }
             } else {
-                console.warn("❌ Notification permission denied.");
+              console.warn("❌ Notification permission denied (web).");
             }
-        } catch (error) {
-            console.error("❌ Error getting notification permission:", error);
+          } catch (error) {
+            console.error("❌ Error getting web notification permission:", error);
+          }
+        } else {
+          // טיפול בסביבת native באמצעות Capacitor PushNotifications
+          try {
+            console.log("Requesting native push notifications permission...");
+            const permissionResult = await PushNotifications.requestPermissions();
+            if (permissionResult.receive === 'granted') {
+              await PushNotifications.register();
+      
+              // מאזינים לאירועי רישום לקבלת הטוקן
+              PushNotifications.addListener('registration', (tokenData) => {
+                console.log("✅ Native push registration token:", tokenData);
+                // שלח את הטוקן לשרת שלך
+                this.sendTokenToServer(tokenData.value);
+              });
+      
+              PushNotifications.addListener('registrationError', (error) => {
+                console.error("❌ Error with native push registration:", error);
+              });
+            } else {
+              console.warn("❌ Native push notification permission not granted.");
+            }
+          } catch (error) {
+            console.error("❌ Error requesting native push notification permission:", error);
+          }
         }
-    }
+      }
+      
 
     // קבלת ה-FCM Token ושליחתו לשרת
     // async getFCMToken(): Promise<string | null> {
@@ -154,39 +189,40 @@ export class FirebaseService {
     // מאזין לנוטיפיקציות כשהאפליקציה **פתוחה**
     listenForMessages() {
         onMessage(this.messaging, (payload) => {
-            console.log("📩 Foreground notification received:", payload);
-
-            this.lastNotificationTime = Date.now();
-
-            // ✅ ניגשים לשדות עם סוגריים מרובעים כדי למנוע שגיאת TS
-            const notificationTitle = payload.data?.['title'] || "🔔 הודעה חדשה";
-            const notificationOptions = {
-                body: payload.data?.['body'] || "📩 יש לך הודעה חדשה!",
-                icon: payload.data?.['icon'] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
-                badge: payload.data?.['badge'] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
-                vibrate: [200, 100, 200],
-                requireInteraction: true
-            };
-
-            if (document.hidden) {
-                console.log("📲 מציג נוטיפיקציה", notificationTitle);
-                new Notification(notificationTitle, notificationOptions);
-            } else {
-                console.log("🔔 הצגת התראה בתוך האפליקציה");
-            }
-            if (payload.data?.['wakeUpApp'] === "true") {
-                console.log("📲 קיבלנו הודעה להעיר את האפליקציה - מבצע התחברות מחדש!");
-                window.focus();
-            }
+          console.log("📩 Foreground notification received:", payload);
+          this.lastNotificationTime = Date.now();
+      
+          const notificationTitle = payload.data?.['title'] || "🔔 הודעה חדשה";
+          const notificationOptions = {
+            body: payload.data?.['body'] || "📩 יש לך הודעה חדשה!",
+            icon: payload.data?.['icon'] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+            badge: payload.data?.['badge'] || "https://res.cloudinary.com/dzqnyehxn/image/upload/v1739858070/belll_fes617.png",
+            vibrate: [200, 100, 200],
+            requireInteraction: true
+          };
+      
+          // אם המסך מוסתר וה-Notification API קיים, מציגים התראה
+          if (document.hidden && typeof Notification !== 'undefined') {
+            console.log("📲 מציג נוטיפיקציה", notificationTitle);
+            new Notification(notificationTitle, notificationOptions);
+          } else {
+            console.log("🔔 הצגת התראה בתוך האפליקציה");
+          }
+      
+          if (payload.data?.['wakeUpApp'] === "true") {
+            console.log("📲 קיבלנו הודעה להעיר את האפליקציה - מבצע התחברות מחדש!");
+            window.focus();
+          }
         });
-    }
+      }
+      
 
 
 
     // שליחת ה-Token לשרת לשימוש עתידי
     async sendTokenToServer(token: string) {
         try {
-            const response = await fetch('http://localhost:3030/api/notification/save-token', {
+            const response = await fetch(`${config.baseURL}/notification/save-token`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

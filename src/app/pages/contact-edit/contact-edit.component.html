@@ -4,7 +4,7 @@
       <a routerLink="/contact">
         <img src="../../../assets/images/back.png" alt="go back" />
       </a>
-      <h2>{{ contact._id ? 'Edit' : 'Add' }} Contact</h2>
+      <h2>{{ contact._id ? 'Edit' : 'Add' }} Content</h2>
       <button *ngIf="contact._id" (click)="onDeleteClick()">
         <img class="delete-img" src="../../../assets/images/delete1.png" alt="delete image" />
       </button>
@@ -119,14 +119,14 @@
         <!-- Additional Info Input -->
         <!-- Additional Info Input -->
         <div class="form-input desc">
-          <label for="additionalInfo">Additional Info</label>
+          <label for="additionalInfo">Add Info/ Links/ etc</label>
           <textarea class="lastName" formControlName="additionalInfo" placeholder="Enter text, links, or anything..."
             id="additionalInfo"></textarea>
         </div>
 
         <!-- הצגת additionalInfo עם לינקים קליקביליים -->
-        <p *ngIf="form.controls['additionalInfo'].value" [innerHTML]="form.controls['additionalInfo'].value | linkify"
-          class="formatted-text"></p>
+        <!-- <p *ngIf="form.controls['additionalInfo'].value" [innerHTML]="form.controls['additionalInfo'].value | linkify"
+          class="formatted-text"></p> -->
 
         <ng-container *ngIf="form.controls['additionalInfo'] as additionalInfoInput">
           <p *ngIf="additionalInfoInput.errors && additionalInfoInput.touched" class="errors">

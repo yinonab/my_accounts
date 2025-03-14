@@ -26,6 +26,7 @@ const firebaseConfig = {
 export class FirebaseService {
     private messaging;
     private fcmToken: { [userId: string]: string } = {};
+    private nativeToken: string | null = null; // [RED] טוקן native
     private tokenSubject = new BehaviorSubject<string | null>(null);
     readonly vapidKey = "BJ0eDoKaqa38VXNfTokyeUKpM0OA9RflAK0gMkjeA-ddZlCYvE02m5YZa7ESS8dujQL-4S_67puRZJVP5Y_CYuo"; // וודא שזה המפתח הנכון
     private injector = inject(Injector);
@@ -90,6 +91,7 @@ export class FirebaseService {
 
     // בקשת הרשאות וקבלת ה-token
     async requestNotificationPermission(): Promise<void> {
+      console.log("Platform:", Capacitor.getPlatform());
         if (Capacitor.getPlatform() === 'web' && typeof Notification !== 'undefined') {
           // טיפול בסביבת web
           try {
@@ -118,6 +120,8 @@ export class FirebaseService {
               PushNotifications.addListener('registration', (tokenData) => {
                 console.log("✅ Native push registration token:", tokenData);
                 // שלח את הטוקן לשרת שלך
+                this.nativeToken = tokenData.value; // [RED] שמירת הטוקן native
+                this.tokenSubject.next(this.nativeToken);
                 this.sendTokenToServer(tokenData.value);
               });
       
@@ -155,33 +159,36 @@ export class FirebaseService {
     //     }
     // }
     async getFCMToken(): Promise<string | null> {
-        const currentUser = this.userService.getLoggedInUser()?._id; // שיטה שמחזירה את ה-ID של המשתמש המחובר כעת
-        console.log(` currentUser - ${currentUser}:`);
-
-        if (currentUser && this.fcmToken[currentUser]) {
-            console.log(`🔄 משתמש ב-Token הקיים עבור המשתמש: ${currentUser}`, this.fcmToken[currentUser]);
-            return this.fcmToken[currentUser];
-        }
-
-        try {
-            const newToken = await getToken(this.messaging, { vapidKey: this.vapidKey });
-            console.log(` newToken - ${newToken}:`);
-
-
-            if (newToken) {
-                console.log(`✅ FCM Token חדש התקבל עבור ${currentUser}:`, newToken);
-                this.fcmToken[currentUser!] = newToken; // שמור את ה-Token לפי המשתמש
-                await this.notificationService.saveSubscription({ token: newToken });
-                return newToken;
-            } else {
-                console.warn("⚠️ לא התקבל Token.");
-                return null;
-            }
-        } catch (error) {
-            console.error("❌ שגיאה בעת קבלת FCM Token:", error);
-            return null;
-        }
-    }
+      console.log("Platform:", Capacitor.getPlatform());
+      if (Capacitor.getPlatform() === 'web') {
+          const currentUser = this.userService.getLoggedInUser()?._id;
+          console.log(` currentUser - ${currentUser}:`);
+          if (currentUser && this.fcmToken[currentUser]) {
+              console.log(`🔄 Using existing web token for user ${currentUser}:`, this.fcmToken[currentUser]);
+              return this.fcmToken[currentUser];
+          }
+          try {
+              const newToken = await getToken(this.messaging, { vapidKey: this.vapidKey });
+              console.log(` newToken (web) - ${newToken}:`);
+              if (newToken) {
+                  console.log(`✅ New FCM Token received for ${currentUser}:`, newToken);
+                  this.fcmToken[currentUser!] = newToken;
+                  await this.notificationService.saveSubscription({ token: newToken });
+                  return newToken;
+              } else {
+                  console.warn("⚠️ No FCM token received (web).");
+                  return null;
+              }
+          } catch (error) {
+              console.error("❌ Error retrieving FCM Token (web):", error);
+              return null;
+          }
+      } else {
+          // [RED] בסביבה native נחזיר את הטוקן שהתקבל מהאירוע registration
+          console.log("Running on native – using native token:", this.nativeToken);
+          return this.nativeToken;
+      }
+  }
 
     getLastNotificationTime(): number | null {
         return this.lastNotificationTime;

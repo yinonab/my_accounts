@@ -1,3 +1,6 @@
+declare var cordova: any;
+declare var device: any;
+
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subscription, take } from 'rxjs';
 import { ContactService } from '../services/contact.service';
@@ -7,6 +10,10 @@ import { NotificationService } from '../services/notification.service';
 import { NotificationMobileService } from '../services/notification.mobile.service';
 import { UserService } from '../services/user.service';
 import { SocketService } from '../services/socket.service';
+import { App } from '@capacitor/app'; // 🔸 תוסף חדש
+import { Device } from '@capacitor/device'; // 🔸 תוסף חדש
+
+
 
 @Component({
   selector: 'app-root',
@@ -48,9 +55,11 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe({
         error: err => console.log('err:', err)
-      })
+      });
+
     console.log("🚀 AppComponent Initialized");
     this.userService.refreshLoginTokenIfNeeded();
+
     document.addEventListener("visibilitychange", async () => {
       if (document.hidden) {
         console.log("🔄 האפליקציה עברה לרקע, שולח פינג כדי לוודא שה-Socket לא יתנתק...");
@@ -76,8 +85,34 @@ export class AppComponent implements OnInit, OnDestroy {
           console.warn("⚠️ לא נמצא טוקן, מבצע בקשת הרשאה מחדש...");
           this.firebaseService.requestNotificationPermission();
         }
-
       }
+    });
+
+    // 🔸🔸🔸 קוד חדש לטיפול במעבר בין מצב רקע וקדמה (עם Capacitor) 🔸🔸🔸
+    App.addListener('appStateChange', async ({ isActive }) => {
+      if (!isActive) {
+        console.log("🔄 (Capacitor) האפליקציה עברה לרקע, שולח פינג לשמירת החיבור...");
+        this.socketService.emit("ping");
+      } else {
+        console.log("🔄 (Capacitor) האפליקציה חזרה לקדמה – בודק חיבורים וטוקנים...");
+        this.userService.refreshLoginTokenIfNeeded();
+        if (!this.socketService.isConnected()) {
+          console.log("🔌 (Capacitor) ה-Socket נותק, מבצע התחברות מחדש...");
+          this.socketService.setup();
+        }
+        const newToken = await this.firebaseService.getFCMToken();
+        if (newToken) {
+          console.log("✅ (Capacitor) טוקן מעודכן:", newToken);
+        } else {
+          console.warn("⚠️ (Capacitor) אין טוקן, מבקש הרשאות מחדש...");
+          this.firebaseService.requestNotificationPermission();
+        }
+      }
+    });
+
+    // 🔸🔸🔸 קוד חדש לקבלת מידע על המכשיר (עם Capacitor Device) 🔸🔸🔸
+    Device.getInfo().then(info => {
+      console.log("📱 (Capacitor Device) Device Info:", info);
     });
     this.resetIdleTimer();
 
@@ -112,7 +147,7 @@ export class AppComponent implements OnInit, OnDestroy {
       alert("📌 כדי לקבל התראות ב-iOS, התקן את האפליקציה למסך הבית.");
     }
 
-    if (Notification.permission === 'default') {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       setTimeout(() => {
         const lastNotificationTime = this.firebaseService.getLastNotificationTime() ?? 0; // אם null, נגדיר כ-0
 

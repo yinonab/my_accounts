@@ -7,6 +7,8 @@ import { UserIndexComponent } from '../user-index/user-index.component.js';
 import { UserService } from '../../../services/user.service.js';
 import { ContactService } from '../../../services/contact.service.js';
 import { Contact } from '../../../models/contact.model.js';
+import { ChangeDetectorRef } from '@angular/core';
+
 
 @Component({
   selector: 'user-preview',
@@ -26,7 +28,7 @@ export class UserPreviewComponent {
   private static openDropdownIdSubject = new BehaviorSubject<string | null>(null);
   static openDropdownId$ = UserPreviewComponent.openDropdownIdSubject.asObservable();
 
-  constructor(private router: Router, private socketService: SocketService, private userIndex: UserIndexComponent, private contactService: ContactService) { }
+  constructor(private router: Router, private socketService: SocketService,private cdr: ChangeDetectorRef, private userIndex: UserIndexComponent, private contactService: ContactService) { }
   ngOnInit(): void {
     console.log('🚀 UserPreviewComponent initialized');
     UserPreviewComponent.openDropdownId$.subscribe(openDropdownId => {
@@ -65,10 +67,25 @@ export class UserPreviewComponent {
   }
   openPrivateChat(event: Event): void {
     event.stopPropagation();
-    console.log(`🟢 Opening private chat with user: ${this.user._id}`);
-    this.isPrivateChatOpen = true;
-    this.userIndex.resetUnreadMessages(this.user._id);
+    console.log(`🟢 1) Opening private chat with user: ${this.user._id}`);
+    try {
+      console.log('🟢 2) about to set isPrivateChatOpen = true');
+      this.isPrivateChatOpen = true;
+      console.log(`🟢 3) isPrivateChatOpen is now: ${this.isPrivateChatOpen}`);
+      
+      console.log('🟢 4) about to call resetUnreadMessages');
+      this.userIndex.resetUnreadMessages(this.user._id);
+      console.log('🟢 5) resetUnreadMessages finished');
+  
+      console.log('🟢 6) about to call cdr.detectChanges()');
+      this.cdr.detectChanges();
+      console.log('🟢 7) detectChanges finished');
+    } catch (error) {
+      console.error('❌ Error in openPrivateChat:', error);
+    }
   }
+  
+  
   filterContactsByOwner(ownerId: string): void {
     this.contacts = this.allContacts.filter(contact => {
       const owner = contact.owner as string | { _id: string };

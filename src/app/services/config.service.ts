@@ -7,7 +7,7 @@ export const config = {
   baseURL: (function() {
     // אם האפליקציה נייטיבית (למשל באמולטור), נשתמש בכתובת מתאימה
     if (Capacitor.getPlatform() !== 'web' && window.location.hostname === 'localhost') {
-      return 'http://10.0.2.2:3030/api';
+      return 'http://192.168.1.88:3030/api';
     }
     return isProduction
       ? 'https://backend-my-accounts.onrender.com/api'

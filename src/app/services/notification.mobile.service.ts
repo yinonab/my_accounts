@@ -15,6 +15,7 @@ export class NotificationMobileService {
   }
 
   async requestNotificationPermission(): Promise<void> {
+    console.log("Platform:", Capacitor.getPlatform());
     // אם הסביבה web – נשתמש ב-Notification.requestPermission()
     if (Capacitor.getPlatform() === 'web' && typeof Notification !== 'undefined') {
       try {
@@ -163,6 +164,7 @@ export class NotificationMobileService {
     document.getElementById('allow-btn')?.addEventListener('click', async () => {
       console.log("🟢 לחיצה על 'אפשר התראות'");
       if (Capacitor.getPlatform() === 'web' && typeof Notification !== 'undefined') {
+        console.log("Platform:", Capacitor.getPlatform());
         try {
           const permission = await Notification.requestPermission();
           console.log("🔔 Web notification permission received:", permission);

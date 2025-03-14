@@ -13,6 +13,7 @@ import { FirebaseService } from '../services/firebase.service';
 import { CloudinaryService } from '../services/cloudinary.service';
 
 
+
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
@@ -27,8 +28,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('roomInput') roomInput!: ElementRef;
   @ViewChild('chatInput') chatInput!: ElementRef;
   notificationsEnabled = false;
-  Notification = Notification;
-  notificationPermission: string = 'default';
+  //Notification = Notification;
+  notificationPermission: string = (typeof Notification !== 'undefined') ? Notification.permission : 'default';
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
   isUploading = false;  // מציין אם יש קובץ שנמצא בהעלאה
   uploadProgress = 0;   // מציין את אחוזי ההעלאה
@@ -109,7 +110,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
     this.socketSubscription = new Subscription();
-    this.notificationPermission = Notification.permission;
+    this.notificationPermission = (typeof Notification !== 'undefined') ? Notification.permission : 'default';
+
     this.initializeNotifications();
     this.firebaseService.getFCMToken().then(token => {
       if (token) {
@@ -240,8 +242,14 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
   showNotificationPrompt() {
+    // [RED] בדיקה אם Notification קיים – אם לא, לא נמשיך
+    if (typeof Notification === 'undefined') {
+      console.warn("Notification API is not available in this environment.");
+      return;
+    }
+    
     if (document.querySelector('.notification-prompt')) return; // מניעת כפילויות
-
+  
     const prompt = document.createElement('div');
     prompt.className = 'notification-prompt';
     prompt.innerHTML = `
@@ -253,12 +261,14 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         </div>
       </div>
     `;
-
+  
     document.body.appendChild(prompt);
-
+  
     document.getElementById('allow-btn')?.addEventListener('click', async () => {
       console.log("🟢 לחיצה על 'אפשר התראות'");
-      Notification.requestPermission().then(async permission => {
+      // [RED] עטיפה בבדיקה לוודא ש־Notification קיים
+      if (typeof Notification !== 'undefined') {
+        const permission = await Notification.requestPermission();
         console.log("🔔 הרשאת נוטיפיקציות התקבלה:", permission);
         if (permission === 'granted') {
           await this.requestNotificationPermission();
@@ -266,15 +276,18 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         } else {
           console.warn('❌ המשתמש לא אישר התראות');
         }
-      });
+      } else {
+        console.warn("Notification API is not available in this environment.");
+      }
       prompt.remove();
     });
-
+  
     document.getElementById('dismiss-btn')?.addEventListener('click', () => {
       console.log('🔕 המשתמש דחה את הבקשה');
       prompt.remove();
     });
   }
+  
   private scrollToBottom(): void {
     setTimeout(() => {
       if (this.messagesContainer?.nativeElement) { // בדיקה למניעת שגיאה

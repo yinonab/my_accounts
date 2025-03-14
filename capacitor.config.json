@@ -1,5 +1,8 @@
 {
   "appId": "com.myaccount.myapp",
   "appName": "my_accounts",
-  "webDir": "dist/my_accounts_temp/browser"
+  "webDir": "dist/my_accounts_temp/browser",
+  "server": {
+    "url": "https://backend-my-accounts.onrender.com"
+  }
 }

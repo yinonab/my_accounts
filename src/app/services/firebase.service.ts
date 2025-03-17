@@ -90,52 +90,121 @@ export class FirebaseService {
     }
 
     // בקשת הרשאות וקבלת ה-token
+    // async requestNotificationPermission(): Promise<void> {
+    //   console.log("Platform:", Capacitor.getPlatform());
+    //     if (Capacitor.getPlatform() === 'web' && typeof Notification !== 'undefined') {
+    //       // טיפול בסביבת web
+    //       try {
+    //         const permission = await Notification.requestPermission();
+    //         console.log("🔔 Notification permission (web):", permission);
+    //         if (permission === 'granted') {
+    //           const token = await this.getFCMToken();
+    //           if (!token) {
+    //             console.warn("No valid FCM token received; not sending to server.");
+    //           }
+    //         } else {
+    //           console.warn("❌ Notification permission denied (web).");
+    //         }
+    //       } catch (error) {
+    //         console.error("❌ Error getting web notification permission:", error);
+    //       }
+    //     } else {
+    //       // טיפול בסביבת native באמצעות Capacitor PushNotifications
+    //       try {
+    //         console.log("Requesting native push notifications permission...");
+    //         const permissionResult = await PushNotifications.requestPermissions();
+    //         if (permissionResult.receive === 'granted') {
+    //           await PushNotifications.register();
+      
+    //           // מאזינים לאירועי רישום לקבלת הטוקן
+    //           PushNotifications.addListener('registration', (tokenData) => {
+    //             console.log("✅ Native push registration token:", tokenData);
+    //             // שלח את הטוקן לשרת שלך
+    //             this.nativeToken = tokenData.value; // [RED] שמירת הטוקן native
+    //             this.tokenSubject.next(this.nativeToken);
+    //             this.sendTokenToServer(tokenData.value);
+    //           });
+      
+    //           PushNotifications.addListener('registrationError', (error) => {
+    //             console.error("❌ Error with native push registration:", error);
+    //           });
+    //         } else {
+    //           console.warn("❌ Native push notification permission not granted.");
+    //         }
+    //       } catch (error) {
+    //         console.error("❌ Error requesting native push notification permission:", error);
+    //       }
+    //     }
+    //   }
+
+    
+
     async requestNotificationPermission(): Promise<void> {
-      console.log("Platform:", Capacitor.getPlatform());
-        if (Capacitor.getPlatform() === 'web' && typeof Notification !== 'undefined') {
-          // טיפול בסביבת web
+      console.log("🚀 Checking notification permissions on:", Capacitor.getPlatform());
+  
+      if (Capacitor.getPlatform() === 'web' && typeof Notification !== 'undefined') {
           try {
-            const permission = await Notification.requestPermission();
-            console.log("🔔 Notification permission (web):", permission);
-            if (permission === 'granted') {
-              const token = await this.getFCMToken();
-              if (!token) {
-                console.warn("No valid FCM token received; not sending to server.");
+              const permission = await Notification.requestPermission();
+              console.log("🔔 Web Notification Permission:", permission);
+              if (permission === 'granted') {
+                  const token = await this.getFCMToken();
+                  if (!token) {
+                      console.warn("⚠️ No valid FCM token received; not sending to server.");
+                  }
+              } else {
+                  console.warn("❌ Web Notification permission denied.");
               }
-            } else {
-              console.warn("❌ Notification permission denied (web).");
-            }
           } catch (error) {
-            console.error("❌ Error getting web notification permission:", error);
+              console.error("❌ Error getting web notification permission:", error);
           }
-        } else {
-          // טיפול בסביבת native באמצעות Capacitor PushNotifications
+      } else {
+          // 🟢 טיפול בסביבת native באמצעות Capacitor PushNotifications
           try {
-            console.log("Requesting native push notifications permission...");
-            const permissionResult = await PushNotifications.requestPermissions();
-            if (permissionResult.receive === 'granted') {
+              console.log("📲 Checking native push notification permission...");
+  
+              // 🔴 שלב ראשון: לבדוק אם כבר יש הרשאה
+              const permissionStatus = await PushNotifications.checkPermissions();
+              console.log("🔄 Current native push permission status:", permissionStatus);
+  
+              if (permissionStatus.receive !== 'granted') {
+                  console.log("📢 Requesting push permission...");
+                  const permissionResult = await PushNotifications.requestPermissions();
+                  console.log("🔄 Native Push Notification Permission Result:", permissionResult);
+  
+                  if (permissionResult.receive !== 'granted') {
+                      console.warn("❌ Native push notification permission not granted.");
+                      return;
+                  }
+              }
+  
+              console.log("✅ Notification permission granted!");
+  
+              // 🔴 רישום לקבלת טוקן
               await PushNotifications.register();
-      
-              // מאזינים לאירועי רישום לקבלת הטוקן
+  
+              // 🔴 בדיקה אם נרשם טוקן בפועל
               PushNotifications.addListener('registration', (tokenData) => {
-                console.log("✅ Native push registration token:", tokenData);
-                // שלח את הטוקן לשרת שלך
-                this.nativeToken = tokenData.value; // [RED] שמירת הטוקן native
-                this.tokenSubject.next(this.nativeToken);
-                this.sendTokenToServer(tokenData.value);
+                  if (tokenData.value) {
+                      console.log("🎉 ✅ Native push registration token received:", tokenData.value);
+                      this.nativeToken = tokenData.value;
+                      this.tokenSubject.next(this.nativeToken);
+                      this.sendTokenToServer(tokenData.value);
+                  } else {
+                      console.warn("⚠️ Token registration event triggered but token is empty!");
+                  }
               });
-      
+  
               PushNotifications.addListener('registrationError', (error) => {
-                console.error("❌ Error with native push registration:", error);
+                  console.error("❌ Error during native push registration:", error);
               });
-            } else {
-              console.warn("❌ Native push notification permission not granted.");
-            }
+  
           } catch (error) {
-            console.error("❌ Error requesting native push notification permission:", error);
+              console.error("❌ Error requesting native push notification permission:", error);
           }
-        }
       }
+  }
+  
+  
       
 
     // קבלת ה-FCM Token ושליחתו לשרת
@@ -159,7 +228,8 @@ export class FirebaseService {
     //     }
     // }
     async getFCMToken(): Promise<string | null> {
-      console.log("Platform:", Capacitor.getPlatform());
+      console.log("🚀 Retrieving FCM Token on:", Capacitor.getPlatform());
+  
       if (Capacitor.getPlatform() === 'web') {
           const currentUser = this.userService.getLoggedInUser()?._id;
           console.log(` currentUser - ${currentUser}:`);
@@ -184,11 +254,26 @@ export class FirebaseService {
               return null;
           }
       } else {
-          // [RED] בסביבה native נחזיר את הטוקן שהתקבל מהאירוע registration
-          console.log("Running on native – using native token:", this.nativeToken);
+          console.log("📲 Running on native – checking native token...");
+  
+          // 🟢 נוודא שהטוקן בנייטיב מתקבל
+          if (!this.nativeToken) {
+              console.warn("❌ No native token found. Trying to register again...");
+              await this.requestNotificationPermission();
+  
+              // 🔴 נוודא שוב אחרי רישום מחדש
+              if (!this.nativeToken) {
+                  console.error("🚨 Still no native token after re-registration!");
+                  return null;
+              }
+          }
+  
+          console.log("✅ Native token found:", this.nativeToken);
           return this.nativeToken;
       }
   }
+  
+  
 
     getLastNotificationTime(): number | null {
         return this.lastNotificationTime;

@@ -12,6 +12,8 @@ import { UserService } from '../services/user.service';
 import { SocketService } from '../services/socket.service';
 import { App } from '@capacitor/app'; // 🔸 תוסף חדש
 import { Device } from '@capacitor/device'; // 🔸 תוסף חדש
+import { FacebookLogin } from '@capacitor-community/facebook-login';
+import { FacebookService } from '../services/FacebookService';
 
 
 
@@ -29,12 +31,15 @@ export class AppComponent implements OnInit, OnDestroy {
   private notificationService = inject(NotificationService);
   private userService = inject(UserService);
   private socketService = inject(SocketService);
+  private facebookService = inject(FacebookService);
+
   subscription!: Subscription
   private idleTimer: any;
   private idleTime = 0;
   private idleMaxTime = 600; // 10 דקות
 
   showBatteryOptimizationButton = true;
+  
 
   // 🟢 הפונקציה מחזירה את הערך בכל שינוי
   get showInstallButton(): boolean {
@@ -58,6 +63,8 @@ export class AppComponent implements OnInit, OnDestroy {
       });
 
     console.log("🚀 AppComponent Initialized");
+    this.facebookService.checkFacebookLoginState();
+
     this.userService.refreshLoginTokenIfNeeded();
 
     document.addEventListener("visibilitychange", async () => {

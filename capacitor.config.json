@@ -4,5 +4,11 @@
   "webDir": "dist/my_accounts_temp/browser",
   "server": {
     "url": "https://backend-my-accounts.onrender.com"
+  },
+  "plugins": {
+    "FacebookLogin": {
+      "appId": "2280747752304909",
+      "permissions": ["email", "public_profile"]
+    }
   }
 }

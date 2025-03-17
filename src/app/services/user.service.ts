@@ -250,8 +250,14 @@ export class UserService {
     email?: string;
     accessToken: string;
   }): Observable<User> {
+    console.log("🔹 Sending Facebook user data to backend:", fbUser);
     return from(storageService.login<{ user: User; loginToken: string }>('auth/facebook', fbUser)).pipe(
       tap((response) => {
+        console.log("✅ Server response:", response);
+        if (!response || !response.user || !response.loginToken) {
+          console.error("❌ Error: No user or loginToken received from server!");
+          return;
+      }
         const loggedInUser: User = response.user;
         const loginToken: string = response.loginToken;
         // שמירת המשתמש ב־BehaviorSubject וב־localStorage
@@ -264,6 +270,7 @@ export class UserService {
         this.socketService.login(loggedInUser._id);
         // שמירת ה־loginToken (גיבוי ב-cookie, localStorage ו-sessionStorage)
         this._saveLoginToken(loginToken);
+        console.log("✅ LoginToken saved:", loginToken);
       }),
       map(response => response.user),
       catchError(this._handleError)

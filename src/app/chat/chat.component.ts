@@ -75,7 +75,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       this.chatInput.nativeElement.focus();
     }
-    this.scrollToBottom();
+    setTimeout(() => this.scrollToBottom(), 300);
   }
 
   showDebugInfo() {
@@ -290,11 +290,14 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   
   private scrollToBottom(): void {
     setTimeout(() => {
-      if (this.messagesContainer?.nativeElement) { // בדיקה למניעת שגיאה
-        this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
-      }
+        requestAnimationFrame(() => {
+            if (this.messagesContainer?.nativeElement) {
+                this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
+            }
+        });
     }, 100);
-  }
+}
+
 
 
 
@@ -632,7 +635,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // ניקוי הודעת המדיה הממתינה
     this.pendingMediaMessage = null;
-    this.scrollToBottom();
+    // this.scrollToBottom();
+    setTimeout(() => this.scrollToBottom(), 300);
     this.onStopTyping();
   }
 
@@ -802,7 +806,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     // שליחת ההודעה לשרת
     this.socketService.sendPrivateMessage(this.targetUserId, this.newMessage, localMessage.tempId, undefined, undefined,);
     this.privateMessages.push(localMessage);
-    this.scrollToBottom();
+    // this.scrollToBottom();
+    setTimeout(() => this.scrollToBottom(), 300);
+
     this.onStopTyping();
 
     // איפוס ומיקוד מחדש לשמירת המקלדת פתוחה
@@ -843,6 +849,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   closeMediaModal(): void {
     this.selectedMedia = null;
   }
+  
 
 
   ngOnDestroy(): void {

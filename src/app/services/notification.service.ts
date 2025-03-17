@@ -5,6 +5,11 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom, Observable } from 'rxjs';
 import { config } from './config.service';
 import { FirebaseService } from './firebase.service';
+import { UserService } from './user.service';
+import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
+
+
 
 // הוספת הממשק החדש
 export interface PushNotificationData {
@@ -42,6 +47,7 @@ export class NotificationService {
 
 
   constructor(
+    private userService: UserService,
     private swPush: SwPush,
     private http: HttpClient,
     private swUpdate: SwUpdate,
@@ -205,6 +211,20 @@ export class NotificationService {
         return;
         // }
       }
+      if (data.data?.['senderId'] === this.userService.getLoggedInUser()?._id) {
+        console.warn("🚫 לא שולח נוטיפיקציה לשולח עצמו.");
+        return;
+    }
+
+    if (Capacitor.getPlatform() !== 'web') {
+      const appState = await App.getState();
+      console.log("📱 App state:", appState);
+
+      if (appState.isActive) {
+          console.warn("🚫 האפליקציה פעילה - לא שולח נוטיפיקציה.");
+          return;
+      }
+  }
       console.log("📡 Payload before sending to server:", JSON.stringify({
         title: data.title,
         body: data.body,

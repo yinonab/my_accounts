@@ -9,6 +9,9 @@
     "FacebookLogin": {
       "appId": "2280747752304909",
       "permissions": ["email", "public_profile"]
+    },
+    "BackgroundService": {
+      "classname": "com.myaccount.myapp.plugin.BackgroundServicePlugin"
     }
   }
 }

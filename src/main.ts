@@ -3,6 +3,13 @@ import { AppModule } from './app/app.module';
 import { FirebaseService } from './app/services/firebase.service'; // ✅ שימוש בשירות Firebase
 import { inject } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
+import BackgroundService from './app/services/ForegroundService'
+
+console.log("📌 BackgroundService loaded:", BackgroundService);
+
+
+(window as any).BackgroundService = BackgroundService;
+
 
 platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
   const firebaseService = inject(FirebaseService); // ✅ יוצרים מופע של FirebaseService

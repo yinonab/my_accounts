@@ -75,7 +75,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       this.chatInput.nativeElement.focus();
     }
-    setTimeout(() => this.scrollToBottom(), 300);
+    setTimeout(() => this.scrollToBottom(), 100);
   }
 
   showDebugInfo() {
@@ -636,7 +636,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     // ניקוי הודעת המדיה הממתינה
     this.pendingMediaMessage = null;
     // this.scrollToBottom();
-    setTimeout(() => this.scrollToBottom(), 300);
+    setTimeout(() => this.scrollToBottom(), 100);
     this.onStopTyping();
   }
 
@@ -807,7 +807,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     this.socketService.sendPrivateMessage(this.targetUserId, this.newMessage, localMessage.tempId, undefined, undefined,);
     this.privateMessages.push(localMessage);
     // this.scrollToBottom();
-    setTimeout(() => this.scrollToBottom(), 300);
+    setTimeout(() => this.scrollToBottom(), 100);
 
     this.onStopTyping();
 

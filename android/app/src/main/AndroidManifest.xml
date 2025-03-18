@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" package="com.myaccount.myapp">
+    xmlns:tools="http://schemas.android.com/tools">
 
 
     <application
@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!-- 🔹 Facebook SDK Configuration -->
+         <!-- 🔹 Facebook SDK Configuration -->
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"/>
@@ -22,15 +22,14 @@
             android:value="@string/facebook_client_token"/>
         <meta-data
             android:name="com.facebook.sdk.AutoInitEnabled"
-            android:value="true"/> <!-- 🔹 חובה כדי לאפשר אתחול אוטומטי -->
+            android:value="true"/>
 
-        <!-- 🔹 Facebook Login Activities -->
-        <activity
+         <activity
             android:name="com.facebook.FacebookActivity"
+            android:exported="true"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize|orientation"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            tools:replace="android:configChanges,android:theme"/>
-            
+            tools:replace="android:configChanges,android:theme"/>     
 
         <activity
             android:name="com.facebook.CustomTabActivity"
@@ -52,12 +51,19 @@
             android:exported="true">
 
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
-        <!-- 🔹 FileProvider Configuration -->
+        <service
+            android:name="com.myaccount.myapp.plugin.BackgroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync">
+        </service>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -65,15 +71,8 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"/>
+                android:resource="@xml/file_paths"></meta-data>
         </provider>
-
-        <!-- 🔹 Background Service -->
-        <service
-            android:name="de.appplant.cordova.plugin.background.ForegroundService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="dataSync|mediaPlayback"/>
     </application>
 
     <!-- 🔹 Permissions -->

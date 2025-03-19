@@ -11,7 +11,7 @@
       "permissions": ["email", "public_profile"]
     },
     "BackgroundService": {
-      "classname": "com.myaccount.myapp.plugin.BackgroundServicePlugin"
+      "name": "BackgroundService"
     }
   }
 }

@@ -14,7 +14,8 @@ import { App } from '@capacitor/app'; // 🔸 תוסף חדש
 import { Device } from '@capacitor/device'; // 🔸 תוסף חדש
 import { FacebookLogin } from '@capacitor-community/facebook-login';
 import { FacebookService } from '../services/FacebookService';
-import { ForegroundService } from '../services/ForegroundService';
+import { BackgroundServiceService } from '../services/background-service.service';
+
 
 
 
@@ -33,7 +34,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private socketService = inject(SocketService);
   private facebookService = inject(FacebookService);
-  private foregroundService = inject(ForegroundService);
+  private backgroundServiceService = inject(BackgroundServiceService);
 
   subscription!: Subscription
   private idleTimer: any;
@@ -52,7 +53,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
   ngOnInit(): void {
-    this.foregroundService.startService();
+    this.backgroundServiceService.startService();
     const batteryOptDisabled = localStorage.getItem('batteryOptimizationDisabled');
     if (batteryOptDisabled === 'true') {
       this.showBatteryOptimizationButton = false;

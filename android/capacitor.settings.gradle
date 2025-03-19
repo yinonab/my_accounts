@@ -20,5 +20,8 @@ project(':capacitor-preferences').projectDir = new File('../node_modules/@capaci
 include ':capacitor-push-notifications'
 project(':capacitor-push-notifications').projectDir = new File('../node_modules/@capacitor/push-notifications/android')
 
+include ':capacitor-background-service'
+project(':capacitor-background-service').projectDir = new File('../capacitor-background-service/android')
+
 include ':capacitor-secure-storage-plugin'
 project(':capacitor-secure-storage-plugin').projectDir = new File('../node_modules/capacitor-secure-storage-plugin/android')

@@ -9,6 +9,7 @@ import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 
 
+
 // הגדרות Firebase מהקונסול
 const firebaseConfig = {
     apiKey: "AIzaSyD6YVTQRO_GtEp_LAZOIzRODS3jNHu-YgE",
@@ -43,6 +44,8 @@ export class FirebaseService {
         this.registerServiceWorker();
         this.requestNotificationPermission();
         this.listenForMessages();
+        this.listenForBackgroundMessages();
+
     }
     private get notificationService(): NotificationService {
         if (!this._notificationService) {
@@ -68,76 +71,47 @@ export class FirebaseService {
     //         }
     //     }
     // }
+    // private async registerServiceWorker() {
+    //     if ('serviceWorker' in navigator) {
+    //         if (navigator.serviceWorker.controller) {
+    //             console.log("🔄 Service Worker כבר רשום. לא מבצע רישום נוסף.");
+    //             return;
+    //         }
+    //         try {
+    //             const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    //             console.log("✅ Service Worker Registered:", registration);
+    //         } catch (error) {
+    //             console.error("❌ Service Worker Registration Failed:", error);
+    //         }
+    //     }
+    // }
+    
+
     private async registerServiceWorker() {
         if ('serviceWorker' in navigator) {
-            if (navigator.serviceWorker.controller) {
-                console.log("🔄 Service Worker כבר רשום. לא מבצע רישום נוסף.");
-                return;
-            }
             try {
                 const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
                 console.log("✅ Service Worker Registered:", registration);
+    
+                // 🔥 וודא ש-Firebase משתמש ב-Service Worker
+                navigator.serviceWorker.ready.then((reg) => {
+                    console.log("✅ Service Worker is Ready:", reg);
+                });
+    
             } catch (error) {
                 console.error("❌ Service Worker Registration Failed:", error);
             }
+        } else {
+            console.warn("⚠️ Service Workers are not supported in this browser.");
         }
     }
-
+    
 
     // מחזיר Observable שניתן להאזין לו כדי לקבל את ה-token
     getTokenObservable() {
         return this.tokenSubject.asObservable();
     }
 
-    // בקשת הרשאות וקבלת ה-token
-    // async requestNotificationPermission(): Promise<void> {
-    //   console.log("Platform:", Capacitor.getPlatform());
-    //     if (Capacitor.getPlatform() === 'web' && typeof Notification !== 'undefined') {
-    //       // טיפול בסביבת web
-    //       try {
-    //         const permission = await Notification.requestPermission();
-    //         console.log("🔔 Notification permission (web):", permission);
-    //         if (permission === 'granted') {
-    //           const token = await this.getFCMToken();
-    //           if (!token) {
-    //             console.warn("No valid FCM token received; not sending to server.");
-    //           }
-    //         } else {
-    //           console.warn("❌ Notification permission denied (web).");
-    //         }
-    //       } catch (error) {
-    //         console.error("❌ Error getting web notification permission:", error);
-    //       }
-    //     } else {
-    //       // טיפול בסביבת native באמצעות Capacitor PushNotifications
-    //       try {
-    //         console.log("Requesting native push notifications permission...");
-    //         const permissionResult = await PushNotifications.requestPermissions();
-    //         if (permissionResult.receive === 'granted') {
-    //           await PushNotifications.register();
-      
-    //           // מאזינים לאירועי רישום לקבלת הטוקן
-    //           PushNotifications.addListener('registration', (tokenData) => {
-    //             console.log("✅ Native push registration token:", tokenData);
-    //             // שלח את הטוקן לשרת שלך
-    //             this.nativeToken = tokenData.value; // [RED] שמירת הטוקן native
-    //             this.tokenSubject.next(this.nativeToken);
-    //             this.sendTokenToServer(tokenData.value);
-    //           });
-      
-    //           PushNotifications.addListener('registrationError', (error) => {
-    //             console.error("❌ Error with native push registration:", error);
-    //           });
-    //         } else {
-    //           console.warn("❌ Native push notification permission not granted.");
-    //         }
-    //       } catch (error) {
-    //         console.error("❌ Error requesting native push notification permission:", error);
-    //       }
-    //     }
-    //   }
-
-    
 
     async requestNotificationPermission(): Promise<void> {
       console.log("🚀 Checking notification permissions on:", Capacitor.getPlatform());
@@ -183,20 +157,30 @@ export class FirebaseService {
               await PushNotifications.register();
   
               // 🔴 בדיקה אם נרשם טוקן בפועל
-              PushNotifications.addListener('registration', (tokenData) => {
-                  if (tokenData.value) {
-                      console.log("🎉 ✅ Native push registration token received:", tokenData.value);
-                      this.nativeToken = tokenData.value;
-                      this.tokenSubject.next(this.nativeToken);
-                      this.sendTokenToServer(tokenData.value);
-                  } else {
-                      console.warn("⚠️ Token registration event triggered but token is empty!");
-                  }
-              });
+              PushNotifications.addListener('registration', async (tokenData) => {
+                if (tokenData.value) {
+                    console.log("🎉 ✅ Native push registration token received:", tokenData.value);
+                    this.nativeToken = tokenData.value;
+                    this.tokenSubject.next(this.nativeToken);
+                    await this.notificationService.saveSubscription({ token: tokenData.value });
+                } else {
+                    console.warn("⚠️ Token registration event triggered but token is empty!");
+                }
+            });
+            
   
               PushNotifications.addListener('registrationError', (error) => {
                   console.error("❌ Error during native push registration:", error);
               });
+              PushNotifications.addListener('pushNotificationReceived', (notification) => {
+                console.log('📲 Received background notification:', notification);
+                // כאן תוכל להוסיף את הלוגיקה שלך כדי להציג את הנוטיפיקציה בסטאטוס בר או בצורה אחרת
+                // לדוגמה, תוכל להציג את הנוטיפיקציה בסטאטוס בר או בטיפול מותאם אישית:
+                if (notification.body) {
+                    // הצגת נוטיפיקציה בצורה מותאמת אישית, לדוגמה בהודעה
+                    alert(`New notification: ${notification.body}`);
+                }
+            });
   
           } catch (error) {
               console.error("❌ Error requesting native push notification permission:", error);
@@ -277,6 +261,38 @@ export class FirebaseService {
 
     getLastNotificationTime(): number | null {
         return this.lastNotificationTime;
+    }
+
+    async listenForBackgroundMessages() {
+        PushNotifications.addListener('pushNotificationReceived', (notification) => {
+            console.log("📲 Received background notification:", notification);
+        
+            const notificationTitle = notification.title || "🔔 הודעה חדשה";
+            
+            // לוודא ש-`badge` הוא תמיד מחרוזת
+            const notificationBadge = typeof notification.badge === 'number' ? notification.badge.toString() : notification.badge;
+        
+            const notificationOptions = {
+                body: notification.body || "📩 יש לך הודעה חדשה!",
+                badge: notificationBadge,  // שדה badge עכשיו הוא תמיד string
+                vibrate: [200, 100, 200],
+                requireInteraction: true
+            };
+        
+            // אם האפליקציה ברקע - נשלח נוטיפיקציה כסטטוס בר
+            if (document.hidden) {
+                console.log("📲 Showing notification in background:", notificationTitle);
+                new Notification(notificationTitle, notificationOptions);
+            } else {
+                console.log("🔔 Showing notification inside the app");
+            }
+        
+            if (notification.data?.['wakeUpApp'] === "true") {
+                console.log("📲 Wake-up app triggered");
+                window.focus();
+            }
+        });
+        
     }
     // מאזין לנוטיפיקציות כשהאפליקציה **פתוחה**
     listenForMessages() {

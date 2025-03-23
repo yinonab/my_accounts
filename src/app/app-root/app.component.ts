@@ -15,6 +15,7 @@ import { Device } from '@capacitor/device'; // 🔸 תוסף חדש
 import { FacebookLogin } from '@capacitor-community/facebook-login';
 import { FacebookService } from '../services/FacebookService';
 import { BackgroundServiceService } from '../services/background-service.service';
+import { Capacitor } from '@capacitor/core';
 
 
 
@@ -40,6 +41,9 @@ export class AppComponent implements OnInit, OnDestroy {
   private idleTimer: any;
   private idleTime = 0;
   private idleMaxTime = 600; // 10 דקות
+  private backgroundPingInterval: any = null; // טיימר לשליחת פינגים ברקע
+  private backgroundTimeout: any = null; // טיימר לשליחת פינגים ברקע
+
 
   showBatteryOptimizationButton = true;
   
@@ -52,34 +56,101 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
 
-  ngOnInit(): void {
-    this.backgroundServiceService.startService();
+  async ngOnInit(): Promise<void> {
+    try {
+    
+    await this.firebaseService.requestNotificationPermission();
+      console.log('🔔 בקשת נוטיפיקציות נשלחה.');
+
+      await this.backgroundServiceService.startService();
+      console.log('✅ Background Service הופעל.');
+      await this.backgroundServiceService.startForegroundService();
+      console.log('🚀 Foreground Service הופעל.');
     const batteryOptDisabled = localStorage.getItem('batteryOptimizationDisabled');
     if (batteryOptDisabled === 'true') {
       this.showBatteryOptimizationButton = false;
     }
     this.notificationService.startKeepAliveNotifications();
+  } 
+  catch (error) {
+    console.error("❌ שגיאה ב-ngOnInit:", error);
+  }
+
+  try {
     this.keepScreenAwake();
-    this.subscription = this.contactService.loadContacts()
+} catch (error) {
+    console.error("❌ שגיאה ב-keepScreenAwake:", error);
+}
+try {
+  this.subscription = this.contactService.loadContacts()
       .pipe(take(1))
       .subscribe({
-        error: err => console.log('err:', err)
+          error: err => console.log('❌ שגיאה ב-loadContacts:', err)
       });
+} catch (error) {
+  console.error("❌ שגיאה בזמן טעינת אנשי קשר:", error);
+}
 
     console.log("🚀 AppComponent Initialized");
-    this.facebookService.checkFacebookLoginState();
+    try {
+      this.facebookService.checkFacebookLoginState();
+      this.userService.refreshLoginTokenIfNeeded();
+  } catch (error) {
+      console.error("❌ שגיאה בבדיקת פייסבוק או רענון טוקן:", error);
+  }
 
-    this.userService.refreshLoginTokenIfNeeded();
-
+    App.addListener('appStateChange', async ({ isActive }) => {
+      if (!isActive) {
+        console.log("🔄 האפליקציה ברקע, שולח פינג כל 30 שניות...");
+        
+        // הפעלת טיימר לשליחת פינגים כל 30 שניות
+        this.backgroundPingInterval = setInterval(() => {
+          console.log("🔄 שולח פינג...");
+          this.socketService.emit("ping");
+        }, 30000); // כל 30 שניות
+    
+        // הפעלת טיימר לרענון אחרי 2 דקות ברקע
+        this.backgroundTimeout = setTimeout(() => {
+          console.log("🔄 רענון בגלל זמן ממושך ברקע...");
+         // location.reload(); // רענון אחרי 5 * 30 שניות (2.5 דקות)
+        }, 5 * 30 * 1000); // רענון אחרי 2.5 דקות
+      } else {
+        console.log("🔄 האפליקציה חזרה לפוקוס...");
+        
+        // כשחוזרים לפוקוס, מפסיקים לשלוח פינגים
+        if (this.backgroundPingInterval) {
+          clearInterval(this.backgroundPingInterval);
+          this.backgroundPingInterval = null;
+          console.log("🛑 הפסקת שליחת פינגים");
+        }
+    
+        // מפסיקים את טיימר הרענון
+        if (this.backgroundTimeout) {
+          clearTimeout(this.backgroundTimeout);
+          this.backgroundTimeout = null;
+          console.log("🛑 הפסקת טיימר הרענון");
+        }
+    
+        this.socketService.setup();
+      }
+    });
+    
     document.addEventListener("visibilitychange", async () => {
       if (document.hidden) {
         console.log("🔄 האפליקציה עברה לרקע, שולח פינג כדי לוודא שה-Socket לא יתנתק...");
         this.socketService.emit("ping");
-        // console.log("🔄 הדף ברקע - מפעיל טיימר לרענון...");
-        // setTimeout(() => {
-        //   console.log("🔄 רענון בגלל זמן ממושך ברקע...");
-        //   location.reload();
-        // },10 * 60 * 1000); // רענון כל 2 דקות
+    
+        // הפעלת טיימר לשליחת פינגים כל 30 שניות
+        this.backgroundPingInterval = setInterval(() => {
+          console.log("🔄 שולח פינג...");
+          this.socketService.emit("ping");
+        }, 30000); // כל 30 שניות
+    
+        // הפעלת טיימר לרענון אחרי 2 דקות ברקע
+        this.backgroundTimeout = setTimeout(() => {
+          console.log("🔄 רענון בגלל זמן ממושך ברקע...");
+          //location.reload(); // רענון אחרי 5 * 30 שניות (2.5 דקות)
+        }, 5 * 30 * 1000); // רענון אחרי 2.5 דקות
       } else {
         console.log("🔄 האפליקציה חזרה לפוקוס – בודק תוקף Token...");
         this.userService.refreshLoginTokenIfNeeded();
@@ -96,9 +167,23 @@ export class AppComponent implements OnInit, OnDestroy {
           console.warn("⚠️ לא נמצא טוקן, מבצע בקשת הרשאה מחדש...");
           this.firebaseService.requestNotificationPermission();
         }
+    
+        // כשחוזרים לפוקוס, מפסיקים לשלוח פינגים
+        if (this.backgroundPingInterval) {
+          clearInterval(this.backgroundPingInterval);
+          this.backgroundPingInterval = null;
+          console.log("🛑 הפסקת שליחת פינגים");
+        }
+    
+        // מפסיקים את טיימר הרענון
+        if (this.backgroundTimeout) {
+          clearTimeout(this.backgroundTimeout);
+          this.backgroundTimeout = null;
+          console.log("🛑 הפסקת טיימר הרענון");
+        }
       }
     });
-
+   
     // 🔸🔸🔸 קוד חדש לטיפול במעבר בין מצב רקע וקדמה (עם Capacitor) 🔸🔸🔸
     App.addListener('appStateChange', async ({ isActive }) => {
       if (!isActive) {
@@ -148,10 +233,33 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       }
     });
+
+    setInterval(async () => {
+      const platform = Capacitor.getPlatform();
+      console.log(`🔄 Checking FCM Token on platform: ${platform}`);
+      
+      let token = await this.firebaseService.getFCMToken();
+      if (!token) {
+        console.warn(`⚠️ FCM Token missing on ${platform}! Requesting notification permission...`);
+        await this.firebaseService.requestNotificationPermission();
+        
+        // ננסה לקבל את הטוקן שוב לאחר בקשת ההרשאה
+        token = await this.firebaseService.getFCMToken();
+        if (!token) {
+          console.error(`🚨 Still no FCM Token on ${platform} after requesting permission.`);
+        } else {
+          console.log(`✅ FCM Token obtained on ${platform}:`, token);
+        }
+      } else {
+        console.log(`✅ FCM Token on ${platform} is present:`, token);
+      }
+    }, 2 * 60 * 1000);
+    
+    
     setInterval(() => {
       console.log("🔄 שולח Keep-Alive ping לשרת...");
       this.userService.keepSessionAlive();
-    }, 3 * 60 * 1000);
+    }, 1 * 60 * 1000);
 
 
     if (!this.pwaService.isRunningStandalone() && this.pwaService.isIOS()) {
@@ -183,19 +291,24 @@ export class AppComponent implements OnInit, OnDestroy {
 
     }
 
+    // בעת אתחול האפליקציה, מקבלים את הטוקן
     this.firebaseService.getFCMToken().then(token => {
       if (token) {
         console.log("🔑 FCM Token received (on init):", token);
+        // ניתן לעדכן את השרת כאן אם רוצים
+        this.notificationService.saveSubscription({ token });
       }
     });
 
-    // הפעלת שירות Firebase
-    this.firebaseService.getTokenObservable().subscribe(token => {
-      if (token) {
-        console.log("🔑 FCM Token received:", token);
-        // כאן תוכל לשלוח את ה-token לשרת אם צריך
+    // מאזין לשינויים בטוקן
+    this.firebaseService.getTokenObservable().subscribe(async (newToken) => {
+      if (newToken) {
+        console.log("🔑 FCM Token updated:", newToken);
+        // כאן ניתן לבצע בדיקה אם הטוקן שונה מהקודם ואם כן, לעדכן את השרת
+        await this.notificationService.saveSubscription({ token: newToken });
       }
     });
+
   }
 
   installPWA() {

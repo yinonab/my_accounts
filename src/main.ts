@@ -9,7 +9,7 @@ import { Capacitor } from '@capacitor/core';
 
 
 platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
-  const firebaseService = inject(FirebaseService); // ✅ יוצרים מופע של FirebaseService
+  //const firebaseService = inject(FirebaseService); // ✅ יוצרים מופע של FirebaseService
 
   if ('serviceWorker' in navigator) {
     console.log("Platform:", Capacitor.getPlatform());
@@ -29,11 +29,11 @@ platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
           }
 
           // ✅ קבלת ה-FCM Token ושליחתו לשרת
-          const token = await firebaseService.getFCMToken();
-          if (token) {
-            console.log('🔑 FCM Token received:', token);
-            await firebaseService.sendTokenToServer(token);
-          }
+          // const token = await firebaseService.getFCMToken();
+          // if (token) {
+          //   console.log('🔑 FCM Token received:', token);
+          //   await firebaseService.sendTokenToServer(token);
+          // }
         } else {
           console.warn("Notification API is not available in this environment (native mode).");
         }

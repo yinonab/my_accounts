@@ -105,11 +105,12 @@ export class SocketService {
       this.socket.on('disconnect', (reason) => {
         this.errorLogger.log('Socket disconnected', { reason });
         console.log('Socket disconnected:', reason);
-        setTimeout(() => {
-          console.log("🔄 מנסה להתחבר מחדש...");
-          this.setup();
-        }, 5000);
-      });
+        
+        // מתחבר מחדש מיד אחרי ניתוק
+        console.log("🔄 מנסה להתחבר מחדש...");
+        this.setup(); // חיבור מחדש מיידי ללא המתנה
+    });
+    
     } catch (error) {
       this.errorLogger.log('Error in setup', { error });
     }

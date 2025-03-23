@@ -350,7 +350,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     try {
-      const registration = await navigator.serviceWorker.register('/ngsw-worker.js');
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: this.urlBase64ToUint8Array(config.notifications.vapidPublicKey)

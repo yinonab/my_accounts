@@ -302,7 +302,7 @@ export class SocketService {
     this.heartbeatInterval = setInterval(() => {
       console.log("🔄 שולח Keep-Alive ל-Socket...");
       this.socket?.emit("ping");
-    }, 30000); // כל 30 שניות
+    }, 15000); // כל 30 שניות
 
     // שימוש ב-Web Worker כדי למנוע ניתוק גם כשהאפליקציה ברקע
     if (typeof Worker !== 'undefined') {

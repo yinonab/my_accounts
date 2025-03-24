@@ -1,0 +1,46 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.myaccount.plugin.backgroundservice">
+
+    <!-- הרשאות נחוצות -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+
+    <application
+        android:allowBackup="true"
+        android:allowClearUserData="false"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
+        <!-- שירות הרקע -->
+        <service
+            android:name="com.myaccount.plugin.backgroundservice.BackgroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:stopWithTask="false"
+            android:process=":remote"/>
+
+        <!-- שירות JobScheduler -->
+        <service
+            android:name="com.myaccount.plugin.backgroundservice.RestartJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false"/>
+
+        <!-- מאזין לאתחול המכשיר -->
+        <receiver
+            android:name="com.myaccount.plugin.backgroundservice.BootReceiver"
+            android:enabled="true"
+            android:exported="false"
+            android:directBootAware="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/> 
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>

@@ -58,6 +58,18 @@ export class AppComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     try {
+
+      // ★ מאזין להודעות פרטיות (ירשם פעם אחת לכל האפליקציה) ★
+    this.socketService.onPrivateMessage((msg) => {
+      console.log("📩 הודעה פרטית התקבלה:", msg);
+      // כאן ניתן לעדכן את מצב האפליקציה, להציג התראה או לטפל בהודעה בצורה אחרת
+    });
+
+    // ★ מאזין להודעות כלליות (ירשם פעם אחת לכל האפליקציה) ★
+    this.socketService.onMessage((msg) => {
+      console.log("📩 הודעה כללית התקבלה:", msg);
+      // כאן ניתן לטפל בהודעה כללית, לעדכן UI או לעבד את הנתונים בהתאם לצורך
+    });
     
     await this.firebaseService.requestNotificationPermission();
       console.log('🔔 בקשת נוטיפיקציות נשלחה.');
@@ -107,7 +119,7 @@ try {
         this.backgroundPingInterval = setInterval(() => {
           console.log("🔄 שולח פינג...");
           this.socketService.emit("ping");
-        }, 30000); // כל 30 שניות
+        }, 17000); // כל 30 שניות
     
         // הפעלת טיימר לרענון אחרי 2 דקות ברקע
         this.backgroundTimeout = setTimeout(() => {
@@ -144,7 +156,7 @@ try {
         this.backgroundPingInterval = setInterval(() => {
           console.log("🔄 שולח פינג...");
           this.socketService.emit("ping");
-        }, 30000); // כל 30 שניות
+        }, 40000); // כל 30 שניות
     
         // הפעלת טיימר לרענון אחרי 2 דקות ברקע
         this.backgroundTimeout = setTimeout(() => {
@@ -253,7 +265,7 @@ try {
       } else {
         console.log(`✅ FCM Token on ${platform} is present:`, token);
       }
-    }, 2 * 60 * 1000);
+    }, 1 * 60 * 1000);
     
     
     setInterval(() => {

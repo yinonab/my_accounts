@@ -1,0 +1,10 @@
+.vscode/
+android/
+public/
+src/
+angular.json
+capacitor.config.json
+ngsw-config.json
+tsconfig.app.json
+tsconfig.json
+tsconfig.spec.json

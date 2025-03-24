@@ -1,9 +1,18 @@
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        jcenter() // לעיתים נדרש עבור socket.io
+    }
+}
+
 include ':app'
 include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
 
-include ':background-service-plugin'  // שם הפלאגין שלך
-project(':background-service-plugin').projectDir = new File('./android/app/src/main/java/com/myaccount/myapp/plugin')  // הנתיב לפלאגין שלך
-
+include ':capacitor-background-service'  // שם הפלאגין
+project(':capacitor-background-service').projectDir = new File('../capacitor-background-service/android')  // נתיב נכון לפלאגין שלך
 
 apply from: 'capacitor.settings.gradle'

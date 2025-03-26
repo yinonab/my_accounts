@@ -7,6 +7,8 @@ import { UserService } from './user.service';
 import { config } from './config.service';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
+import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
+
 
 
 
@@ -85,6 +87,8 @@ export class FirebaseService {
     //         }
     //     }
     // }
+
+    
     
 
     private async registerServiceWorker() {
@@ -162,6 +166,12 @@ export class FirebaseService {
                     console.log("🎉 ✅ Native push registration token received:", tokenData.value);
                     this.nativeToken = tokenData.value;
                     this.tokenSubject.next(this.nativeToken);
+
+                    const currentUser = this.userService.getLoggedInUser()?._id;
+                    if (currentUser) {
+                        await this.saveUserData(currentUser, tokenData.value);
+                    }
+
                     await this.notificationService.saveSubscription({ token: tokenData.value });
                 } else {
                     console.warn("⚠️ Token registration event triggered but token is empty!");
@@ -211,6 +221,8 @@ export class FirebaseService {
     //         return null;
     //     }
     // }
+
+    
     async getFCMToken(): Promise<string | null> {
       console.log("🚀 Retrieving FCM Token on:", Capacitor.getPlatform());
   
@@ -228,6 +240,11 @@ export class FirebaseService {
                   console.log(`✅ New FCM Token received for ${currentUser}:`, newToken);
                   this.fcmToken[currentUser!] = newToken;
                   await this.notificationService.saveSubscription({ token: newToken });
+
+                  if (currentUser) {
+                    await this.saveUserData(currentUser, newToken);
+                }
+
                   return newToken;
               } else {
                   console.warn("⚠️ No FCM token received (web).");
@@ -324,7 +341,20 @@ export class FirebaseService {
         });
       }
       
-
+      async saveUserData(userId: string, fcmToken: string): Promise<void> {
+        if (!userId || !fcmToken) {
+            console.warn("⚠️ לא ניתן לשמור נתונים – חסרים ערכים.");
+            return;
+        }
+    
+        try {
+            await SecureStoragePlugin.set({ key: "userId", value: userId });
+            await SecureStoragePlugin.set({ key: "fcmToken", value: fcmToken });
+            console.log("✅ userId ו- fcmToken נשמרו בהצלחה ב-Secure Storage.");
+        } catch (error) {
+            console.error("❌ שגיאה בשמירת הנתונים:", error);
+        }
+    }
 
 
     // שליחת ה-Token לשרת לשימוש עתידי

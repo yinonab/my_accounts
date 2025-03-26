@@ -23,7 +23,7 @@
     "@angular/router": "^18.2.0",
     "@angular/service-worker": "^18.2.0",
     "@capacitor-community/facebook-login": "^7.0.0",
-    "@capacitor-community/fcm": "^7.1.0",
+    "@capacitor-community/fcm": "^7.1.1",
     "@capacitor/android": "^7.1.0",
     "@capacitor/app": "^7.0.0",
     "@capacitor/cli": "^7.1.0",

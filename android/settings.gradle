@@ -13,6 +13,6 @@ include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
 
 include ':capacitor-background-service'  // שם הפלאגין
-project(':capacitor-background-service').projectDir = new File('../capacitor-background-service/android')  // נתיב נכון לפלאגין שלך
+project(':capacitor-background-service').projectDir = new File('./capacitor-background-service/android')
 
 apply from: 'capacitor.settings.gradle'

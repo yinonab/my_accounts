@@ -12,6 +12,12 @@
     },
     "BackgroundService": {
       "name": "BackgroundService"
+    },
+    "FirebaseMessaging": {
+      "presentationOptions": ["alert", "badge", "sound"]
     }
+  },
+  "android": {
+    "googleServicesFile": "app/google-services.json"
   }
 }

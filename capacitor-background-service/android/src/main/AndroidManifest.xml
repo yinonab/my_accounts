@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
 
     <application
+        android:name="com.myaccount.plugin.backgroundservice.MyApplication" 
         android:allowBackup="true"
         android:allowClearUserData="false"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
@@ -47,6 +48,18 @@
 
             </intent-filter>
         </receiver>
+
+        <!-- <provider
+            android:name="androidx.work.impl.WorkManagerInitializer"
+            android:authorities="${applicationId}.workmanager-init"
+            android:enabled="true"
+            android:exported="false" /> -->
+
+
+         <activity 
+            android:name="com.myaccount.plugin.backgroundservice.EnableLocationActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
 
     </application>
 </manifest>

@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">my_accounts</string>
+    <string name="title_activity_main">my_accounts</string>
+    <string name="package_name">com.myaccount.myapp</string>
+    <string name="custom_url_scheme">com.myaccount.myapp</string>
+    <string name="facebook_app_id">2280747752304909</string>
+    <string name="facebook_client_token">5eeef41fa43b00cf0a5eceb6b1788719</string>
+    <string name="fb_login_protocol_scheme">fb2280747752304909</string>
+</resources>

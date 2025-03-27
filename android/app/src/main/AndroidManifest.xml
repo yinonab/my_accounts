@@ -4,6 +4,7 @@
 
 
     <application
+        android:name="com.myaccount.plugin.backgroundservice.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -92,6 +93,12 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+        <!-- <provider
+            android:name="androidx.work.impl.WorkManagerInitializer"
+            android:authorities="${applicationId}.workmanager-init"
+            android:exported="false"
+            android:enabled="true"/> -->
+
     </application>
 
     <!-- 🔹 Permissions -->

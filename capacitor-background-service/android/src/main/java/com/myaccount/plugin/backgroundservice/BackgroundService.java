@@ -1,5 +1,14 @@
 package com.myaccount.plugin.backgroundservice;
+import com.myaccount.plugin.backgroundservice.EnableLocationActivity;
+
 import android.provider.Settings;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import java.util.concurrent.TimeUnit;
+import com.myaccount.plugin.backgroundservice.R;
+
+
 
 
 import android.app.PendingIntent;
@@ -61,20 +70,23 @@ public class BackgroundService extends Service {
     private LocationCallback locationCallback;
     private RequestQueue requestQueue;
     private static final long LOCATION_UPDATE_INTERVAL = 30000; // 30 שניות
-    private static final double SAFE_ZONE_LAT = 32.0853; // קו רוחב
-    private static final double SAFE_ZONE_LNG = 34.7818; // קו אורך
+    private static final double SAFE_ZONE_LAT = 40.7128; // קו רוחב
+    private static final double SAFE_ZONE_LNG = -74.0060; // קו אורך
     private static final double SAFE_ZONE_RADIUS = 0.001; // חצי ק"מ
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "🚀 Background Service Created");
+         createNotificationChannel();
+        startForegroundServiceMode();
         requestUserToEnableLocationAndPermissions();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         requestQueue = Volley.newRequestQueue(this);
         startLocationTracking(); // ✅ הפעלת מעקב אחר מיקום
-
+        acquireWakeLock();
         startForegroundServiceMode(); // ✅ הפעלת השירות כ-Foreground Service
+        scheduleLocationWorker();
 
         PowerManager pm = (PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE);
         if (pm != null && !pm.isIgnoringBatteryOptimizations(getPackageName())) {
@@ -106,8 +118,7 @@ public class BackgroundService extends Service {
 
 
         // ✅ יצירת ערוץ נוטיפיקציה
-        createNotificationChannel();
-        startForegroundServiceMode();
+       
         connectWebSocket();
         
     }
@@ -141,6 +152,39 @@ public int onStartCommand(Intent intent, int flags, int startId) {
 
     return START_STICKY;
 }
+
+
+    private void scheduleLocationWorker() {
+    Log.d(TAG, "📅 Scheduling WorkManager task...");
+
+    PeriodicWorkRequest locationWorkRequest = 
+        new PeriodicWorkRequest.Builder(LocationWorker.class, 3, TimeUnit.MINUTES)
+            .setInitialDelay(0, TimeUnit.MINUTES)
+            .build();
+
+    WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+        "LocationWorker",
+        ExistingPeriodicWorkPolicy.REPLACE,
+        locationWorkRequest
+    );
+    }
+
+    private void acquireWakeLock() {
+    PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+    if (powerManager != null) {
+        if (wakeLock == null || !wakeLock.isHeld()) { 
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "BackgroundService:WakeLock");
+            wakeLock.setReferenceCounted(false);
+            wakeLock.acquire();
+            Log.d(TAG, "✅ WakeLock acquired – service will stay alive.");
+        } else {
+            Log.d(TAG, "⚠️ WakeLock already acquired.");
+        }
+    } else {
+        Log.e(TAG, "❌ Failed to acquire WakeLock!");
+    }
+    }
+
 
 
      private void connectWebSocket() {
@@ -181,22 +225,14 @@ public int onStartCommand(Intent intent, int flags, int startId) {
             Log.e(TAG, "❌ WebSocket connection error: " + e.getMessage());
         }
     }
-            private void requestUserToEnableLocationAndPermissions() {
-            Log.d(TAG, "⚠️ Requesting user to enable location settings...");
+           private void requestUserToEnableLocationAndPermissions() {
+    Log.d(TAG, "⚠️ Requesting user to enable location settings...");
 
-            // 1️⃣ בקשה להפעיל GPS
-            Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            gpsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(gpsIntent);
+    Intent intent = new Intent(getApplicationContext(), EnableLocationActivity.class);
+    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // חובה עבור Service
+    startActivity(intent);
+}
 
-            // 2️⃣ פתיחת הגדרות האפליקציה כדי להעניק הרשאות מיקום
-            Intent permissionIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            permissionIntent.setData(Uri.parse("package:" + getPackageName()));
-            permissionIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            // עיכוב של שנייה כדי למנוע קריאה כפולה מיידית
-            new Handler(Looper.getMainLooper()).postDelayed(() -> startActivity(permissionIntent), 1000);
-        }
 
 
     private void startLocationTracking() {
@@ -381,17 +417,22 @@ private void getUserData(Callback callback) {
 
 
     // ✅ הפעלת השירות במצב Foreground (אם הוא לא פעיל)
-   public void startForegroundServiceMode() {
+  public void startForegroundServiceMode() {
     if (!isForeground) {
         isForeground = true;
 
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("App Running in Background")
-            .setContentText("This service keeps the app running")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setOngoing(true) // ✅ מונע סגירה בטעות
-            .setPriority(NotificationCompat.PRIORITY_HIGH) // ✅ משאיר את השירות פעיל
-            .build();
+        // יצירת ערוץ נוטיפיקציה (חובה ב-Android 8 ומעלה)
+        createNotificationChannel();
+
+        // יצירת הנוטיפיקציה
+       Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+        .setContentTitle("App Running in Background")
+        .setContentText("This service keeps the app running")
+        .setSmallIcon(R.mipmap.ic_launcher_foreground) // השתמש באייקון מתוך תיקיית mipmap
+        .setOngoing(true) 
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .build();
+
 
         startForeground(1, notification);
         Log.d(TAG, "✅ Service switched to Foreground mode");
@@ -399,6 +440,7 @@ private void getUserData(Callback callback) {
         Log.d(TAG, "⚠️ Service is already running in Foreground mode");
     }
 }
+
 
 
     // ✅ עצירת ה-Foreground והחזרה ל-Background
@@ -417,12 +459,13 @@ private void getUserData(Callback callback) {
             NotificationChannel serviceChannel = new NotificationChannel(
                 CHANNEL_ID,
                 "Background Service",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_HIGH
             );
 
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
                 manager.createNotificationChannel(serviceChannel);
+                Log.d(TAG, "Notification channel created: " + serviceChannel.getId());
             }
         }
     }

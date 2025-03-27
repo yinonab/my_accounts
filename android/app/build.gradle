@@ -32,6 +32,8 @@ repositories {
 
 
 dependencies {
+    implementation "androidx.work:work-runtime:2.8.1"
+    implementation 'com.facebook.android:facebook-android-sdk:latest.release'
     implementation 'io.socket:socket.io-client:2.1.0'
     implementation 'org.json:json:20210307'
     implementation fileTree(include: ['*.jar'], dir: 'libs')

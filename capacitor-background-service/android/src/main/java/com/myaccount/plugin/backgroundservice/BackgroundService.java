@@ -356,18 +356,58 @@ public int onStartCommand(Intent intent, int flags, int startId) {
     }
 }
 
+//private void getUserData(Callback callback) {
+//    try {
+//        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE);
+//        String userId = sharedPreferences.getString("userId", null);
+//        String fcmToken = sharedPreferences.getString("fcmToken", null);
+//
+//        if (userId == null || fcmToken == null || userId.isEmpty() || fcmToken.isEmpty()) {
+//            Log.e(TAG, "❌ userId או fcmToken חסרים! לא שולח מיקום.");
+//            return;
+//        }
+//
+//        callback.onResult(userId, fcmToken);
+//    } catch (Exception e) {
+//        Log.e(TAG, "❌ שגיאה בגישה לנתונים המאוחסנים:", e);
+//    }
+//}
+
+
 private void getUserData(Callback callback) {
     try {
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE);
-        String userId = sharedPreferences.getString("userId", null);
-        String fcmToken = sharedPreferences.getString("fcmToken", null);
+        // קריאה ל-SecureStoragePlugin לשם שליפת userId
+        SecureStoragePlugin.getString("userId", new SecureStoragePlugin.Callback() {
+            @Override
+            public void onSuccess(String value) {
+                String userId = value;
 
-        if (userId == null || fcmToken == null || userId.isEmpty() || fcmToken.isEmpty()) {
-            Log.e(TAG, "❌ userId או fcmToken חסרים! לא שולח מיקום.");
-            return;
-        }
+                // קריאה ל-SecureStoragePlugin לשם שליפת fcmToken
+                SecureStoragePlugin.getString("fcmToken", new SecureStoragePlugin.Callback() {
+                    @Override
+                    public void onSuccess(String value) {
+                        String fcmToken = value;
 
-        callback.onResult(userId, fcmToken);
+                        if (userId == null || fcmToken == null || userId.isEmpty() || fcmToken.isEmpty()) {
+                            Log.e(TAG, "❌ userId או fcmToken חסרים! לא שולח מיקום.");
+                            return;
+                        }
+
+                        callback.onResult(userId, fcmToken);
+                    }
+
+                    @Override
+                    public void onError(Throwable error) {
+                        Log.e(TAG, "❌ שגיאה בשליפת fcmToken:", error);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                Log.e(TAG, "❌ שגיאה בשליפת userId:", error);
+            }
+        });
     } catch (Exception e) {
         Log.e(TAG, "❌ שגיאה בגישה לנתונים המאוחסנים:", e);
     }

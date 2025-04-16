@@ -5,9 +5,13 @@ import { BehaviorSubject } from 'rxjs';
 import { NotificationService } from './notification.service';
 import { UserService } from './user.service';
 import { config } from './config.service';
-import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
-import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
+import { Preferences } from '@capacitor/preferences';
+import { Capacitor } from '@capacitor/core';
+import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection } from '@capacitor-community/sqlite';
+
+
+
 
 
 
@@ -36,12 +40,25 @@ export class FirebaseService {
     private _notificationService: NotificationService | null = null;
     private _userService: UserService | null = null;
     private lastNotificationTime: number | null = null;
+   // private sqlite = new SQLiteConnection(CapacitorSQLite);
+    private sqlite: SQLiteConnection | undefined;
+
+    private db: SQLiteDBConnection | null = null; // משתנה לשמירת חיבור יחיד
+    private dbName = "myDatabase";
+    private closeTimeout: any; // משתנה לשמירה על ה-Timer
+
+
+
     constructor() {
         console.log("🚀 Firebase Service Initialized");
 
         // אתחול Firebase
         const app = initializeApp(firebaseConfig);
         this.messaging = getMessaging(app);
+        setTimeout(() => {
+            this.initializeDatabase();
+          }, 10000); // דיליי 3 שניות
+        
 
         this.registerServiceWorker();
         this.requestNotificationPermission();
@@ -61,7 +78,14 @@ export class FirebaseService {
         }
         return this._userService;
     }
-
+    private async initializeDatabase() {
+        try {
+          this.sqlite = new SQLiteConnection(CapacitorSQLite);
+          await this.initDb();
+        } catch (error) {
+          console.error('Error initializing SQLite', error);
+        }
+      }
     // רישום ה-Service Worker כדי לקבל נוטיפיקציות גם כשהאפליקציה לא פתוחה
     // private async registerServiceWorker() {
     //     if ('serviceWorker' in navigator) {
@@ -87,6 +111,33 @@ export class FirebaseService {
     //         }
     //     }
     // }
+
+    
+    private dbInitializing = false; // למנוע פתיחת חיבורים כפולים
+
+    private async initDb(): Promise<void> {
+        if (this.db || this.dbInitializing) return; // אם החיבור קיים - לא יוצרים חדש
+        this.dbInitializing = true; // מסמן שהאתחול התחיל
+    
+        try {
+            this.db = await this.sqlite!.createConnection(this.dbName, false, "no-encryption", 1, false);
+            await this.db.open();
+    
+            await this.db.execute(`
+                CREATE TABLE IF NOT EXISTS user_data (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    userId TEXT NOT NULL UNIQUE,
+                    fcmToken TEXT NOT NULL
+                )
+            `);
+            console.log("✅ SQLite initialized successfully.");
+        } catch (error) {
+            console.error("❌ Failed to initialize SQLite:", error);
+            this.db = null;
+        } finally {
+            this.dbInitializing = false; // מסמן שהאתחול הסתיים
+        }
+    }
 
     
     
@@ -341,19 +392,123 @@ export class FirebaseService {
         });
       }
       
-      async saveUserData(userId: string, fcmToken: string): Promise<void> {
-        if (!userId || !fcmToken) {
-            console.warn("⚠️ לא ניתן לשמור נתונים – חסרים ערכים.");
+      // בצד האנגולרי
+    //   async saveUserData(userId: string, fcmToken: string) {
+    //     // שמירה ב-Capacitor Preferences (עובד גם באנדרואיד)
+    //     await Preferences.set({ key: 'userId', value: userId });
+    //     await Preferences.set({ key: 'fcmToken', value: fcmToken });
+      
+    //     // שמירה נוספת ב-localStorage כגיבוי
+    //     localStorage.setItem('userId', userId);
+    //     localStorage.setItem('fcmToken', fcmToken);
+        
+    //     console.log('Data saved for Android');
+    //   }
+    
+    async saveUserData(userId: string, fcmToken: string): Promise<void> {
+        await this.initDb(); // ודא שבסיס הנתונים מאותחל
+        if (!this.db) {
+            console.error("❌ Database connection not available.");
             return;
         }
     
         try {
-            await SecureStoragePlugin.set({ key: "userId", value: userId });
-            await SecureStoragePlugin.set({ key: "fcmToken", value: fcmToken });
-            console.log("✅ userId ו- fcmToken נשמרו בהצלחה ב-Secure Storage.");
+            await this.db.run(`INSERT OR REPLACE INTO user_data (userId, fcmToken) VALUES (?, ?)`, [userId, fcmToken]);
+            console.log(`✅ Data saved successfully: userId=${userId}, fcmToken=${fcmToken}`);
+
+              await this.debugAllData(); 
+    
+            // 🔍 קריאה מיידית ל-getUserData כדי לוודא שהנתונים נשמרו כראוי
+            const savedData = await this.getUserData();
+            if (savedData) {
+                console.log(`🔍 Verification: Retrieved from DB → userId=${savedData.userId}, fcmToken=${savedData.fcmToken}`);
+            } else {
+                console.warn("⚠️ Verification failed: No data retrieved after save!");
+            }
         } catch (error) {
-            console.error("❌ שגיאה בשמירת הנתונים:", error);
+            console.error("❌ Error saving data to SQLite:", error);
+        } finally {
+            await this.closeDb(); // סגירת החיבור
         }
+    }
+    
+    
+
+    /**
+     * שליפת נתונים
+     */
+    async getUserData(): Promise<{ userId: string, fcmToken: string } | null> {
+        await this.initDb();
+        if (!this.db) {
+            console.error("❌ Database connection not available.");
+            return null;
+        }
+    
+        try {
+            const res = await this.db.query(`SELECT userId, fcmToken FROM user_data LIMIT 1`);
+            if (res.values && res.values.length > 0) {
+                const { userId, fcmToken } = res.values[0];
+                console.log(`🎯 Loaded from database: userId=${userId}, fcmToken=${fcmToken}`);
+                return { userId, fcmToken };
+            } else {
+                console.warn("⚠️ No user data found.");
+                return null;
+            }
+        } catch (error) {
+            console.error("❌ Error fetching user data from SQLite:", error);
+            return null;
+        } finally {
+            await this.closeDb(); // ❗ סגירת החיבור אחרי כל שליפה
+        }
+    }
+
+    async debugAllData(): Promise<void> {
+        await this.initDb();
+        if (!this.db) {
+          console.error("❌ Database connection not available.");
+          return;
+        }
+      
+        try {
+          // שליפת כל הרשומות בטבלה
+          const result = await this.db.query("SELECT * FROM user_data");
+          
+          // הדפסת המבנה של הטבלה (רשימת עמודות)
+          const tableInfo = await this.db.query("PRAGMA table_info(user_data)");
+          console.log("📊 Table structure:", tableInfo.values);
+      
+          // הדפסת כל הנתונים
+          console.log("📦 All records in user_data:", result.values);
+      
+          // ספירת רשומות
+          const count = await this.db.query("SELECT COUNT(*) as count FROM user_data");
+          console.log(`🔢 Total records: ${count.values?.[0]?.count || 0}`);
+      
+        } catch (error) {
+          console.error("❌ Debug failed:", error);
+        } finally {
+          await this.closeDb();
+        }
+      }
+    
+
+    /**
+     * סגירת החיבור אם צריך
+     */
+    async closeDb(): Promise<void> {
+        if (!this.db) return; // אין מה לסגור אם אין חיבור
+    
+        clearTimeout(this.closeTimeout); // מבטל כל טיימר קודם
+    
+        this.closeTimeout = setTimeout(async () => {
+            try {
+                await this.db?.close();
+                console.log("✅ Database connection closed after inactivity.");
+                this.db = null;
+            } catch (error) {
+                console.error("❌ Error closing database connection:", error);
+            }
+        }, 15000); // ❗ יסגור את החיבור אחרי 5 שניות של חוסר פעילות
     }
 
 

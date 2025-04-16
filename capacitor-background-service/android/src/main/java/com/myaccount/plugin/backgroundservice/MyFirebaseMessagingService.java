@@ -1,5 +1,5 @@
 package com.myaccount.plugin.backgroundservice;
-
+import com.getcapacitor.BridgeActivity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -30,31 +30,34 @@ public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
     super.onMessageReceived(remoteMessage);
     Log.d(TAG, "📩 Notification received: " + remoteMessage.getData());
 
-    // ✅ אם יש "notification" - מציג כרגיל
+    boolean isSilent = "true".equals(remoteMessage.getData().get("silent"));
+
+    if (isSilent) {
+        Log.d(TAG, "🤫 Silent notification received. No need to show notification.");
+        startBackgroundService();
+        return; // לא מציגים התראה
+    }
+
+    // אם יש הודעת Notification רגילה
     if (remoteMessage.getNotification() != null) {
         Log.d(TAG, "🔔 Title: " + remoteMessage.getNotification().getTitle());
         Log.d(TAG, "🔔 Body: " + remoteMessage.getNotification().getBody());
         showNotification(remoteMessage);
-    } 
-    // ✅ אם זו הודעת `data` בלבד - בונה ידנית
-    else if (remoteMessage.getData().size() > 0) {
-        Log.d(TAG, "📩 Handling `data`-only notification...");
-        
-        String title = remoteMessage.getData().get("title");
-        String body = remoteMessage.getData().get("body");
+    } else if (remoteMessage.getData().size() > 0) {
+        Log.d(TAG, "📩 Handling data-only notification...");
         showNotification(remoteMessage);
-
     }
 
-    // ✅ הפעלת שירות רק אם נדרש
+    // תמיד להפעיל את ה-BackgroundService
     startBackgroundService();
 }
+
 
 
     /**
      * מציג נוטיפיקציה כאשר הודעה מתקבלת
      */
-   private void showNotification(RemoteMessage remoteMessage) {
+  private void showNotification(RemoteMessage remoteMessage) {
     Context context = getApplicationContext();
     NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -63,31 +66,24 @@ public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         return;
     }
 
-    // קבלת הנתונים מההתראה
-    String title = "Notification"; // ערך ברירת מחדל
-    String body = "You have a new message"; // ערך ברירת מחדל
+    String title = "Notification"; // ברירת מחדל
+    String body = "You have a new message";
 
     if (remoteMessage.getNotification() != null) {
-        // אם יש `notification` - נשתמש בו
         title = remoteMessage.getNotification().getTitle();
         body = remoteMessage.getNotification().getBody();
     } else if (remoteMessage.getData().size() > 0) {
-        // אם ההודעה היא מסוג `data-only`
         title = remoteMessage.getData().get("title");
         body = remoteMessage.getData().get("body");
     }
-
-    // יצירת Intent לפתיחת האפליקציה בעת לחיצה על ההתראה
-    Intent intent = new Intent();
-    intent.setClassName(context.getPackageName(), "com.myaccount.myapp.MainActivity");
-
+    Intent intent = new Intent(context, BridgeActivity.class);
+    //Intent intent = new Intent(context, MainActivity.class);
     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    
+
     PendingIntent pendingIntent = PendingIntent.getActivity(
-            context, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE
+            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
     );
 
-    // יצירת ערוץ נוטיפיקציות (נדרש עבור Android 8 ומעלה)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID, "FCM Channel", NotificationManager.IMPORTANCE_HIGH
@@ -98,21 +94,20 @@ public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         notificationManager.createNotificationChannel(channel);
     }
 
-    // בניית ההתראה
     NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(title)
-            .setContentText(body)
+            .setContentTitle(title != null ? title : "New Message")
+            .setContentText(body != null ? body : "")
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setDefaults(NotificationCompat.DEFAULT_ALL) // ✅ מאפשר צליל ורטט
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setContentIntent(pendingIntent);
 
-    // הצגת ההתראה
     notificationManager.notify((int) System.currentTimeMillis(), builder.build());
 
     Log.d(TAG, "✅ Notification displayed: " + title + " - " + body);
 }
+
 
     
 

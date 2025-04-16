@@ -45,6 +45,7 @@ android {
 repositories {
     google()
     mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
 
@@ -62,4 +63,6 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation 'com.google.android.gms:play-services-location:21.0.1'
     implementation 'com.android.volley:volley:1.2.1'
+    implementation project(':capacitor-community-sqlite')
+
 }

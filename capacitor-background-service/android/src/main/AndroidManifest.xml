@@ -3,6 +3,7 @@
 
     <!-- הרשאות נחוצות -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
@@ -52,6 +53,9 @@
 
             </intent-filter>
         </receiver>
+
+        <receiver android:name="com.myaccount.plugin.backgroundservice.AlarmReceiver" />
+
 
         <!-- <provider
             android:name="androidx.work.impl.WorkManagerInitializer"

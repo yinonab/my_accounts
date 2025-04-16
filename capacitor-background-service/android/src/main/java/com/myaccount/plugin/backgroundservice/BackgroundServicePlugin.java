@@ -37,7 +37,8 @@ public class BackgroundServicePlugin extends Plugin {
 
         try {
             Intent serviceIntent = new Intent(getContext(), BackgroundService.class);
-            
+            // BackgroundService.setStaticBridge(getBridge());
+
             // ✅ בדיקה אם השירות כבר רץ כדי למנוע הפעלה כפולה
             if (!isServiceRunning(BackgroundService.class)) {
                 getContext().startForegroundService(serviceIntent);

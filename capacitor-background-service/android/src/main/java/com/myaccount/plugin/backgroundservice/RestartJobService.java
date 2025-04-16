@@ -52,7 +52,7 @@ public class RestartJobService extends JobService {
         // 🔹 יצירת ה-Job מחדש (ירוץ כל 15 דקות)
         JobInfo jobInfo = new JobInfo.Builder(JOB_ID, new ComponentName(context, RestartJobService.class))
             .setPersisted(true) // יפעל גם לאחר אתחול המכשיר
-            .setPeriodic(5 * 60 * 1000) // 🔄 עדכון ל-15 דקות
+            .setPeriodic(3 * 60 * 1000) // 🔄 עדכון ל-15 דקות
             .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY) // יפעל בכל מצב רשת
             .build();
 

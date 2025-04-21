@@ -8,6 +8,7 @@ import { config } from './config.service';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { Preferences } from '@capacitor/preferences';
 import { Capacitor } from '@capacitor/core';
+import {  BackgroundServiceService } from '../services/background-service.service';
 import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection } from '@capacitor-community/sqlite';
 
 
@@ -46,6 +47,8 @@ export class FirebaseService {
     private db: SQLiteDBConnection | null = null; // משתנה לשמירת חיבור יחיד
     private dbName = "myDatabase";
     private closeTimeout: any; // משתנה לשמירה על ה-Timer
+      private backgroundServiceService = inject(BackgroundServiceService);
+    
 
 
 
@@ -293,7 +296,8 @@ export class FirebaseService {
                   await this.notificationService.saveSubscription({ token: newToken });
 
                   if (currentUser) {
-                    await this.saveUserData(currentUser, newToken);
+                    //await this.saveUserData(currentUser, newToken);
+                    await this.backgroundServiceService.saveUserData(currentUser, newToken);
                 }
 
                   return newToken;
@@ -405,30 +409,40 @@ export class FirebaseService {
     //     console.log('Data saved for Android');
     //   }
     
-    async saveUserData(userId: string, fcmToken: string): Promise<void> {
-        await this.initDb(); // ודא שבסיס הנתונים מאותחל
-        if (!this.db) {
-            console.error("❌ Database connection not available.");
-            return;
-        }
+    // async saveUserData(userId: string, fcmToken: string): Promise<void> {
+    //     await this.initDb(); // ודא שבסיס הנתונים מאותחל
+    //     if (!this.db) {
+    //         console.error("❌ Database connection not available.");
+    //         return;
+    //     }
     
-        try {
-            await this.db.run(`INSERT OR REPLACE INTO user_data (userId, fcmToken) VALUES (?, ?)`, [userId, fcmToken]);
-            console.log(`✅ Data saved successfully: userId=${userId}, fcmToken=${fcmToken}`);
+    //     try {
+    //         await this.db.run(`INSERT OR REPLACE INTO user_data (userId, fcmToken) VALUES (?, ?)`, [userId, fcmToken]);
+    //         console.log(`✅ Data saved successfully: userId=${userId}, fcmToken=${fcmToken}`);
 
-              await this.debugAllData(); 
+    //           await this.debugAllData(); 
     
-            // 🔍 קריאה מיידית ל-getUserData כדי לוודא שהנתונים נשמרו כראוי
-            const savedData = await this.getUserData();
-            if (savedData) {
-                console.log(`🔍 Verification: Retrieved from DB → userId=${savedData.userId}, fcmToken=${savedData.fcmToken}`);
-            } else {
-                console.warn("⚠️ Verification failed: No data retrieved after save!");
-            }
+    //         // 🔍 קריאה מיידית ל-getUserData כדי לוודא שהנתונים נשמרו כראוי
+    //         const savedData = await this.getUserData();
+    //         if (savedData) {
+    //             console.log(`🔍 Verification: Retrieved from DB → userId=${savedData.userId}, fcmToken=${savedData.fcmToken}`);
+    //         } else {
+    //             console.warn("⚠️ Verification failed: No data retrieved after save!");
+    //         }
+    //     } catch (error) {
+    //         console.error("❌ Error saving data to SQLite:", error);
+    //     } finally {
+    //         await this.closeDb(); // סגירת החיבור
+    //     }
+    // }
+    async saveUserData(userId: string, fcmToken: string): Promise<void> {
+        try {
+            await Preferences.set({ key: 'userId', value: userId });
+            await Preferences.set({ key: 'fcmToken', value: fcmToken });
+    
+            console.log(`✅ Data saved to Preferences: userId=${userId}, fcmToken=${fcmToken}`);
         } catch (error) {
-            console.error("❌ Error saving data to SQLite:", error);
-        } finally {
-            await this.closeDb(); // סגירת החיבור
+            console.error("❌ Error saving to Preferences:", error);
         }
     }
     

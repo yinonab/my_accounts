@@ -74,6 +74,8 @@ export class AppComponent implements OnInit, OnDestroy {
     await this.firebaseService.requestNotificationPermission();
       console.log('🔔 בקשת נוטיפיקציות נשלחה.');
 
+      await this.firebaseService.getFCMToken();
+      console.log('✅ getFCMToken הופעל.');
       await this.backgroundServiceService.startService();
       console.log('✅ Background Service הופעל.');
       await this.backgroundServiceService.startForegroundService();

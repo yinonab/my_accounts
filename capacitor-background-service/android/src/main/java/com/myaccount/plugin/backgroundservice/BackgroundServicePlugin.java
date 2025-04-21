@@ -9,6 +9,10 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.PluginCall;
+import android.content.SharedPreferences;
+import com.getcapacitor.JSObject;
+
+
 
 @CapacitorPlugin(name = "BackgroundService")
 public class BackgroundServicePlugin extends Plugin {
@@ -120,6 +124,27 @@ public class BackgroundServicePlugin extends Plugin {
             call.reject("Failed to stop foreground service", e);
         }
     }
+
+    @PluginMethod
+public void saveUserData(PluginCall call) {
+    String userId = call.getString("userId");
+    String fcmToken = call.getString("fcmToken");
+
+    Log.d("PLUGIN", "📥 saveUserData from Angular: userId=" + userId + ", fcmToken=" + fcmToken);
+
+    // שמור ל־SharedPreferences:
+    Context context = getContext();
+    SharedPreferences prefs = context.getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE);
+    SharedPreferences.Editor editor = prefs.edit();
+    editor.putString("userId", userId);
+    editor.putString("fcmToken", fcmToken);
+    editor.apply();
+
+    JSObject result = new JSObject();
+    result.put("success", true);
+    call.resolve(result);
+}
+
 
     /**
      * ✅ פונקציה לבדיקה אם השירות כבר רץ (כדי למנוע הפעלה כפולה)

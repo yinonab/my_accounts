@@ -101,6 +101,11 @@ public class BackgroundService extends Service {
    private CapacitorSQLite sqliteInstance;
    private com.getcapacitor.PluginHandle sqlitePlugin;
 private BackgroundDatabaseManager dbManager;
+private String globalUserId = null;
+private String globalFcmToken = null;
+private final Handler clearNotificationHandler = new Handler(Looper.getMainLooper());
+private static final long CLEAR_NOTIFICATIONS_INTERVAL = 2 * 60 * 1000; // כל 2 דקות
+
 
 private boolean isDatabaseOpen = false;
 private static final int MAX_DB_RETRIES = 8;
@@ -193,8 +198,8 @@ public int onStartCommand(Intent intent, int flags, int startId) {
     // if (mSocket == null || !mSocket.connected()) {
     //     connectWebSocket();
     // }
-    if (mSocket == null || !mSocket.connected()) { // 🔥
-    connectWebSocket();
+    if (mSocket == null || !mSocket.connected()) {
+    waitUntilUserDataAndConnectWebSocket();
     } else {
         Log.d(TAG, "⚡ WebSocket already connected. Skipping duplicate connect."); // 🔥
     }
@@ -294,12 +299,16 @@ private void initEverything() {
         // Log.d(TAG, "✅ [initEverything] WebSocket connection established"); // CHANGED
 
         Log.d(TAG, "11. [initEverything] Connecting to WebSocket...");
-        if (mSocket == null || !mSocket.connected()) { // 🔥
-            connectWebSocket();
+        if (mSocket == null || !mSocket.connected()) {
+        waitUntilUserDataAndConnectWebSocket();
         } else {
             Log.d(TAG, "⚡ WebSocket already connected. Skipping duplicate connect."); // 🔥
         }
         Log.d(TAG, "✅ [initEverything] WebSocket connection established");
+
+        Log.d(TAG, "🧼 Starting periodic notification clearing task...");
+        startClearingNotificationsPeriodically();
+        Log.d(TAG, "✅ Periodic notification clearing task started");
 
 
         Log.d(TAG, "🎉 [initEverything] All initialization steps completed successfully!"); // CHANGED
@@ -460,13 +469,36 @@ private void startWebSocketKeepAlive() {
     }, WEBSOCKET_KEEP_ALIVE_INTERVAL);
 }
 
+private void startClearingNotificationsPeriodically() {
+    clearNotificationHandler.postDelayed(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                Log.d(TAG, "🧹 Clearing all app notifications...");
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                if (notificationManager != null) {
+                    notificationManager.cancelAll(); // ❌ מוחק את כל ההתראות
+                    Log.d(TAG, "✅ All notifications cleared");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Failed to clear notifications", e);
+            }
+
+            // תזמון חוזר
+            clearNotificationHandler.postDelayed(this, CLEAR_NOTIFICATIONS_INTERVAL);
+        }
+    }, CLEAR_NOTIFICATIONS_INTERVAL);
+}
+
 
 // ✅ פונקציה קטנה לעזרה - קוראת ל־dbManager ושולחת מיקום
 private void sendLocationUsingDatabase(double latitude, double longitude) {
-    dbManager.ensureConnectionReady(() -> {
+    waitUntilUserDataAvailableThen((userId, fcmToken) -> {
         Log.d(TAG, "📞 [sendLocationUsingDatabase] Starting - trying to retrieve userId and fcmToken from DB");
 
-       dbManager.getUserData((userId, fcmToken) -> {
+       
+        if (userId != null && !userId.isEmpty()) globalUserId = userId;
+        if (fcmToken != null && !fcmToken.isEmpty()) globalFcmToken = fcmToken;
 
         Log.d(TAG, "🔍 [sendLocationUsingDatabase] getUserData callback received:");
         Log.d(TAG, "🔹 userId: " + (userId != null ? userId : "null"));
@@ -481,7 +513,7 @@ private void sendLocationUsingDatabase(double latitude, double longitude) {
         Log.d(TAG, "✅ [sendLocationUsingDatabase] userId and fcmToken are valid. Sending location to server...");
         sendLocationToServer(userId, latitude, longitude, fcmToken);
     });
-    });
+   
 }
 
 
@@ -674,7 +706,7 @@ private void connectWebSocket() {
 /**
  * ✅ פונקציה חדשה שמבצעת שליחת userId ו־user-ready לאחר ההתחברות
  * 🚀 עם תמיכה ב-Retry אוטומטי אם ה-DB עוד לא מוכן
- */
+//  */
 private void sendUserIdAfterConnect() {
     sendUserIdAfterConnect(0); // מתחיל עם ניסיון ראשון
 }
@@ -682,15 +714,107 @@ private void sendUserIdAfterConnect() {
 /**
  * 🔁 גרסת Retry - מנסה שוב אם אין עדיין userId
  */
+// private void sendUserIdAfterConnect(int attempt) {
+//    final int MAX_RETRIES = 12;
+//    final int RETRY_DELAY_MS = 14000;
+
+//     if (globalUserId != null && !globalUserId.isEmpty()) {
+//         Log.d(TAG, "📨 Using globalUserId – skipping DB");
+//         sendSetUserSocket(globalUserId);
+//         return;
+//     }
+
+
+//     try {
+//         Log.d(TAG, "📨 [sendUserIdAfterConnect] Attempt " + (attempt + 1) + " to retrieve userId from DB...");
+
+//         dbManager.ensureConnectionReady(() -> {
+//             dbManager.getUserData((userId, fcmToken) -> {
+//                 if (userId != null && !userId.isEmpty()) globalUserId = userId;
+//                 if (fcmToken != null && !fcmToken.isEmpty()) globalFcmToken = fcmToken;
+
+//                 if (userId == null || userId.isEmpty()) {
+//                     Log.e(TAG, "❌ [sendUserIdAfterConnect] userId is missing on attempt " + (attempt + 1));
+
+//                     if (attempt < MAX_RETRIES) {
+//                         Log.d(TAG, "🔁 Retrying sendUserIdAfterConnect after delay...");
+//                         new Handler(Looper.getMainLooper()).postDelayed(() -> sendUserIdAfterConnect(attempt + 1), RETRY_DELAY_MS);
+//                     } else {
+//                         Log.e(TAG, "❌ [sendUserIdAfterConnect] Max retries reached. Giving up.");
+//                     }
+//                     return;
+//                 }
+
+//                 try {
+//                     JSONObject userData = new JSONObject();
+//                     userData.put("userId", userId);
+//                     userData.put("username", "MyUserName"); // אם תרצה בעתיד - גם username מה־DB
+
+//                     Log.d(TAG, "📨 [sendUserIdAfterConnect] Sending set-user-socket to server...");
+//                     mSocket.emit("set-user-socket", userData);
+//                     Log.d(TAG, "✅ [sendUserIdAfterConnect] Sent set-user-socket!");
+
+//                     // שלח גם user-ready אחרי דיליי קטן
+//                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
+//                         mSocket.emit("user-ready");
+//                         Log.d(TAG, "📨 [sendUserIdAfterConnect] Sent user-ready after set-user-socket!");
+//                     }, 250);
+
+//                 } catch (Exception e) {
+//                     Log.e(TAG, "❌ [sendUserIdAfterConnect] Failed to create JSON or send set-user-socket", e);
+//                 }
+//             });
+//         });
+//     } catch (Exception e) {
+//         Log.e(TAG, "❌ [sendUserIdAfterConnect] Unexpected error", e);
+//     }
+// }
+
+private void waitUntilUserDataAndConnectWebSocket() {
+    final Handler handler = new Handler(Looper.getMainLooper());
+
+    Runnable checkRunnable = new Runnable() {
+        @Override
+        public void run() {
+            SharedPreferences prefs = getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE);
+            String userId = prefs.getString("userId", null);
+            String fcmToken = prefs.getString("fcmToken", null);
+
+            Log.d(TAG, "⏳ Checking SharedPreferences for userId/fcmToken before socket connect...");
+            if (userId != null && !userId.isEmpty() && fcmToken != null && !fcmToken.isEmpty()) {
+                globalUserId = userId;
+                globalFcmToken = fcmToken;
+                Log.d(TAG, "✅ userId & fcmToken available! Proceeding to connect WebSocket...");
+                connectWebSocket(); // במקום לחבר מידית, רק אחרי שהמידע מוכן
+            } else {
+                Log.d(TAG, "⏳ Data not ready yet. Retrying in 20 seconds...");
+                handler.postDelayed(this, 20000); // כל 20 שניות
+            }
+        }
+    };
+
+    handler.post(checkRunnable);
+}
+
+
 private void sendUserIdAfterConnect(int attempt) {
-    final int MAX_RETRIES = 6;         // 🔥 עד 6 ניסיונות
-    final int RETRY_DELAY_MS = 5000;    // 🔥 5 שניות בין ניסיונות
+    final int MAX_RETRIES = 12;
+    final int RETRY_DELAY_MS = 14000;
+
+    // 🧠 אם כבר יש userId גלובלי - לא ניגש בכלל ל־DB
+    if (globalUserId != null && !globalUserId.isEmpty()) {
+        Log.d(TAG, "📨 [sendUserIdAfterConnect] Using globalUserId – skipping DB");
+        sendSetUserSocket(globalUserId);
+        return;
+    }
 
     try {
         Log.d(TAG, "📨 [sendUserIdAfterConnect] Attempt " + (attempt + 1) + " to retrieve userId from DB...");
 
-        dbManager.ensureConnectionReady(() -> {
-            dbManager.getUserData((userId, fcmToken) -> {
+        waitUntilUserDataAvailableThen((userId, fcmToken) -> {
+                if (userId != null && !userId.isEmpty()) globalUserId = userId;
+                if (fcmToken != null && !fcmToken.isEmpty()) globalFcmToken = fcmToken;
+
                 if (userId == null || userId.isEmpty()) {
                     Log.e(TAG, "❌ [sendUserIdAfterConnect] userId is missing on attempt " + (attempt + 1));
 
@@ -703,31 +827,34 @@ private void sendUserIdAfterConnect(int attempt) {
                     return;
                 }
 
-                try {
-                    JSONObject userData = new JSONObject();
-                    userData.put("userId", userId);
-                    userData.put("username", "MyUserName"); // אם תרצה בעתיד - גם username מה־DB
+                sendSetUserSocket(userId); // 💡 עברנו לפונקציה נפרדת
 
-                    Log.d(TAG, "📨 [sendUserIdAfterConnect] Sending set-user-socket to server...");
-                    mSocket.emit("set-user-socket", userData);
-                    Log.d(TAG, "✅ [sendUserIdAfterConnect] Sent set-user-socket!");
-
-                    // שלח גם user-ready אחרי דיליי קטן
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        mSocket.emit("user-ready");
-                        Log.d(TAG, "📨 [sendUserIdAfterConnect] Sent user-ready after set-user-socket!");
-                    }, 250);
-
-                } catch (Exception e) {
-                    Log.e(TAG, "❌ [sendUserIdAfterConnect] Failed to create JSON or send set-user-socket", e);
-                }
             });
-        });
     } catch (Exception e) {
         Log.e(TAG, "❌ [sendUserIdAfterConnect] Unexpected error", e);
     }
 }
 
+private void sendSetUserSocket(String userId) {
+    try {
+        JSONObject userData = new JSONObject();
+        userData.put("userId", userId);
+        userData.put("username", "MyUserName"); // תוכל להוסיף גם מ־DB בעתיד
+
+        Log.d(TAG, "📨 [sendSetUserSocket] Sending set-user-socket to server...");
+        mSocket.emit("set-user-socket", userData);
+        Log.d(TAG, "✅ [sendSetUserSocket] Sent set-user-socket!");
+
+        // שליחה של user-ready אחרי 250ms
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            mSocket.emit("user-ready");
+            Log.d(TAG, "📨 [sendSetUserSocket] Sent user-ready after set-user-socket!");
+        }, 250);
+
+    } catch (Exception e) {
+        Log.e(TAG, "❌ [sendSetUserSocket] Failed to create JSON or send", e);
+    }
+}
 
 
     private void requestUserToEnableLocationAndPermissions() {
@@ -828,8 +955,9 @@ public interface Callback {
    private void checkAndSendLocation(double lat, double lng) {
     Log.d(TAG, "📞 [checkAndSendLocation] Starting - trying to retrieve userId and fcmToken from DB"); // CHANGED
 
-      dbManager.ensureConnectionReady(() -> {
-    dbManager.getUserData((userId, fcmToken) -> {
+      waitUntilUserDataAvailableThen((userId, fcmToken) -> {
+        if (userId != null && !userId.isEmpty()) globalUserId = userId;
+        if (fcmToken != null && !fcmToken.isEmpty()) globalFcmToken = fcmToken;
 
            Log.d(TAG, "🔍 [checkAndSendLocation] getUserData callback received:");
         Log.d(TAG, "🔹 userId: " + (userId != null ? userId : "null"));
@@ -851,7 +979,6 @@ public interface Callback {
                 Log.d(TAG, "🛡️ [checkAndSendLocation] Still inside SafeZone, not sending location.");
             }
     });
-     });
     
 }
 
@@ -1087,7 +1214,8 @@ private void sendLocationToServerInternal(String userId, double lat, double lng,
                 }
             } else {
                 Log.e(TAG, "❌ WebSocket instance is null! Recreating connection...");
-                connectWebSocket();
+                waitUntilUserDataAndConnectWebSocket();
+
             }
             if (isPinging) {
                 pingHandler.postDelayed(this, PING_INTERVAL);
@@ -1155,13 +1283,100 @@ private void scheduleNextAlarm() {
         }
     }
 
+
+// private void waitUntilUserDataAvailableThen(Callback callback) {
+//     final int MAX_WAIT_TIME_MS = 5 * 60 * 1000; // 5 דקות
+//     final int INTERVAL_MS = 5000; // כל 5 שניות
+//     final long startTime = System.currentTimeMillis();
+
+//     Handler waitHandler = new Handler(Looper.getMainLooper());
+
+//     // שלב ראשון - לוודא שה־DB מוכן
+//     dbManager.ensureConnectionReady(() -> {
+//         Log.d(TAG, "🧩 DB is ready, starting to wait for user data...");
+
+//         waitHandler.post(new Runnable() {
+//             @Override
+//             public void run() {
+//                 dbManager.getUserData((userId, fcmToken) -> {
+//                     if (userId != null && !userId.isEmpty() &&
+//                         fcmToken != null && !fcmToken.isEmpty()) {
+
+//                         globalUserId = userId;
+//                         globalFcmToken = fcmToken;
+
+//                         Log.d(TAG, "✅ [waitUntilUserDataAvailableThen] userId and fcmToken loaded!");
+//                         showNotification("📥 User Data Ready", "userId & fcmToken loaded successfully.");
+//                         callback.onResult(userId, fcmToken);
+//                         return;
+//                     }
+
+//                     long elapsed = System.currentTimeMillis() - startTime;
+//                     if (elapsed >= MAX_WAIT_TIME_MS) {
+//                         Log.e(TAG, "⏱️ Timeout: userId or fcmToken not available after 5 minutes.");
+//                         dbManager.showDatabaseFailureNotification(); // 💥 נצל את הקיים
+//                         return;
+//                     }
+
+//                     Log.d(TAG, "⏳ Retrying to fetch user data from DB... Elapsed: " + (elapsed / 1000) + "s");
+//                     waitHandler.postDelayed(this, INTERVAL_MS);
+//                 });
+//             }
+//         });
+//     });
+// }
+
     
+    private void waitUntilUserDataAvailableThen(Callback callback) {
+    final int MAX_ATTEMPTS = 5;
+    final int INTERVAL_MS = 60 * 1000; // דקה בין ניסיונות
+    final long startTime = System.currentTimeMillis();
+
+    Handler waitHandler = new Handler(Looper.getMainLooper());
+
+    Runnable attemptRunnable = new Runnable() {
+        int attempt = 0;
+
+        @Override
+        public void run() {
+            attempt++;
+            SharedPreferences prefs = getApplicationContext().getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE);
+            String userId = prefs.getString("userId", null);
+            String fcmToken = prefs.getString("fcmToken", null);
+
+            Log.d(TAG, "🧪 Checking SharedPreferences from BackgroundService (Attempt " + attempt + ")");
+            Log.d(TAG, "🧪 userId = " + userId);
+            Log.d(TAG, "🧪 fcmToken = " + fcmToken);
+
+            if (userId != null && !userId.isEmpty() && fcmToken != null && !fcmToken.isEmpty()) {
+                globalUserId = userId;
+                globalFcmToken = fcmToken;
+
+                Log.d(TAG, "✅ [waitUntilUserDataAvailableThen] Data loaded successfully on attempt " + attempt);
+                callback.onResult(userId, fcmToken);
+                return;
+            }
+
+            if (attempt >= MAX_ATTEMPTS) {
+                Log.e(TAG, "❌ [waitUntilUserDataAvailableThen] Max attempts reached. Data not found.");
+                showNotification("🔌 User Data Missing", "No userId/fcmToken after 5 attempts.");
+                return;
+            }
+
+            Log.d(TAG, "⏳ [waitUntilUserDataAvailableThen] Retrying in 60 seconds...");
+            waitHandler.postDelayed(this, INTERVAL_MS);
+        }
+    };
+
+    waitHandler.post(attemptRunnable);
+}
+
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(
                 CHANNEL_ID,
-                "Background Service",
+                "fcm_channel",
                 NotificationManager.IMPORTANCE_HIGH
             );
 

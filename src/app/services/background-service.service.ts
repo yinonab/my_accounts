@@ -7,6 +7,9 @@ export interface BackgroundServicePlugin {
   stopService(): Promise<void>;
   startForegroundService(): Promise<void>;  // ✅ הוספת תמיכה ב-Foreground
   stopForegroundService(): Promise<void>;   // ✅ הוספת תמיכה ב-Foreground
+
+  saveUserData(options: { userId: string; fcmToken: string }): Promise<{ success: boolean }>;
+
 }
 
 // 🔹 רישום הפלאגין עם סוג מוגדר
@@ -57,4 +60,18 @@ export class BackgroundServiceService {
       console.error('❌ Error stopping foreground service:', error);
     }
   }
+  // ✅ שמירת userId ו-fcmToken דרך הפלאגין
+async saveUserData(userId: string, fcmToken: string): Promise<void> {
+  try {
+    const result = await BackgroundService.saveUserData({ userId, fcmToken });
+    if (result?.success) {
+      console.log('✅ User data saved via plugin');
+    } else {
+      console.warn('⚠️ Plugin returned failure saving user data');
+    }
+  } catch (error) {
+    console.error('❌ Error saving user data via plugin:', error);
+  }
+}
+
 }

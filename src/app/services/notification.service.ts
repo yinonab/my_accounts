@@ -8,6 +8,8 @@ import { FirebaseService } from './firebase.service';
 import { UserService } from './user.service';
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
+import {  BackgroundServiceService } from '../services/background-service.service';
+
 
 
 
@@ -51,7 +53,8 @@ export class NotificationService {
     private swPush: SwPush,
     private http: HttpClient,
     private swUpdate: SwUpdate,
-    private firebaseService: FirebaseService
+    private firebaseService: FirebaseService,
+    private backgroundServiceService: BackgroundServiceService
   ) {
     console.log('🚀 NotificationService Initialized', {
       vapidPublicKey: this.VAPID_PUBLIC_KEY ? '✅ Present' : '❌ Missing',
@@ -268,6 +271,16 @@ export class NotificationService {
 
       console.log('✅ Notification sent successfully', { timestamp: new Date().toISOString() });
       console.log('✅ Notification response', { response });
+
+      if (Capacitor.getPlatform() === 'android') {
+        const channelId = 'fcm_channel'; // או כל לוגיקה אחרת שאתה קובע
+        await this.backgroundServiceService.sendNotificationFromPlugin(
+          data.title,
+          data.body,
+          token,
+          channelId
+        );
+      }
 
     } catch (error) {
       console.error('❌ Error sending notification:', error);

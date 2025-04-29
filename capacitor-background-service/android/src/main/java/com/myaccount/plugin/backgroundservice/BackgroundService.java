@@ -74,7 +74,7 @@ import android.net.Uri;
 public class BackgroundService extends Service {
 
     private static final String TAG = "BackgroundService";
-    private static final String CHANNEL_ID = "BackgroundServiceChannel";
+    private static final String CHANNEL_ID = "fcm_channel";
     private PowerManager.WakeLock wakeLock;
     private boolean isForeground = false;
     private Socket mSocket;
@@ -1369,6 +1369,28 @@ private void scheduleNextAlarm() {
     };
 
     waitHandler.post(attemptRunnable);
+}
+
+public static void sendNotificationToServer(Context context, String title, String body, String token, String channelId) {
+    try {
+        JSONObject json = new JSONObject();
+        json.put("title", title);
+        json.put("body", body);
+        json.put("token", token);
+        json.put("channelId", channelId);
+
+        JsonObjectRequest request = new JsonObjectRequest(
+            Request.Method.POST,
+            "https://backend-my-accounts.onrender.com/api/notification/send",
+            json,
+            response -> Log.d("PLUGIN", "✅ Notification sent from plugin successfully"),
+            error -> Log.e("PLUGIN", "❌ Failed to send notification from plugin", error)
+        );
+
+        Volley.newRequestQueue(context).add(request);
+    } catch (JSONException e) {
+        Log.e("PLUGIN", "❌ JSON error in sendNotificationToServer", e);
+    }
 }
 
 

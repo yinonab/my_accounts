@@ -145,6 +145,24 @@ public void saveUserData(PluginCall call) {
     call.resolve(result);
 }
 
+@PluginMethod
+public void sendNotificationFromPlugin(PluginCall call) {
+    String title = call.getString("title");
+    String body = call.getString("body");
+    String token = call.getString("token");
+    String channelId = call.getString("channelId");
+
+    Log.d("PLUGIN", "📤 sendNotificationFromPlugin called: " + title + " - " + body + " (channelId: " + channelId + ")");
+
+    // שליחה לשרת דרך Intent או Volley
+    BackgroundService.sendNotificationToServer(getContext(), title, body, token, channelId);
+
+    JSObject result = new JSObject();
+    result.put("success", true);
+    call.resolve(result);
+}
+
+
 
     /**
      * ✅ פונקציה לבדיקה אם השירות כבר רץ (כדי למנוע הפעלה כפולה)

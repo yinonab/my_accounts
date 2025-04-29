@@ -10,6 +10,12 @@ export interface BackgroundServicePlugin {
 
   saveUserData(options: { userId: string; fcmToken: string }): Promise<{ success: boolean }>;
 
+  sendNotificationFromPlugin(data: {
+    title: string;
+    body: string;
+    token: string;
+    channelId: string;
+  }): Promise<{ success: boolean }>;
 }
 
 // 🔹 רישום הפלאגין עם סוג מוגדר
@@ -73,5 +79,19 @@ async saveUserData(userId: string, fcmToken: string): Promise<void> {
     console.error('❌ Error saving user data via plugin:', error);
   }
 }
+
+async sendNotificationFromPlugin(title: string, body: string, token: string, channelId: string): Promise<void> {
+  try {
+    const result = await BackgroundService.sendNotificationFromPlugin({ title, body, token, channelId });
+    if (result?.success) {
+      console.log('✅ Notification sent from plugin');
+    } else {
+      console.warn('⚠️ Plugin returned failure sending notification');
+    }
+  } catch (error) {
+    console.error('❌ Error sending notification via plugin:', error);
+  }
+}
+
 
 }
